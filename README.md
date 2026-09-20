@@ -25,6 +25,32 @@
       background: rgba(13, 71, 161, 0.85); z-index: 9999;
       display: flex; justify-content: center; align-items: center;
     }
+
+    /* PRINT STYLES: Itatago ang navbar, buttons, at overlay kapag nag-print */
+    @media print {
+      body {
+        background-color: #fff !important;
+        color: #000 !important;
+        font-size: 12pt;
+      }
+      .navbar, #loginOverlay, .btn, .nav, .modal, .no-print {
+        display: none !important;
+      }
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .tab-pane {
+        display: block !important;
+        opacity: 1 !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -114,7 +140,12 @@
       <!-- ================= 1. POS ENTRY TAB ================= -->
       <div class="tab-pane fade show active" id="pos-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-cash-register me-2"></i>Record New Transaction</h4>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-cash-register me-2"></i>Record New Transaction</h4>
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+              <i class="fa-solid fa-print me-1"></i> I-print ang Page / Resibo
+            </button>
+          </div>
           <form id="posForm">
             <div class="row g-3 mb-4">
               <div class="col-md-6">
@@ -231,6 +262,9 @@
             <div class="d-flex gap-2 align-items-center">
               <label class="fw-bold me-1">Select Date:</label>
               <input type="date" id="dailyReportDate" class="form-control" onchange="generateDailyReport()">
+              <button class="btn btn-outline-primary ms-2" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i> Print Report
+              </button>
             </div>
           </div>
 
@@ -383,7 +417,12 @@
       <!-- ================= 3. UTANG & PAYMENTS TAB ================= -->
       <div class="tab-pane fade" id="credit-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit & Utang Ledger</h4>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit & Utang Ledger</h4>
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+              <i class="fa-solid fa-print me-1"></i> Print Utang List
+            </button>
+          </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle">
               <thead class="table-dark">
@@ -395,7 +434,7 @@
                   <th>Balance (₱)</th>
                   <th>Due Date</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th class="no-print">Action</th>
                 </tr>
               </thead>
               <tbody id="creditTableBody">
@@ -409,7 +448,12 @@
       <!-- ================= 3.5 CUSTOMER ORDER LOOKUP TAB ================= -->
       <div class="tab-pane fade" id="search-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-magnifying-glass me-2"></i>Track Customer Last Order</h4>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-magnifying-glass me-2"></i>Track Customer Last Order</h4>
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+              <i class="fa-solid fa-print me-1"></i> Print Customer Record
+            </button>
+          </div>
           
           <div class="row g-2 mb-4">
             <div class="col-md-9">
@@ -496,9 +540,14 @@
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management & End of Day Summary</h4>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
-              <i class="fa-solid fa-plus me-1"></i> Add Product
-            </button>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i> Print Inventory
+              </button>
+              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="fa-solid fa-plus me-1"></i> Add Product
+              </button>
+            </div>
           </div>
 
           <div class="table-responsive mb-4">
@@ -511,7 +560,7 @@
                   <th>Stock In (+Add)</th>
                   <th>Sold</th>
                   <th>Ending Stock</th>
-                  <th class="col-action"><i class="fa-solid fa-trash"></i></th>
+                  <th class="col-action no-print"><i class="fa-solid fa-trash"></i></th>
                 </tr>
               </thead>
               <tbody id="inventoryTableBody">
@@ -550,6 +599,9 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit Computation</h4>
             <div class="d-flex gap-2 align-items-center">
+              <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i> Print Audit Report
+              </button>
               <button class="btn btn-warning fw-bold text-dark me-2" data-bs-toggle="modal" data-bs-target="#bossModal">
                 <i class="fa-solid fa-user-tie me-1"></i> Add D/Eco Boss Adjustment
               </button>
@@ -604,7 +656,7 @@
                   <tr>
                     <th>Expense Name / Description</th>
                     <th style="width: 200px;">Amount (₱)</th>
-                    <th class="col-action"><i class="fa-solid fa-trash"></i></th>
+                    <th class="col-action no-print"><i class="fa-solid fa-trash"></i></th>
                   </tr>
                 </thead>
                 <tbody id="expenseTableBody">
@@ -969,7 +1021,7 @@
           <td><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" required></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" required></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm bg-light pos-subtotal" placeholder="0.00" readonly></td>
-          <td class="col-action">
+          <td class="col-action no-print">
             <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removePosRow('row-${rowId}')">
               <i class="fa-solid fa-trash-can"></i>
             </button>
@@ -1286,7 +1338,7 @@
         <tr id="exp-${rowId}">
           <td><input type="text" class="form-control form-control-sm exp-name" placeholder="e.g., Sahod ni Juan, Kuryente, etc." value="${name}" onchange="saveCurrentMonthExpenses()"></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${amount}" onchange="saveCurrentMonthExpenses()" oninput="updateCalculationsOnly()"></td>
-          <td class="col-action">
+          <td class="col-action no-print">
             <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
               <i class="fa-solid fa-trash-can"></i>
             </button>
@@ -1372,7 +1424,7 @@
             <tr id="exp-${rowId}">
               <td><input type="text" class="form-control form-control-sm exp-name" placeholder="Expense Name" value="${exp.name}" onchange="saveCurrentMonthExpenses()"></td>
               <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${exp.amount || ''}" onchange="saveCurrentMonthExpenses()" oninput="updateCalculationsOnly()"></td>
-              <td class="col-action">
+              <td class="col-action no-print">
                 <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
@@ -1494,7 +1546,7 @@
             <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
             <td>${t.dueDate || 'N/A'}</td>
             <td>${statusBadge}</td>
-            <td>
+            <td class="no-print">
               <button class="btn btn-sm btn-success fw-bold" onclick="openPaymentModal(${t.id})">
                 <i class="fa-solid fa-hand-holding-dollar me-1"></i> Magbayad
               </button>
@@ -1550,150 +1602,10 @@
         method: method,
         date: todayFormatted
       });
-
-      alert(`Matagumpay na na-record ang bayad na ₱${payAmount.toFixed(2)} para kay ${tx.customer}!`);
       
+      alert('Payment successfully saved!');
       bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
       renderCreditTable();
-    }
-
-    // ================= INVENTORY LOGIC =================
-    document.getElementById('addProductForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('newProdName').value.trim();
-      const qty = parseInt(document.getElementById('newProdQty').value) || 1;
-      const stock = parseInt(document.getElementById('newProdStock').value) || 0;
-
-      const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-      if (existing) {
-        alert('Ang produktong ito ay nasa listahan na!');
-        return;
-      }
-
-      inventory.push({
-        name: name,
-        qty: qty,
-        beginning: stock,
-        stockIn: 0,
-        ending: stock
-      });
-
-      alert('Bagong produkto matagumpay na naidagdag!');
-      this.reset();
-      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-      renderInventoryTable();
-    });
-
-    function renderInventoryTable() {
-      const tbody = document.getElementById('inventoryTableBody');
-      const tfoot = document.getElementById('inventoryTableFooter');
-      tbody.innerHTML = '';
-
-      if (inventory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang produkto sa inventory. Magnet-add ng produkto.</td></tr>`;
-        tfoot.innerHTML = '';
-        return;
-      }
-
-      let totalBeg = 0, totalIn = 0, totalSold = 0, totalEnd = 0;
-
-      inventory.forEach((item, index) => {
-        let sold = 0;
-        transactions.forEach(t => {
-          if (t.itemsList) {
-            t.itemsList.forEach(i => {
-              if (i.name.toLowerCase() === item.name.toLowerCase()) {
-                sold += i.qty;
-              }
-            });
-          }
-        });
-
-        const currentEnding = (item.beginning + item.stockIn) - sold;
-        item.ending = currentEnding;
-
-        totalBeg += item.beginning;
-        totalIn += item.stockIn;
-        totalSold += sold;
-        totalEnd += currentEnding;
-
-        tbody.innerHTML += `
-          <tr>
-            <td class="fw-bold text-start">${item.name}</td>
-            <td class="text-center">${item.qty}</td>
-            <td class="text-center">${item.beginning}</td>
-            <td class="text-center">
-              <input type="number" min="0" class="form-control form-control-sm inventory-input d-inline" value="${item.stockIn}" onchange="updateStockIn(${index}, this.value)">
-            </td>
-            <td class="text-center text-danger fw-bold">${sold}</td>
-            <td class="text-center text-success fw-bold fs-6">${currentEnding}</td>
-            <td class="col-action">
-              <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tfoot.innerHTML = `
-        <tr>
-          <td class="text-start">KABUUAN (TOTAL)</td>
-          <td>-</td>
-          <td>${totalBeg}</td>
-          <td>${totalIn}</td>
-          <td class="text-danger">${totalSold}</td>
-          <td class="text-success">${totalEnd}</td>
-          <td></td>
-        </tr>
-      `;
-    }
-
-    function updateStockIn(index, val) {
-      inventory[index].stockIn = parseInt(val) || 0;
-      renderInventoryTable();
-    }
-
-    function deleteInventoryItem(index) {
-      if (confirm('Sigurado ka bang gusto mong burahin ang produktong ito sa inventory?')) {
-        inventory.splice(index, 1);
-        renderInventoryTable();
-      }
-    }
-
-    function renderCustomerSalesLog() {
-      const tbody = document.getElementById('customerSalesLogBody');
-      tbody.innerHTML = '';
-
-      let logs = [];
-      transactions.forEach(t => {
-        if (t.itemsList) {
-          t.itemsList.forEach(item => {
-            logs.push({
-              date: t.date,
-              customer: t.customer,
-              product: item.name,
-              qty: item.qty
-            });
-          });
-        }
-      });
-
-      if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Walang pumasok na pagbili.</td></tr>`;
-        return;
-      }
-
-      logs.forEach(log => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${log.date}</td>
-            <td class="fw-bold">${log.customer}</td>
-            <td>${log.product}</td>
-            <td class="text-center fw-bold text-primary">${log.qty}</td>
-          </tr>
-        `;
-      });
     }
   </script>
 </body>

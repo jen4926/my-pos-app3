@@ -13,20 +13,52 @@
     .nav-pills .nav-link.active { background-color: #1976d2; }
     .nav-pills .nav-link { color: #fff; margin-right: 5px; }
     .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
-    .credit-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
+    .credit-fields, .container-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
     
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
     .inventory-input { width: 75px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
+    
+    /* Login Backdrop overlay */
+    #loginOverlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(13, 71, 161, 0.85); z-index: 9999;
+      display: flex; justify-content: center; align-items: center;
+    }
   </style>
 </head>
 <body>
+
+  <!-- ================= 0. LOGIN OVERLAY ================= -->
+  <div id="loginOverlay">
+    <div class="card p-4 shadow-lg" style="width: 380px; border-top: 5px solid #1976d2;">
+      <div class="text-center mb-3">
+        <i class="fa-solid fa-store fa-3x text-primary mb-2"></i>
+        <h4 class="fw-bold">RMVillasis POS</h4>
+        <p class="text-muted small">Mangyaring mag-log in upang magpatuloy</p>
+      </div>
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Username:</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. admin" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password:</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        <div id="loginError" class="alert alert-danger p-2 small d-none">
+          Mali ang username o password!
+        </div>
+        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Navbar -->
   <nav class="navbar navbar-dark expand-lg mb-4">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold fs-4" href="#">
-        <i class="fa-solid fa-store me-2"></i>RMVillasis Enterprises POS
+        <i class="fa-solid fa-store me-2"></i>RMVillasis POS
       </a>
       <ul class="nav nav-pills me-auto" id="mainTabs" role="tablist">
         <li class="nav-item">
@@ -49,12 +81,25 @@
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
-        <li class="nav-item">
+        <li class="nav-item admin-only">
           <button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()">
             <i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit & Net Profit
           </button>
         </li>
       </ul>
+
+      <!-- User Profile & Account Controls -->
+      <div class="dropdown text-end text-white">
+        <a href="#" class="d-block link-light text-decoration-none dropdown-toggle fw-bold" id="userDropdown" data-bs-toggle="dropdown">
+          <i class="fa-solid fa-circle-user fa-lg me-1"></i> <span id="currentUserName">User</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end text-small shadow">
+          <li><a class="dropdown-item" href="#" onclick="openChangeProfileModal()"><i class="fa-solid fa-key me-2"></i>Change Name / Password</a></li>
+          <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users & Admins</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i>Log Out</a></li>
+        </ul>
+      </div>
     </div>
   </nav>
 
@@ -99,9 +144,32 @@
               </button>
             </div>
 
+            <!-- CONTAINER / DEPOSIT DETAILS -->
+            <div class="card p-3 bg-light border mb-3">
+              <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-box-open me-2"></i>Container / Lalagyan Details</h6>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Container Status:</label>
+                  <select id="containerStatus" class="form-select" onchange="toggleContainerFields()">
+                    <option value="NONE">Walang Container / Soli Agad</option>
+                    <option value="HIRAM">Hiram / Bagon (Walang Deposit)</option>
+                    <option value="DEPOSIT">May Deposito (With Deposit Fee)</option>
+                  </select>
+                </div>
+                <div class="col-md-4 container-qty-group" style="display: none;">
+                  <label class="form-label fw-semibold">Ilang Container / Lalagyan:</label>
+                  <input type="number" min="1" id="containerQty" class="form-control" value="1" placeholder="Hal. 2">
+                </div>
+                <div class="col-md-4 container-deposit-group" style="display: none;">
+                  <label class="form-label fw-semibold">Halaga ng Deposito bawat Isa (₱):</label>
+                  <input type="number" step="0.01" min="0" id="containerDepositRate" class="form-control" placeholder="0.00" oninput="calculateTotal()">
+                </div>
+              </div>
+            </div>
+
             <div class="row g-3 mt-2">
               <div class="col-md-4">
-                <label class="form-label fw-semibold">Total Amount (₱):</label>
+                <label class="form-label fw-semibold">Total Amount (₱) <small class="text-muted">(Inc. Deposit)</small>:</label>
                 <input type="number" step="0.01" id="totalAmount" class="form-control bg-light fs-5 fw-bold text-primary" readonly placeholder="0.00">
               </div>
 
@@ -161,7 +229,6 @@
             </div>
           </div>
 
-          <!-- Daily Overview Cards -->
           <div class="row g-3 mb-4">
             <div class="col-md-4">
               <div class="card p-3 stat-card bg-light">
@@ -183,7 +250,6 @@
             </div>
           </div>
 
-          <!-- Daily Encoded Table -->
           <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>List of Encoded Transactions Today</h6>
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
@@ -192,6 +258,7 @@
                   <th>#</th>
                   <th>Customer Name</th>
                   <th>Products Bought</th>
+                  <th>Container Status</th>
                   <th>Total Amount</th>
                   <th>Paid Amount</th>
                   <th>Balance</th>
@@ -277,7 +344,6 @@
             </div>
           </div>
 
-          <!-- Audit Overview Cards -->
           <div class="row g-3 mb-4">
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light">
@@ -305,7 +371,6 @@
             </div>
           </div>
 
-          <!-- DETAILED SALARY & EXPENSES SECTION -->
           <div class="card p-3 bg-light mb-4 border">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-receipt me-2"></i>Itemized Salary & Expenses Breakdown</h6>
@@ -329,7 +394,6 @@
             </div>
           </div>
 
-          <!-- D/Eco Boss Table Log -->
           <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Transactions Log</h6>
           <div class="table-responsive mb-4">
             <table class="table table-sm table-bordered bg-white">
@@ -349,6 +413,86 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- MODAL: CHANGE PROFILE (Name & Password) -->
+  <div class="modal fade" id="changeProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-id-card me-2"></i>Edit My Profile</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="changeProfileForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Display Name:</label>
+              <input type="text" id="profDisplayName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">New Password:</label>
+              <input type="password" id="profPassword" class="form-control" placeholder="Iwanang blangko kung ayaw palitan">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: USER MANAGEMENT (Admin Only) -->
+  <div class="modal fade" id="userManagementModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-users-gear me-2"></i>User & Admin Accounts Management</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <h6 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-plus me-1"></i>Add New System User / Admin</h6>
+          <form id="newUserForm" class="row g-2 mb-4 bg-light p-3 border rounded">
+            <div class="col-md-3">
+              <input type="text" id="newAccName" class="form-control form-control-sm" placeholder="Full Name" required>
+            </div>
+            <div class="col-md-3">
+              <input type="text" id="newAccUser" class="form-control form-control-sm" placeholder="Username" required>
+            </div>
+            <div class="col-md-3">
+              <input type="password" id="newAccPass" class="form-control form-control-sm" placeholder="Password" required>
+            </div>
+            <div class="col-md-2">
+              <select id="newAccRole" class="form-select form-select-sm">
+                <option value="Staff">Staff</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button type="submit" class="btn btn-sm btn-success w-100"><i class="fa-solid fa-plus"></i></button>
+            </div>
+          </form>
+
+          <h6 class="fw-bold mb-2"><i class="fa-solid fa-users me-1"></i>Existing System Users</h6>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="userListBody">
+                <!-- User rows rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -465,10 +609,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // System Users Database
+    let users = [
+      { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
+      { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
+    ];
+    let currentUser = null;
+
     // Database Objects
     let transactions = [
-      { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (x1)", total: 250.00, paid: 100.00, balance: 150.00, dueDate: "2026-09-30", status: "PARTIAL", payments: [{ amount: 100.00, method: "Cash", date: "2026-09-20" }] },
-      { id: 2, date: "2026-09-20", customer: "Maria Clara", product: "Pintura Red (x1)", total: 450.00, paid: 450.00, balance: 0.00, dueDate: "N/A", status: "PAID", payments: [{ amount: 450.00, method: "GCash", date: "2026-09-20" }] }
+      { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (x1)", containerInfo: "Hiram (1 pc)", total: 250.00, paid: 100.00, balance: 150.00, dueDate: "2026-09-30", status: "PARTIAL", payments: [{ amount: 100.00, method: "Cash", date: "2026-09-20" }] },
+      { id: 2, date: "2026-09-20", customer: "Maria Clara", product: "Pintura Red (x1)", containerInfo: "May Deposito (₱50.00)", total: 500.00, paid: 500.00, balance: 0.00, dueDate: "N/A", status: "PAID", payments: [{ amount: 500.00, method: "GCash", date: "2026-09-20" }] }
     ];
 
     let inventory = [
@@ -478,7 +629,6 @@
 
     let bossAdjustments = [];
     
-    // Structure for detailed expenses per month: { "YYYY-MM": [ { name: "", amount: 0 } ] }
     let monthlyExpensesData = {
       "2026-09": [
         { name: "Sahod ni Juan", amount: 5000.00 },
@@ -493,6 +643,97 @@
     document.getElementById('dailyReportDate').value = todayFormatted;
     document.getElementById('bossDate').value = todayFormatted;
     document.getElementById('auditMonth').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+
+    // ================= AUTHENTICATION LOGIC =================
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+
+      const found = users.find(user => user.username === u && user.password === p);
+
+      if (found) {
+        currentUser = found;
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('loginError').classList.add('d-none');
+        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
+        
+        // Hide Admin controls if staff
+        const adminElements = document.querySelectorAll('.admin-only');
+        adminElements.forEach(el => {
+          el.style.display = currentUser.role === 'Admin' ? 'block' : 'none';
+        });
+
+        this.reset();
+      } else {
+        document.getElementById('loginError').classList.remove('d-none');
+      }
+    });
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('loginOverlay').style.display = 'flex';
+    }
+
+    function openChangeProfileModal() {
+      if(!currentUser) return;
+      document.getElementById('profDisplayName').value = currentUser.name;
+      document.getElementById('profPassword').value = '';
+      new bootstrap.Modal(document.getElementById('changeProfileModal')).show();
+    }
+
+    document.getElementById('changeProfileForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      currentUser.name = document.getElementById('profDisplayName').value;
+      const newPass = document.getElementById('profPassword').value;
+      if(newPass) currentUser.password = newPass;
+
+      document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
+      alert('Profile successfully updated!');
+      bootstrap.Modal.getInstance(document.getElementById('changeProfileModal')).hide();
+    });
+
+    function openUserManagementModal() {
+      renderUserList();
+      new bootstrap.Modal(document.getElementById('userManagementModal')).show();
+    }
+
+    function renderUserList() {
+      const tbody = document.getElementById('userListBody');
+      tbody.innerHTML = '';
+      users.forEach((u, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${u.name}</td>
+            <td><code>${u.username}</code></td>
+            <td><span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-secondary'}">${u.role}</span></td>
+            <td class="text-center">
+              ${u.id !== 1 ? `<button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteUser(${index})"><i class="fa-solid fa-trash"></i></button>` : `<small class="text-muted">Master</small>`}
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    document.getElementById('newUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      users.push({
+        id: Date.now(),
+        name: document.getElementById('newAccName').value,
+        username: document.getElementById('newAccUser').value,
+        password: document.getElementById('newAccPass').value,
+        role: document.getElementById('newAccRole').value
+      });
+      this.reset();
+      renderUserList();
+    });
+
+    function deleteUser(index) {
+      if(confirm('Sigurado ka bang gusto mong alisin ang user na ito?')) {
+        users.splice(index, 1);
+        renderUserList();
+      }
+    }
 
     // ================= POS LOGIC =================
     function addPosRow() {
@@ -526,6 +767,26 @@
       }
     }
 
+    function toggleContainerFields() {
+      const status = document.getElementById('containerStatus').value;
+      const qtyGroup = document.querySelector('.container-qty-group');
+      const depositGroup = document.querySelector('.container-deposit-group');
+
+      if (status === 'HIRAM') {
+        qtyGroup.style.display = 'block';
+        depositGroup.style.display = 'none';
+        document.getElementById('containerDepositRate').value = '0';
+      } else if (status === 'DEPOSIT') {
+        qtyGroup.style.display = 'block';
+        depositGroup.style.display = 'block';
+      } else {
+        qtyGroup.style.display = 'none';
+        depositGroup.style.display = 'none';
+        document.getElementById('containerDepositRate').value = '0';
+      }
+      calculateTotal();
+    }
+
     function calculateTotal() {
       const rows = document.querySelectorAll('#posItemsBody tr');
       let grandTotal = 0;
@@ -536,6 +797,14 @@
         row.querySelector('.pos-subtotal').value = subtotal.toFixed(2);
         grandTotal += subtotal;
       });
+
+      const status = document.getElementById('containerStatus').value;
+      if (status === 'DEPOSIT') {
+        const cQty = parseFloat(document.getElementById('containerQty').value) || 0;
+        const cRate = parseFloat(document.getElementById('containerDepositRate').value) || 0;
+        grandTotal += (cQty * cRate);
+      }
+
       document.getElementById('totalAmount').value = grandTotal.toFixed(2);
       calculateBalance();
     }
@@ -591,6 +860,17 @@
         if(name) productSummary.push(`${name} (x${qty})`);
       });
 
+      const cStatus = document.getElementById('containerStatus').value;
+      const cQty = document.getElementById('containerQty').value || 0;
+      const cRate = parseFloat(document.getElementById('containerDepositRate').value) || 0;
+      let cInfo = "Wala";
+
+      if (cStatus === 'HIRAM') {
+        cInfo = `Hiram (${cQty} pcs)`;
+      } else if (cStatus === 'DEPOSIT') {
+        cInfo = `May Deposito (${cQty} pcs - ₱${(cQty * cRate).toFixed(2)})`;
+      }
+
       const paymentHistory = [];
       if (paid > 0) {
         paymentHistory.push({ amount: paid, method: method, date: saleDate });
@@ -601,6 +881,7 @@
         date: saleDate,
         customer: document.getElementById('customerName').value,
         product: productSummary.join(', '),
+        containerInfo: cInfo,
         total: total,
         paid: paid,
         balance: balance,
@@ -614,6 +895,7 @@
       document.getElementById('posItemsBody').innerHTML = '';
       addPosRow();
       document.getElementById('saleDate').value = todayFormatted;
+      toggleContainerFields();
       toggleCreditFields();
     });
 
@@ -639,6 +921,7 @@
             <td>${index + 1}</td>
             <td class="fw-bold">${t.customer}</td>
             <td>${t.product}</td>
+            <td><span class="badge bg-secondary">${t.containerInfo || 'Wala'}</span></td>
             <td>₱${t.total.toFixed(2)}</td>
             <td class="text-success">₱${t.paid.toFixed(2)}</td>
             <td class="text-danger">₱${t.balance.toFixed(2)}</td>
@@ -648,7 +931,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
       }
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
@@ -713,7 +996,7 @@
 
     // ================= MONTHLY AUDIT & NET PROFIT =================
     function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
+      const selectedMonth = document.getElementById('auditMonth').value;
       if (!selectedMonth) return;
 
       let grossSales = 0;
@@ -730,13 +1013,11 @@
         });
       });
 
-      // Render Expense Table Rows for Selected Month
       const expBody = document.getElementById('expenseTableBody');
       expBody.innerHTML = '';
       const monthExp = monthlyExpensesData[selectedMonth] || [];
 
       if (monthExp.length === 0) {
-        // If empty, add default single row
         addExpenseRow();
       } else {
         monthExp.forEach(exp => {
@@ -755,13 +1036,11 @@
         });
       }
 
-      // Calculate Total Expenses
       let totalExpenses = 0;
       (monthlyExpensesData[selectedMonth] || []).forEach(e => {
         totalExpenses += e.amount;
       });
 
-      // Boss Adjustments for selected month
       let bossTotal = 0;
       const bossBody = document.getElementById('bossLogsBody');
       bossBody.innerHTML = '';
@@ -785,7 +1064,6 @@
         bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Walang na-record na D/Eco Boss adjustment sa buwang ito.</td></tr>`;
       }
 
-      // Calculation: Net Profit = Total Collection - Expenses + Boss Adjustments
       const netProfit = totalCollected - totalExpenses + bossTotal;
 
       document.getElementById('auditTotalSales').innerText = `₱${grossSales.toFixed(2)}`;

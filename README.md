@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RMVillasis Enterprises POS & Audit</title>
+  <title>RMVillasis Enterprises POS, Daily Report & Audit</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -35,6 +35,11 @@
           </button>
         </li>
         <li class="nav-item">
+          <button class="nav-link" id="daily-tab" data-bs-toggle="pill" data-bs-target="#daily-content" type="button" onclick="generateDailyReport()">
+            <i class="fa-solid fa-calendar-day me-1"></i> Daily Report
+          </button>
+        </li>
+        <li class="nav-item">
           <button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable()">
             <i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments
           </button>
@@ -46,7 +51,7 @@
         </li>
         <li class="nav-item">
           <button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()">
-            <i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit
+            <i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit & Net Profit
           </button>
         </li>
       </ul>
@@ -61,7 +66,6 @@
         <div class="card p-4">
           <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-cash-register me-2"></i>Record New Transaction</h4>
           <form id="posForm">
-            <!-- Customer Details -->
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Date of Sale:</label>
@@ -73,7 +77,6 @@
               </div>
             </div>
 
-            <!-- Multi-Product Table -->
             <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-cart-plus me-2"></i>Items / Products</h6>
             <div class="table-responsive mb-3">
               <table class="table table-bordered align-middle" id="posItemsTable">
@@ -122,7 +125,6 @@
               </div>
             </div>
 
-            <!-- Conditional Credit Fields -->
             <div id="creditFieldsSection" class="credit-fields">
               <h6 class="text-secondary fw-bold mb-3"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Utang / Credit Details</h6>
               <div class="row g-3">
@@ -148,7 +150,63 @@
         </div>
       </div>
 
-      <!-- ================= 2. UTANG & PAYMENTS TAB ================= -->
+      <!-- ================= 2. DAILY REPORT TAB ================= -->
+      <div class="tab-pane fade" id="daily-content">
+        <div class="card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales & Encoded Logs</h4>
+            <div class="d-flex gap-2 align-items-center">
+              <label class="fw-bold me-1">Select Date:</label>
+              <input type="date" id="dailyReportDate" class="form-control" onchange="generateDailyReport()">
+            </div>
+          </div>
+
+          <!-- Daily Overview Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="card p-3 stat-card bg-light">
+                <span class="text-muted small fw-bold">DAILY TOTAL SALES</span>
+                <h4 class="text-primary mt-1 mb-0" id="dailyTotalSales">₱0.00</h4>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
+                <span class="text-muted small fw-bold">DAILY CASH / COLLECTION</span>
+                <h4 class="text-success mt-1 mb-0" id="dailyTotalCollected">₱0.00</h4>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;">
+                <span class="text-muted small fw-bold">TRANSACTIONS ENCODED</span>
+                <h4 class="text-warning mt-1 mb-0" id="dailyTxCount">0</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Encoded Table -->
+          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>List of Encoded Transactions Today</h6>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>#</th>
+                  <th>Customer Name</th>
+                  <th>Products Bought</th>
+                  <th>Total Amount</th>
+                  <th>Paid Amount</th>
+                  <th>Balance</th>
+                  <th>Payment Method</th>
+                </tr>
+              </thead>
+              <tbody id="dailyTableBody">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 3. UTANG & PAYMENTS TAB ================= -->
       <div class="tab-pane fade" id="credit-content">
         <div class="card p-4">
           <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit & Utang Ledger</h4>
@@ -174,13 +232,11 @@
         </div>
       </div>
 
-      <!-- ================= 3. INVENTORY TAB ================= -->
+      <!-- ================= 4. INVENTORY TAB ================= -->
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
-            </div>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
               <i class="fa-solid fa-plus me-1"></i> Add Product
             </button>
@@ -207,12 +263,16 @@
         </div>
       </div>
 
-      <!-- ================= 4. MONTHLY AUDIT TAB ================= -->
+      <!-- ================= 5. MONTHLY AUDIT & NET PROFIT TAB ================= -->
       <div class="tab-pane fade" id="audit-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Financial Summary</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit</h4>
             <div class="d-flex gap-2 align-items-center">
+              <!-- D/Eco Boss Button -->
+              <button class="btn btn-warning fw-bold text-dark me-2" data-bs-toggle="modal" data-bs-target="#bossModal">
+                <i class="fa-solid fa-user-tie me-1"></i> Add D/Eco Boss Adjustment
+              </button>
               <label class="fw-bold me-1">Filter Month:</label>
               <input type="month" id="auditMonth" class="form-control" onchange="generateMonthlyAudit()">
             </div>
@@ -234,54 +294,91 @@
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #c62828;">
-                <span class="text-muted small fw-bold">UNCOLLECTED UTANG</span>
-                <h4 class="text-danger mt-1 mb-0" id="auditTotalReceivables">₱0.00</h4>
+                <span class="text-muted small fw-bold">SALARY / OPERATING EXPENSES</span>
+                <h4 class="text-danger mt-1 mb-0" id="auditExpenses">₱0.00</h4>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;">
-                <span class="text-muted small fw-bold">TRANSACTIONS COUNT</span>
-                <h4 class="text-warning mt-1 mb-0" id="auditTxCount">0</h4>
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #0d47a1;">
+                <span class="text-muted small fw-bold">NET PROFIT (Incl. Boss)</span>
+                <h4 class="text-primary fw-bold mt-1 mb-0" id="auditNetProfit">₱0.00</h4>
               </div>
             </div>
           </div>
 
-          <!-- Breakdown by Payment Method -->
-          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-wallet me-2"></i>Collection Breakdown by Payment Method</h6>
-          <div class="row g-3 mb-4">
-            <div class="col-md-3">
-              <div class="p-3 border rounded text-center bg-white">
-                <i class="fa-solid fa-money-bill-wave text-success fs-3 mb-2"></i>
-                <div class="text-muted small">CASH</div>
-                <h5 class="fw-bold mb-0" id="auditCash">₱0.00</h5>
+          <!-- Expenses & Salary Management Section -->
+          <div class="card p-3 bg-light mb-4 border">
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-calculator me-2"></i>Monthly Salary & Expense Input</h6>
+            <div class="row g-3 align-items-center">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Total Salary & Operating Expenses for Month (₱):</label>
+                <input type="number" step="0.01" id="monthlySalaryInput" class="form-control" value="0.00" oninput="saveMonthlyExpense()">
+              </div>
+              <div class="col-md-6 text-muted small">
+                * Ang halagang ito ay awtomatikong ibabawas sa Gross Sales / Collection para makuha ang eksaktong Net Profit.
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="p-3 border rounded text-center bg-white">
-                <i class="fa-solid fa-mobile-screen-button text-primary fs-3 mb-2"></i>
-                <div class="text-muted small">GCASH</div>
-                <h5 class="fw-bold mb-0" id="auditGCash">₱0.00</h5>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="p-3 border rounded text-center bg-white">
-                <i class="fa-solid fa-building-columns text-info fs-3 mb-2"></i>
-                <div class="text-muted small">BANK TRANSFER (BT)</div>
-                <h5 class="fw-bold mb-0" id="auditBT">₱0.00</h5>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="p-3 border rounded text-center bg-white">
-                <i class="fa-solid fa-money-check text-secondary fs-3 mb-2"></i>
-                <div class="text-muted small">CHEQUE</div>
-                <h5 class="fw-bold mb-0" id="auditCheque">₱0.00</h5>
-              </div>
-            </div>
+          </div>
+
+          <!-- D/Eco Boss Table Log -->
+          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Transactions Log</h6>
+          <div class="table-responsive mb-4">
+            <table class="table table-sm table-bordered bg-white">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Description / Type</th>
+                  <th>Amount (₱)</th>
+                </tr>
+              </thead>
+              <tbody id="bossLogsBody">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
           </div>
 
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Modal para sa D/Eco Boss Adjustment -->
+  <div class="modal fade" id="bossModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Adjustment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="bossForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Date:</label>
+              <input type="date" id="bossDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Adjustment Type:</label>
+              <select id="bossType" class="form-select">
+                <option value="ADD"> Boss Addition / Capital Cash In (+ Net Profit)</option>
+                <option value="SUB"> Boss Withdrawal / Cash Out (- Net Profit)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount (₱):</label>
+              <input type="number" step="0.01" id="bossAmount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Notes / Description:</label>
+              <input type="text" id="bossNotes" class="form-control" placeholder="e.g., Personal Withdrawal, Additional Capital">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-dark"><i class="fa-solid fa-floppy-disk me-1"></i>Save Adjustment</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -359,10 +456,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Sample Data with Payment Methods & Payment History for Audit
+    // Database Objects
     let transactions = [
       { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (x1)", total: 250.00, paid: 100.00, balance: 150.00, dueDate: "2026-09-30", status: "PARTIAL", payments: [{ amount: 100.00, method: "Cash", date: "2026-09-20" }] },
-      { id: 2, date: "2026-09-19", customer: "Maria Clara", product: "Pintura Red (x1)", total: 450.00, paid: 450.00, balance: 0.00, dueDate: "N/A", status: "PAID", payments: [{ amount: 450.00, method: "GCash", date: "2026-09-19" }] }
+      { id: 2, date: "2026-09-20", customer: "Maria Clara", product: "Pintura Red (x1)", total: 450.00, paid: 450.00, balance: 0.00, dueDate: "N/A", status: "PAID", payments: [{ amount: 450.00, method: "GCash", date: "2026-09-20" }] }
     ];
 
     let inventory = [
@@ -370,18 +467,24 @@
       { id: 2, name: "Pintura Red", qty: 50, beginning: 50, stockIn: 0, ending: 45 }
     ];
 
-    // Set Default Dates
+    let bossAdjustments = [];
+    let monthlyExpenses = {};
+
+    // Initial Date Configurations
     const today = new Date();
-    document.getElementById('saleDate').valueAsDate = today;
+    const todayFormatted = today.toISOString().split('T')[0];
+    document.getElementById('saleDate').value = todayFormatted;
+    document.getElementById('dailyReportDate').value = todayFormatted;
+    document.getElementById('bossDate').value = todayFormatted;
     document.getElementById('auditMonth').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
-    // ================= POS FUNCTIONS =================
+    // ================= POS LOGIC =================
     function addPosRow() {
       const tbody = document.getElementById('posItemsBody');
       const rowId = Date.now();
       const rowHTML = `
         <tr id="row-${rowId}">
-          <td><input type="text" class="form-control form-control-sm pos-name" placeholder="Product / Item Name" required></td>
+          <td><input type="text" class="form-control form-control-sm pos-name" placeholder="Product Name" required></td>
           <td><input type="number" class="form-control form-control-sm pos-qty" value="1" min="1" oninput="calculateTotal()" required></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" required></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" required></td>
@@ -494,9 +597,127 @@
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
       addPosRow();
-      document.getElementById('saleDate').valueAsDate = new Date();
+      document.getElementById('saleDate').value = todayFormatted;
       toggleCreditFields();
     });
+
+    // ================= DAILY REPORT LOGIC =================
+    function generateDailyReport() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      const tbody = document.getElementById('dailyTableBody');
+      tbody.innerHTML = '';
+
+      let daySales = 0;
+      let dayCollected = 0;
+      let count = 0;
+
+      const filtered = transactions.filter(t => t.date === selectedDate);
+
+      filtered.forEach((t, index) => {
+        daySales += t.total;
+        dayCollected += t.paid;
+        count++;
+
+        tbody.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td class="fw-bold">${t.customer}</td>
+            <td>${t.product}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
+            <td>${t.payments.length > 0 ? t.payments[0].method : 'N/A'}</td>
+          </tr>
+        `;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
+      }
+
+      document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
+      document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
+      document.getElementById('dailyTxCount').innerText = count;
+    }
+
+    // ================= D/ECO BOSS LOGIC =================
+    document.getElementById('bossForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const date = document.getElementById('bossDate').value;
+      const type = document.getElementById('bossType').value;
+      const amount = parseFloat(document.getElementById('bossAmount').value) || 0;
+      const notes = document.getElementById('bossNotes').value || 'D/Eco Boss Adjustment';
+
+      bossAdjustments.push({ date, type, amount, notes });
+
+      alert('D/Eco Boss Adjustment saved!');
+      bootstrap.Modal.getInstance(document.getElementById('bossModal')).hide();
+      this.reset();
+      generateMonthlyAudit();
+    });
+
+    // ================= MONTHLY AUDIT & NET PROFIT =================
+    function saveMonthlyExpense() {
+      const m = document.getElementById('auditMonth').value;
+      const val = parseFloat(document.getElementById('monthlySalaryInput').value) || 0;
+      monthlyExpenses[m] = val;
+      generateMonthlyAudit();
+    }
+
+    function generateMonthlyAudit() {
+      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
+      if (!selectedMonth) return;
+
+      let grossSales = 0;
+      let totalCollected = 0;
+
+      transactions.forEach(tx => {
+        if (tx.date.startsWith(selectedMonth)) {
+          grossSales += tx.total;
+        }
+        tx.payments.forEach(p => {
+          if (p.date.startsWith(selectedMonth)) {
+            totalCollected += p.amount;
+          }
+        });
+      });
+
+      // Boss Adjustments for selected month
+      let bossTotal = 0;
+      const bossBody = document.getElementById('bossLogsBody');
+      bossBody.innerHTML = '';
+
+      bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).forEach(b => {
+        const val = b.type === 'ADD' ? b.amount : -b.amount;
+        bossTotal += val;
+
+        bossBody.innerHTML += `
+          <tr>
+            <td>${b.date}</td>
+            <td>${b.notes} (${b.type === 'ADD' ? 'Capital In' : 'Withdrawal'})</td>
+            <td class="${b.type === 'ADD' ? 'text-success' : 'text-danger'} fw-bold">
+              ${b.type === 'ADD' ? '+' : '-'}₱${b.amount.toFixed(2)}
+            </td>
+          </tr>
+        `;
+      });
+
+      if (bossBody.innerHTML === '') {
+        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Walang na-record na D/Eco Boss adjustment sa buwang ito.</td></tr>`;
+      }
+
+      // Expenses
+      const expense = monthlyExpenses[selectedMonth] || 0;
+      document.getElementById('monthlySalaryInput').value = expense;
+
+      // Calculation: Net Profit = Total Collection - Expenses + Boss Adjustments
+      const netProfit = totalCollected - expense + bossTotal;
+
+      document.getElementById('auditTotalSales').innerText = `₱${grossSales.toFixed(2)}`;
+      document.getElementById('auditTotalCollected').innerText = `₱${totalCollected.toFixed(2)}`;
+      document.getElementById('auditExpenses').innerText = `₱${expense.toFixed(2)}`;
+      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+    }
 
     // ================= UTANG & PAYMENTS =================
     function renderCreditTable() {
@@ -627,54 +848,9 @@
       renderInventoryTable();
     });
 
-    // ================= MONTHLY AUDIT LOGIC =================
-    function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
-      if (!selectedMonth) return;
-
-      let grossSales = 0;
-      let totalCollected = 0;
-      let totalReceivables = 0;
-      let txCount = 0;
-
-      let methodTotals = {
-        "Cash": 0,
-        "GCash": 0,
-        "Bank Transfer": 0,
-        "Cheque": 0
-      };
-
-      transactions.forEach(tx => {
-        if (tx.date.startsWith(selectedMonth)) {
-          grossSales += tx.total;
-          totalReceivables += tx.balance;
-          txCount++;
-        }
-
-        // Sum up payments made within the selected month
-        tx.payments.forEach(p => {
-          if (p.date.startsWith(selectedMonth)) {
-            totalCollected += p.amount;
-            if (methodTotals[p.method] !== undefined) {
-              methodTotals[p.method] += p.amount;
-            }
-          }
-        });
-      });
-
-      document.getElementById('auditTotalSales').innerText = `₱${grossSales.toFixed(2)}`;
-      document.getElementById('auditTotalCollected').innerText = `₱${totalCollected.toFixed(2)}`;
-      document.getElementById('auditTotalReceivables').innerText = `₱${totalReceivables.toFixed(2)}`;
-      document.getElementById('auditTxCount').innerText = txCount;
-
-      document.getElementById('auditCash').innerText = `₱${methodTotals["Cash"].toFixed(2)}`;
-      document.getElementById('auditGCash').innerText = `₱${methodTotals["GCash"].toFixed(2)}`;
-      document.getElementById('auditBT').innerText = `₱${methodTotals["Bank Transfer"].toFixed(2)}`;
-      document.getElementById('auditCheque').innerText = `₱${methodTotals["Cheque"].toFixed(2)}`;
-    }
-
-    // Init
+    // Initializations
     addPosRow();
+    generateDailyReport();
   </script>
 </body>
 </html>

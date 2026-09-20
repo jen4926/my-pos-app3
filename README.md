@@ -14,6 +14,10 @@
     .nav-pills .nav-link { color: #fff; margin-right: 5px; }
     .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
     .credit-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
+    
+    /* Maliit na Action/Edit column */
+    .col-action { width: 50px; text-align: center; vertical-align: middle; }
+    .inventory-input { width: 80px; text-align: center; }
   </style>
 </head>
 <body>
@@ -157,8 +161,33 @@
       <!-- ================= 3. INVENTORY TAB ================= -->
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
-          <p class="text-muted">Talahanayan ng stocks at mga paninda.</p>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
+              <p class="text-muted m-0">Talahanayan ng stocks, dagdag paninda, at naiwang supply.</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+              <i class="fa-solid fa-plus me-1"></i> Add New Product
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-dark text-center">
+                <tr>
+                  <th class="text-start">Product Name</th>
+                  <th>Beginning Stock</th>
+                  <th>Stock In (+Add)</th>
+                  <th>Sold</th>
+                  <th>Ending Stock</th>
+                  <th class="col-action"><i class="fa-solid fa-trash"></i></th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <!-- Dynamic Content via JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -170,6 +199,34 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Modal para sa Pagdaragdag ng Bagong Produkto -->
+  <div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-box-open me-2"></i>Add New Inventory Item</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="addProductForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Product Name:</label>
+              <input type="text" id="newProdName" class="form-control" placeholder="e.g., Semento" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Beginning Stock:</label>
+              <input type="number" id="newProdStock" class="form-control" value="0" min="0" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Product</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -218,6 +275,11 @@
     let transactions = [
       { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (1 Bag)", total: 250.00, paid: 100.00, balance: 150.00, dueDate: "2026-09-30", status: "PARTIAL" },
       { id: 2, date: "2026-09-19", customer: "Maria Clara", product: "Pintura Red", total: 450.00, paid: 0.00, balance: 450.00, dueDate: "2026-09-28", status: "UNPAID" }
+    ];
+
+    let inventory = [
+      { id: 1, name: "Semento (1 Bag)", beginning: 100, stockIn: 20, ending: 80 },
+      { id: 2, name: "Pintura Red", beginning: 50, stockIn: 0, ending: 45 }
     ];
 
     // Set Default Date to Today
@@ -378,8 +440,88 @@
       renderCreditTable();
     }
 
-    // Initial Render
+    // ================= INVENTORY FUNCTIONS =================
+
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = '';
+
+      if (inventory.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang laman ang inventory. Magdagdag ng bagong item.</td></tr>`;
+        return;
+      }
+
+      inventory.forEach((item, index) => {
+        // Sold = Beginning + StockIn - Ending
+        const sold = Math.max(0, (item.beginning + item.stockIn) - item.ending);
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <input type="text" class="form-control form-control-sm fw-bold" value="${item.name}" onchange="updateInventory(${index}, 'name', this.value)">
+            </td>
+            <td>
+              <input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.beginning}" min="0" onchange="updateInventory(${index}, 'beginning', this.value)">
+            </td>
+            <td>
+              <input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.stockIn}" min="0" onchange="updateInventory(${index}, 'stockIn', this.value)">
+            </td>
+            <td class="text-center align-middle fw-semibold text-primary">
+              ${sold}
+            </td>
+            <td>
+              <input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.ending}" min="0" onchange="updateInventory(${index}, 'ending', this.value)">
+            </td>
+            <td class="col-action align-middle">
+              <button class="btn btn-sm btn-outline-danger border-0" title="Delete Item" onclick="deleteInventoryItem(${index})">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function updateInventory(index, key, value) {
+      if (key === 'name') {
+        inventory[index].name = value;
+      } else {
+        inventory[index][key] = parseInt(value) || 0;
+      }
+      renderInventoryTable();
+    }
+
+    function deleteInventoryItem(index) {
+      if (confirm('Sigurado ka bang gusto mong burahin ang item na ito sa inventory?')) {
+        inventory.splice(index, 1);
+        renderInventoryTable();
+      }
+    }
+
+    // Save New Product from Modal
+    document.getElementById('addProductForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newProdName').value;
+      const stock = parseInt(document.getElementById('newProdStock').value) || 0;
+
+      inventory.push({
+        id: inventory.length + 1,
+        name: name,
+        beginning: stock,
+        stockIn: 0,
+        ending: stock
+      });
+
+      this.reset();
+      const modalEl = document.getElementById('addProductModal');
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      modalInstance.hide();
+      renderInventoryTable();
+    });
+
+    // Initial Renders
     renderCreditTable();
+    renderInventoryTable();
   </script>
 </body>
 </html>

@@ -269,7 +269,6 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit</h4>
             <div class="d-flex gap-2 align-items-center">
-              <!-- D/Eco Boss Button -->
               <button class="btn btn-warning fw-bold text-dark me-2" data-bs-toggle="modal" data-bs-target="#bossModal">
                 <i class="fa-solid fa-user-tie me-1"></i> Add D/Eco Boss Adjustment
               </button>
@@ -294,7 +293,7 @@
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #c62828;">
-                <span class="text-muted small fw-bold">SALARY / OPERATING EXPENSES</span>
+                <span class="text-muted small fw-bold">TOTAL SALARIES / EXPENSES</span>
                 <h4 class="text-danger mt-1 mb-0" id="auditExpenses">₱0.00</h4>
               </div>
             </div>
@@ -306,17 +305,27 @@
             </div>
           </div>
 
-          <!-- Expenses & Salary Management Section -->
+          <!-- DETAILED SALARY & EXPENSES SECTION -->
           <div class="card p-3 bg-light mb-4 border">
-            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-calculator me-2"></i>Monthly Salary & Expense Input</h6>
-            <div class="row g-3 align-items-center">
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Total Salary & Operating Expenses for Month (₱):</label>
-                <input type="number" step="0.01" id="monthlySalaryInput" class="form-control" value="0.00" oninput="saveMonthlyExpense()">
-              </div>
-              <div class="col-md-6 text-muted small">
-                * Ang halagang ito ay awtomatikong ibabawas sa Gross Sales / Collection para makuha ang eksaktong Net Profit.
-              </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-receipt me-2"></i>Itemized Salary & Expenses Breakdown</h6>
+              <button class="btn btn-sm btn-outline-danger" onclick="addExpenseRow()">
+                <i class="fa-solid fa-plus me-1"></i> Add Expense Line
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle bg-white" id="expenseTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>Expense Name / Description</th>
+                    <th style="width: 200px;">Amount (₱)</th>
+                    <th class="col-action"><i class="fa-solid fa-trash"></i></th>
+                  </tr>
+                </thead>
+                <tbody id="expenseTableBody">
+                  <!-- Dynamic Expense Rows -->
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -468,7 +477,14 @@
     ];
 
     let bossAdjustments = [];
-    let monthlyExpenses = {};
+    
+    // Structure for detailed expenses per month: { "YYYY-MM": [ { name: "", amount: 0 } ] }
+    let monthlyExpensesData = {
+      "2026-09": [
+        { name: "Sahod ni Juan", amount: 5000.00 },
+        { name: "Kuryente at Tubig", amount: 1500.00 }
+      ]
+    };
 
     // Initial Date Configurations
     const today = new Date();
@@ -656,14 +672,46 @@
       generateMonthlyAudit();
     });
 
-    // ================= MONTHLY AUDIT & NET PROFIT =================
-    function saveMonthlyExpense() {
-      const m = document.getElementById('auditMonth').value;
-      const val = parseFloat(document.getElementById('monthlySalaryInput').value) || 0;
-      monthlyExpenses[m] = val;
+    // ================= DETAILED EXPENSES LOGIC =================
+    function addExpenseRow(name = '', amount = '') {
+      const tbody = document.getElementById('expenseTableBody');
+      const rowId = Date.now();
+      const rowHTML = `
+        <tr id="exp-${rowId}">
+          <td><input type="text" class="form-control form-control-sm exp-name" placeholder="e.g., Sahod ni Juan, Kuryente, etc." value="${name}" oninput="saveCurrentMonthExpenses()"></td>
+          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${amount}" oninput="saveCurrentMonthExpenses()"></td>
+          <td class="col-action">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+      tbody.insertAdjacentHTML('beforeend', rowHTML);
+      saveCurrentMonthExpenses();
+    }
+
+    function removeExpenseRow(rowId) {
+      document.getElementById(rowId).remove();
+      saveCurrentMonthExpenses();
+    }
+
+    function saveCurrentMonthExpenses() {
+      const selectedMonth = document.getElementById('auditMonth').value;
+      const rows = document.querySelectorAll('#expenseTableBody tr');
+      let expList = [];
+
+      rows.forEach(row => {
+        const name = row.querySelector('.exp-name').value;
+        const amount = parseFloat(row.querySelector('.exp-amount').value) || 0;
+        expList.push({ name, amount });
+      });
+
+      monthlyExpensesData[selectedMonth] = expList;
       generateMonthlyAudit();
     }
 
+    // ================= MONTHLY AUDIT & NET PROFIT =================
     function generateMonthlyAudit() {
       const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
       if (!selectedMonth) return;
@@ -680,6 +728,37 @@
             totalCollected += p.amount;
           }
         });
+      });
+
+      // Render Expense Table Rows for Selected Month
+      const expBody = document.getElementById('expenseTableBody');
+      expBody.innerHTML = '';
+      const monthExp = monthlyExpensesData[selectedMonth] || [];
+
+      if (monthExp.length === 0) {
+        // If empty, add default single row
+        addExpenseRow();
+      } else {
+        monthExp.forEach(exp => {
+          const rowId = Date.now() + Math.random();
+          expBody.innerHTML += `
+            <tr id="exp-${rowId}">
+              <td><input type="text" class="form-control form-control-sm exp-name" placeholder="Expense Name" value="${exp.name}" oninput="saveCurrentMonthExpenses()"></td>
+              <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${exp.amount || ''}" oninput="saveCurrentMonthExpenses()"></td>
+              <td class="col-action">
+                <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Calculate Total Expenses
+      let totalExpenses = 0;
+      (monthlyExpensesData[selectedMonth] || []).forEach(e => {
+        totalExpenses += e.amount;
       });
 
       // Boss Adjustments for selected month
@@ -706,16 +785,12 @@
         bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Walang na-record na D/Eco Boss adjustment sa buwang ito.</td></tr>`;
       }
 
-      // Expenses
-      const expense = monthlyExpenses[selectedMonth] || 0;
-      document.getElementById('monthlySalaryInput').value = expense;
-
       // Calculation: Net Profit = Total Collection - Expenses + Boss Adjustments
-      const netProfit = totalCollected - expense + bossTotal;
+      const netProfit = totalCollected - totalExpenses + bossTotal;
 
       document.getElementById('auditTotalSales').innerText = `₱${grossSales.toFixed(2)}`;
       document.getElementById('auditTotalCollected').innerText = `₱${totalCollected.toFixed(2)}`;
-      document.getElementById('auditExpenses').innerText = `₱${expense.toFixed(2)}`;
+      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
       document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
     }
 

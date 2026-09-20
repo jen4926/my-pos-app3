@@ -147,14 +147,21 @@
             </button>
           </div>
           <form id="posForm">
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
                 <label class="form-label fw-semibold">Date of Sale:</label>
                 <input type="date" id="saleDate" class="form-control" required>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label fw-semibold">Customer Name:</label>
                 <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Transaction Location / Uri:</label>
+                <select id="transactionLocation" class="form-select" required>
+                  <option value="Hiway">Hiway</option>
+                  <option value="Byahe">Byahe</option>
+                </select>
               </div>
             </div>
 
@@ -398,6 +405,7 @@
                 <tr>
                   <th>#</th>
                   <th>Customer Name</th>
+                  <th>Location</th>
                   <th>Products Bought</th>
                   <th>Container Status</th>
                   <th>Total Amount</th>
@@ -429,6 +437,7 @@
               <thead class="table-dark">
                 <tr>
                   <th>Customer Name</th>
+                  <th>Location</th>
                   <th>Product(s)</th>
                   <th>Total Cost (₱)</th>
                   <th>Amount Paid (₱)</th>
@@ -515,6 +524,7 @@
                 <thead class="table-dark">
                   <tr>
                     <th>Date</th>
+                    <th>Location</th>
                     <th>Products</th>
                     <th>Container</th>
                     <th>Total (₱)</th>
@@ -581,6 +591,7 @@
                 <tr>
                   <th>Date</th>
                   <th>Customer Name</th>
+                  <th>Location</th>
                   <th>Product Name</th>
                   <th class="text-center">Quantity (Ilan)</th>
                 </tr>
@@ -703,6 +714,13 @@
             <div class="mb-3">
               <label class="form-label fw-semibold">Customer Name:</label>
               <input type="text" id="editCustomerName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Location / Uri:</label>
+              <select id="editLocation" class="form-select" required>
+                <option value="Hiway">Hiway</option>
+                <option value="Byahe">Byahe</option>
+              </select>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Products Bought:</label>
@@ -1165,6 +1183,7 @@
       const method = document.getElementById('paymentMethod').value;
       const saleDate = document.getElementById('saleDate').value;
       const custName = document.getElementById('customerName').value;
+      const location = document.getElementById('transactionLocation').value;
       let paid = parseFloat(document.getElementById('amountPaidNow').value) || 0;
       
       if (paymentType === 'FULL') paid = total;
@@ -1188,7 +1207,7 @@
         totalCostOfGoods += (qty * cost);
         if(name) {
           productSummary.push(`${name} (x${qty})`);
-          itemsPurchasedList.push({ name: name, qty: qty });
+          itemsPurchasedList.push({ name: name, qty: qty, location: location });
 
           const invItem = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
           if(invItem) {
@@ -1225,6 +1244,7 @@
         id: Date.now(),
         date: saleDate,
         customer: custName,
+        location: location,
         product: productSummary.join(', '),
         itemsList: itemsPurchasedList,
         containerInfo: cInfo,
@@ -1279,11 +1299,13 @@
         count++;
 
         const lastMethod = t.payments.length > 0 ? t.payments[t.payments.length - 1].method : 'N/A';
+        const locBadge = t.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
 
         tbody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
             <td class="fw-bold">${t.customer}</td>
+            <td>${locBadge}</td>
             <td>${t.product}</td>
             <td><span class="badge bg-secondary">${t.containerInfo || 'Wala'}</span></td>
             <td>₱${t.total.toFixed(2)}</td>
@@ -1303,7 +1325,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
       }
 
       currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque));
@@ -1328,6 +1350,7 @@
 
       document.getElementById('editTxId').value = tx.id;
       document.getElementById('editCustomerName').value = tx.customer;
+      document.getElementById('editLocation').value = tx.location || 'Hiway';
       document.getElementById('editProduct').value = tx.product;
       document.getElementById('editContainerInfo').value = tx.containerInfo || '';
       document.getElementById('editTotal').value = tx.total;
@@ -1351,6 +1374,7 @@
 
       if(tx) {
         tx.customer = document.getElementById('editCustomerName').value;
+        tx.location = document.getElementById('editLocation').value;
         tx.product = document.getElementById('editProduct').value;
         tx.containerInfo = document.getElementById('editContainerInfo').value;
         tx.total = parseFloat(document.getElementById('editTotal').value) || 0;
@@ -1361,7 +1385,6 @@
         else if (tx.paid > 0) tx.status = "PARTIAL";
         else tx.status = "UNPAID";
 
-        // Update initial payment history entry if exists
         if(tx.payments.length > 0) {
           tx.payments[0].amount = tx.paid;
         } else if(tx.paid > 0) {
@@ -1526,149 +1549,69 @@
       const selectedMonth = document.getElementById('auditMonth').value;
       if (!selectedMonth) return;
 
-      const expBody = document.getElementById('expenseTableBody');
-      expBody.innerHTML = '';
-      const monthExp = monthlyExpensesData[selectedMonth] || [];
-
-      if (monthExp.length === 0) {
-        addExpenseRow();
+      // Render Expense Rows for selected month
+      const tbody = document.getElementById('expenseTableBody');
+      tbody.innerHTML = '';
+      const savedExpenses = monthlyExpensesData[selectedMonth] || [];
+      if (savedExpenses.length > 0) {
+        savedExpenses.forEach(ex => addExpenseRow(ex.name, ex.amount));
       } else {
-        monthExp.forEach(exp => {
-          const rowId = Date.now() + Math.random().toString(36).substring(2, 7);
-          expBody.innerHTML += `
-            <tr id="exp-${rowId}">
-              <td><input type="text" class="form-control form-control-sm exp-name" placeholder="Expense Name" value="${exp.name}" onchange="saveCurrentMonthExpenses()"></td>
-              <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${exp.amount || ''}" onchange="saveCurrentMonthExpenses()" oninput="updateCalculationsOnly()"></td>
-              <td class="col-action no-print">
-                <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
-              </td>
-            </tr>
-          `;
-        });
+        addExpenseRow('Sahod / Labor', 0);
+        addExpenseRow('Kuryente / Tubig / Iba pa', 0);
       }
 
-      const bossBody = document.getElementById('bossLogsBody');
-      bossBody.innerHTML = '';
-
-      bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).forEach(b => {
-        bossBody.innerHTML += `
+      // Render Boss Logs
+      const bossTbody = document.getElementById('bossLogsBody');
+      bossTbody.innerHTML = '';
+      const filteredBoss = bossAdjustments.filter(b => b.date.startsWith(selectedMonth));
+      filteredBoss.forEach(b => {
+        const badge = b.type === 'ADD' ? '<span class="badge bg-success">Boss Addition</span>' : '<span class="badge bg-danger">Boss Withdrawal</span>';
+        bossTbody.innerHTML += `
           <tr>
             <td>${b.date}</td>
-            <td>${b.notes} (${b.type === 'ADD' ? 'Capital In' : 'Withdrawal'})</td>
-            <td class="${b.type === 'ADD' ? 'text-success' : 'text-danger'} fw-bold">
-              ${b.type === 'ADD' ? '+' : '-'}₱${b.amount.toFixed(2)}
-            </td>
+            <td>${badge} - ${b.notes}</td>
+            <td>₱${b.amount.toFixed(2)}</td>
           </tr>
         `;
       });
-
-      if (bossBody.innerHTML === '') {
-        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Walang na-record na D/Eco Boss adjustment sa buwang ito.</td></tr>`;
+      if(filteredBoss.length === 0) {
+        bossTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang Boss Adjustment ngayong buwan.</td></tr>`;
       }
 
       updateCalculationsOnly();
     }
 
-    // ================= SEARCH & TRACK CUSTOMER ORDER =================
-    function searchCustomerOrder() {
-      const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
-      const resultContainer = document.getElementById('searchResultContainer');
-      const noResultAlert = document.getElementById('noCustomerFound');
-      const historyBody = document.getElementById('customerHistoryBody');
-
-      if (!query) {
-        alert('Mangyaring maglagay ng pangalan ng customer.');
-        return;
-      }
-
-      const customerTxs = transactions.filter(t => t.customer.toLowerCase().includes(query));
-
-      if (customerTxs.length === 0) {
-        resultContainer.style.display = 'none';
-        noResultAlert.classList.remove('d-none');
-        return;
-      }
-
-      noResultAlert.classList.add('d-none');
-      resultContainer.style.display = 'block';
-
-      customerTxs.sort((a, b) => b.id - a.id);
-
-      const lastOrder = customerTxs[0];
-
-      document.getElementById('lastOrderCustomer').innerText = lastOrder.customer;
-      document.getElementById('lastOrderDate').innerText = lastOrder.date;
-      document.getElementById('lastOrderContainer').innerText = lastOrder.containerInfo || 'Wala';
-      document.getElementById('lastOrderProducts').innerText = lastOrder.product;
-      document.getElementById('lastOrderTotal').innerText = `₱${lastOrder.total.toFixed(2)}`;
-      document.getElementById('lastOrderPaid').innerText = `₱${lastOrder.paid.toFixed(2)}`;
-      document.getElementById('lastOrderBalance').innerText = `₱${lastOrder.balance.toFixed(2)}`;
-
-      const badgeElem = document.getElementById('lastOrderBadge');
-      badgeElem.innerText = lastOrder.status;
-      if (lastOrder.status === 'PAID') {
-        badgeElem.className = 'badge bg-success fs-6';
-      } else if (lastOrder.status === 'PARTIAL') {
-        badgeElem.className = 'badge bg-warning text-dark fs-6';
-      } else {
-        badgeElem.className = 'badge bg-danger fs-6';
-      }
-
-      historyBody.innerHTML = '';
-      customerTxs.forEach(t => {
-        let badge = t.status === 'PAID' 
-          ? `<span class="badge bg-success">PAID</span>` 
-          : (t.status === 'PARTIAL' ? `<span class="badge bg-warning text-dark">PARTIAL</span>` : `<span class="badge bg-danger">UNPAID</span>`);
-
-        historyBody.innerHTML += `
-          <tr>
-            <td>${t.date}</td>
-            <td class="fw-semibold">${t.product}</td>
-            <td>${t.containerInfo || 'Wala'}</td>
-            <td>₱${t.total.toFixed(2)}</td>
-            <td class="text-success">₱${t.paid.toFixed(2)}</td>
-            <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
-            <td>${badge}</td>
-          </tr>
-        `;
-      });
-    }
-
-    // ================= UTANG & PAYMENTS =================
+    // ================= CREDIT & UTANG TAB =================
     function renderCreditTable() {
       const tbody = document.getElementById('creditTableBody');
       tbody.innerHTML = '';
-      const utangList = transactions.filter(t => t.balance > 0);
 
-      if (utangList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang nakatalang may utang sa kasalukuyan.</td></tr>`;
-        return;
-      }
+      const credits = transactions.filter(t => t.balance > 0);
 
-      utangList.forEach(t => {
-        const statusBadge = t.status === 'UNPAID' 
-          ? `<span class="badge bg-danger">UNPAID</span>` 
-          : `<span class="badge bg-warning text-dark">PARTIAL</span>`;
-
+      credits.forEach(t => {
+        const locBadge = t.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
         tbody.innerHTML += `
           <tr>
             <td class="fw-bold">${t.customer}</td>
+            <td>${locBadge}</td>
             <td>${t.product}</td>
             <td>₱${t.total.toFixed(2)}</td>
             <td class="text-success">₱${t.paid.toFixed(2)}</td>
             <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
             <td>${t.dueDate}</td>
-            <td>${statusBadge}</td>
+            <td><span class="badge bg-warning text-dark">${t.status}</span></td>
             <td class="no-print">
-              <button class="btn btn-sm btn-primary" onclick="openPaymentModal(${t.id})">
-                <i class="fa-solid fa-cash-register me-1"></i> Magbayad
+              <button class="btn btn-sm btn-success" onclick="openPaymentModal(${t.id})">
+                <i class="fa-solid fa-money-bill-wave me-1"></i> Magbayad
               </button>
             </td>
           </tr>
         `;
       });
+
+      if (credits.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang aktibong utang sa ngayon.</td></tr>`;
+      }
     }
 
     function openPaymentModal(txId) {
@@ -1679,7 +1622,7 @@
       document.getElementById('payCustomerName').value = tx.customer;
       document.getElementById('payCurrentBalance').value = tx.balance.toFixed(2);
       document.getElementById('payAmountInput').value = '';
-      
+
       new bootstrap.Modal(document.getElementById('paymentModal')).show();
     }
 
@@ -1687,93 +1630,174 @@
       const txId = parseInt(document.getElementById('payTransactionId').value);
       const payAmount = parseFloat(document.getElementById('payAmountInput').value) || 0;
       const method = document.getElementById('payMethod').value;
-
       const tx = transactions.find(t => t.id === txId);
-      if (!tx) return;
 
-      if (payAmount <= 0) {
-        alert('Mangyaring maglagay ng wastong halaga ng kabayaran.');
-        return;
-      }
+      if(tx && payAmount > 0) {
+        if(payAmount > tx.balance) {
+          alert('Ang binabayad ay mas malaki kaysa sa natitirang utang!');
+          return;
+        }
 
-      if (payAmount > tx.balance) {
-        alert('Ang ibinayad ay mas malaki kaysa sa natitirang balance!');
-        return;
-      }
+        tx.paid += payAmount;
+        tx.balance -= payAmount;
+        if(tx.balance <= 0) {
+          tx.balance = 0;
+          tx.status = "PAID";
+        } else {
+          tx.status = "PARTIAL";
+        }
 
-      tx.paid += payAmount;
-      tx.balance -= payAmount;
-      if (tx.balance === 0) {
-        tx.status = 'PAID';
+        tx.payments.push({
+          amount: payAmount,
+          method: method,
+          date: todayFormatted
+        });
+
+        alert('Payment successfully recorded!');
+        bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+        renderCreditTable();
       } else {
-        tx.status = 'PARTIAL';
+        alert('Mangyaring maglagay ng wastong halaga ng bayad.');
       }
-
-      tx.payments.push({
-        amount: payAmount,
-        method: method,
-        date: todayFormatted
-      });
-
-      alert('Tagumpay na nai-save ang bayad sa utang!');
-      bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
-      renderCreditTable();
-      generateDailyReport();
     }
 
-    // ================= INVENTORY MANGEMENT =================
+    // ================= CUSTOMER ORDER LOOKUP =================
+    function searchCustomerOrder() {
+      const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
+      if(!query) return;
+
+      const matched = transactions.filter(t => t.customer.toLowerCase().includes(query));
+
+      if(matched.length > 0) {
+        // Get the latest transaction as last order
+        const last = matched[matched.length - 1];
+
+        document.getElementById('lastOrderCustomer').innerText = last.customer;
+        document.getElementById('lastOrderDate').innerText = last.date;
+        document.getElementById('lastOrderContainer').innerText = last.containerInfo || 'Wala';
+        document.getElementById('lastOrderProducts').innerText = last.product;
+        document.getElementById('lastOrderTotal').innerText = `₱${last.total.toFixed(2)}`;
+        document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
+        document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
+
+        const badge = document.getElementById('lastOrderBadge');
+        badge.innerText = last.status;
+        badge.className = `badge fs-6 ${last.status === 'PAID' ? 'bg-success' : 'bg-warning text-dark'}`;
+
+        // Populate History
+        const histBody = document.getElementById('customerHistoryBody');
+        histBody.innerHTML = '';
+        matched.forEach(m => {
+          const locBadge = m.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
+          histBody.innerHTML += `
+            <tr>
+              <td>${m.date}</td>
+              <td>${locBadge}</td>
+              <td>${m.product}</td>
+              <td>${m.containerInfo || 'Wala'}</td>
+              <td>₱${m.total.toFixed(2)}</td>
+              <td>₱${m.paid.toFixed(2)}</td>
+              <td>₱${m.balance.toFixed(2)}</td>
+              <td><span class="badge ${m.status === 'PAID' ? 'bg-success' : 'bg-warning text-dark'}">${m.status}</span></td>
+            </tr>
+          `;
+        });
+
+        document.getElementById('searchResultContainer').style.display = 'block';
+        document.getElementById('noCustomerFound').classList.add('d-none');
+      } else {
+        document.getElementById('searchResultContainer').style.display = 'none';
+        document.getElementById('noCustomerFound').classList.remove('d-none');
+      }
+    }
+
+    // ================= INVENTORY LOGIC =================
+    document.getElementById('addProductForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newProdName').value.trim();
+      const qty = parseFloat(document.getElementById('newProdQty').value) || 1;
+      const stock = parseFloat(document.getElementById('newProdStock').value) || 0;
+
+      inventory.push({
+        name: name,
+        qty: qty,
+        beginning: stock,
+        stockIn: 0,
+        ending: stock
+      });
+
+      alert('Product successfully added to inventory!');
+      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+      this.reset();
+      renderInventoryTable();
+    });
+
     function renderInventoryTable() {
       const tbody = document.getElementById('inventoryTableBody');
       const tfoot = document.getElementById('inventoryTableFooter');
       tbody.innerHTML = '';
 
       let totalBeg = 0;
-      let totalIn = 0;
+      let totalStockIn = 0;
       let totalSold = 0;
-      let totalEnd = 0;
+      let totalEnding = 0;
 
       inventory.forEach((item, index) => {
-        let sold = item.beginning + item.stockIn - item.ending;
-        if(sold < 0) sold = 0;
+        // Calculate sold quantity based on transactions
+        let sold = 0;
+        transactions.forEach(t => {
+          if(t.itemsList) {
+            t.itemsList.forEach(i => {
+              if(i.name.toLowerCase() === item.name.toLowerCase()) {
+                sold += i.qty;
+              }
+            });
+          }
+        });
+
+        const ending = Math.max(0, item.beginning + item.stockIn - sold);
+        item.ending = ending;
 
         totalBeg += item.beginning;
-        totalIn += item.stockIn;
+        totalStockIn += item.stockIn;
         totalSold += sold;
-        totalEnd += item.ending;
+        totalEnding += ending;
 
         tbody.innerHTML += `
           <tr>
-            <td class="fw-semibold">${item.name}</td>
-            <td class="text-center"><span class="badge bg-info text-dark">Pcs / Unit</span></td>
-            <td><input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto" value="${item.beginning}" onchange="updateInventoryValue(${index}, 'beginning', this.value)"></td>
-            <td><input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto" value="${item.stockIn}" onchange="updateInventoryValue(${index}, 'stockIn', this.value)"></td>
-            <td class="text-center fw-bold text-primary">${sold}</td>
-            <td><input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto" value="${item.ending}" onchange="updateInventoryValue(${index}, 'ending', this.value)"></td>
+            <td class="fw-bold">${item.name}</td>
+            <td class="text-center">${item.qty}</td>
+            <td class="text-center">${item.beginning}</td>
+            <td class="text-center">
+              <input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto" value="${item.stockIn}" onchange="updateStockIn(${index}, this.value)">
+            </td>
+            <td class="text-center text-danger fw-semibold">${sold}</td>
+            <td class="text-center fw-bold text-success">${ending}</td>
             <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})"><i class="fa-solid fa-trash-can"></i></button>
+              <button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteInventoryItem(${index})"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
       });
 
-      if (inventory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang nakatalang produkto sa inventory. I-click ang "Add Product".</td></tr>`;
+      if(inventory.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Wala pang nakalagay na produkto sa inventory.</td></tr>`;
       }
 
       tfoot.innerHTML = `
         <tr>
-          <td colspan="2" class="text-start">TOTALS:</td>
-          <td>${totalBeg}</td>
-          <td>${totalIn}</td>
-          <td class="text-primary">${totalSold}</td>
-          <td>${totalEnd}</td>
+          <td colspan="2" class="text-end">TOTAL:</td>
+          <td class="text-center">${totalBeg}</td>
+          <td class="text-center">${totalStockIn}</td>
+          <td class="text-center">${totalSold}</td>
+          <td class="text-center">${totalEnding}</td>
           <td class="no-print"></td>
         </tr>
       `;
     }
 
-    function updateInventoryValue(index, field, value) {
-      inventory[index][field] = parseFloat(value) || 0;
+    function updateStockIn(index, val) {
+      inventory[index].stockIn = parseFloat(val) || 0;
       renderInventoryTable();
     }
 
@@ -1784,65 +1808,31 @@
       }
     }
 
-    document.getElementById('addProductForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('newProdName').value.trim();
-      const qty = parseFloat(document.getElementById('newProdQty').value) || 1;
-      const beginning = parseFloat(document.getElementById('newProdStock').value) || 0;
-
-      const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-      if(existing) {
-        alert('Mayroon nang ganitong produkto sa inventory!');
-        return;
-      }
-
-      inventory.push({
-        name: name,
-        qty: qty,
-        beginning: beginning,
-        stockIn: 0,
-        ending: beginning
-      });
-
-      alert('Successfully added new product!');
-      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-      this.reset();
-      renderInventoryTable();
-    });
-
     function renderCustomerSalesLog() {
       const tbody = document.getElementById('customerSalesLogBody');
       tbody.innerHTML = '';
 
-      let logs = [];
+      let count = 0;
       transactions.forEach(t => {
-        if(t.itemsList && t.itemsList.length > 0) {
-          t.itemsList.forEach(item => {
-            logs.push({
-              date: t.date,
-              customer: t.customer,
-              product: item.name,
-              qty: item.qty
-            });
+        if(t.itemsList) {
+          t.itemsList.forEach(i => {
+            count++;
+            const locBadge = i.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
+            tbody.innerHTML += `
+              <tr>
+                <td>${t.date}</td>
+                <td class="fw-bold">${t.customer}</td>
+                <td>${locBadge}</td>
+                <td>${i.name}</td>
+                <td class="text-center">${i.qty}</td>
+              </tr>
+            `;
           });
         }
       });
 
-      logs.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-      logs.forEach(l => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${l.date}</td>
-            <td class="fw-bold">${l.customer}</td>
-            <td>${l.product}</td>
-            <td class="text-center"><span class="badge bg-secondary">${l.qty} pcs</span></td>
-          </tr>
-        `;
-      });
-
-      if(logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang naitatalang customer purchases.</td></tr>`;
+      if(count === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Wala pang naitalang benta ng produkto.</td></tr>`;
       }
     }
   </script>

@@ -243,7 +243,7 @@
             </div>
             <div class="col-md-4">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">DAILY CASH / COLLECTION</span>
+                <span class="text-muted small fw-bold">TOTAL COLLECTION (All Payments)</span>
                 <h4 class="text-success mt-1 mb-0" id="dailyTotalCollected">₱0.00</h4>
               </div>
             </div>
@@ -272,38 +272,38 @@
                     <tbody>
                       <tr>
                         <td class="fw-semibold text-primary">₱1,000</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="1000" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="1000" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱500</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="500" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="500" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱200</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="200" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="200" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱100</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="100" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="100" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱50</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="50" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="50" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱20</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="20" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="20" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">Coins / Barya</td>
                         <td><span class="text-muted small">Kabuuang Barya</span></td>
-                        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                       </tr>
                     </tbody>
                   </table>
@@ -313,19 +313,36 @@
               <!-- CASH VERIFICATION / DISCREPANCY COMPARISON -->
               <div class="col-md-5 d-flex flex-column justify-content-between">
                 <div class="card p-3 bg-white h-100 border">
-                  <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fa-solid fa-scale-balanced me-2"></i>Cash Audit & Comparison</h6>
+                  <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fa-solid fa-scale-balanced me-2"></i>Cash Audit & Deductions</h6>
                   
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small fw-semibold">Total Collections:</span>
+                    <span class="fw-bold text-secondary" id="totalCollectionAll">₱0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Less: GCash</span>
+                    <span class="text-danger small" id="lessGCash">-₱0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Less: Bank Transfer (BT)</span>
+                    <span class="text-danger small" id="lessBT">-₱0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Less: Cheque</span>
+                    <span class="text-danger small" id="lessCheque">-₱0.00</span>
+                  </div>
+
+                  <hr class="my-1">
+
+                  <div class="d-flex justify-content-between align-items-center my-2 bg-light p-2 rounded">
+                    <span class="fw-bold text-dark">Target Cash in Drawer:</span>
+                    <span class="fs-5 fw-bold text-success" id="breakdownTargetSales">₱0.00</span>
+                  </div>
+
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-muted fw-semibold">Total Cash Counted:</span>
                     <span class="fs-5 fw-bold text-dark" id="totalCountedCash">₱0.00</span>
                   </div>
-
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted fw-semibold">Daily Cash Collected:</span>
-                    <span class="fs-5 fw-bold text-success" id="breakdownTargetSales">₱0.00</span>
-                  </div>
-
-                  <hr class="my-2">
 
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="fw-bold text-dark">Discrepancy / Over-Short:</span>
@@ -837,6 +854,19 @@
       addPosRow();
     };
 
+    // ================= ENTER KEY FOCUS NEXT =================
+    function handleEnterNext(event, currentInput) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const inputs = Array.from(document.querySelectorAll('.denom-count, .denom-coins'));
+        const currentIndex = inputs.indexOf(currentInput);
+        if (currentIndex > -1 && currentIndex < inputs.length - 1) {
+          inputs[currentIndex + 1].focus();
+          inputs[currentIndex + 1].select();
+        }
+      }
+    }
+
     // ================= AUTHENTICATION LOGIC =================
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -1120,7 +1150,7 @@
     });
 
     // ================= DAILY REPORT & MONEY BREAKDOWN LOGIC =================
-    let currentDailyCollected = 0;
+    let currentTargetCashInDrawer = 0;
 
     function generateDailyReport() {
       const selectedDate = document.getElementById('dailyReportDate').value;
@@ -1131,12 +1161,23 @@
       let dayCollected = 0;
       let count = 0;
 
+      let totalGCash = 0;
+      let totalBT = 0;
+      let totalCheque = 0;
+
       const filtered = transactions.filter(t => t.date === selectedDate);
 
       filtered.forEach((t, index) => {
         daySales += t.total;
         dayCollected += t.paid;
         count++;
+
+        // Compute Payment Methods
+        t.payments.forEach(p => {
+          if (p.method === 'GCash') totalGCash += p.amount;
+          else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
+          else if (p.method === 'Cheque') totalCheque += p.amount;
+        });
 
         tbody.innerHTML += `
           <tr>
@@ -1156,12 +1197,19 @@
         tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
       }
 
-      currentDailyCollected = dayCollected;
+      // Net Cash left to audit
+      currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque));
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;
-      document.getElementById('breakdownTargetSales').innerText = `₱${dayCollected.toFixed(2)}`;
+
+      // Update Audit UI
+      document.getElementById('totalCollectionAll').innerText = `₱${dayCollected.toFixed(2)}`;
+      document.getElementById('lessGCash').innerText = `-₱${totalGCash.toFixed(2)}`;
+      document.getElementById('lessBT').innerText = `-₱${totalBT.toFixed(2)}`;
+      document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
+      document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
 
       calculateMoneyBreakdown();
     }
@@ -1186,20 +1234,20 @@
 
       document.getElementById('totalCountedCash').innerText = `₱${totalCashCounted.toFixed(2)}`;
 
-      const diff = totalCashCounted - currentDailyCollected;
+      const diff = totalCashCounted - currentTargetCashInDrawer;
       const diffElem = document.getElementById('cashDiscrepancy');
       const alertElem = document.getElementById('cashStatusAlert');
 
       diffElem.innerText = `₱${Math.abs(diff).toFixed(2)}`;
 
-      if (totalCashCounted === 0 && currentDailyCollected === 0) {
+      if (totalCashCounted === 0 && currentTargetCashInDrawer === 0) {
         diffElem.className = "fs-5 fw-bold text-dark";
         alertElem.className = "alert alert-secondary text-center p-2 fw-bold mb-0";
         alertElem.innerHTML = `<i class="fa-solid fa-calculator me-1"></i> Walang koleksyon o breakdown.`;
       } else if (Math.abs(diff) < 0.01) {
         diffElem.className = "fs-5 fw-bold text-success";
         alertElem.className = "alert alert-success text-center p-2 fw-bold mb-0";
-        alertElem.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> PANTAY! Tugma ang pera sa Daily Collection.`;
+        alertElem.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> PANTAY! Tugma ang Cash sa Drawer.`;
       } else if (diff > 0) {
         diffElem.className = "fs-5 fw-bold text-primary";
         alertElem.className = "alert alert-info text-center p-2 fw-bold mb-0";
@@ -1517,108 +1565,110 @@
       let totEnding = 0;
 
       inventory.forEach((item, index) => {
-        const sold = Math.max(0, (item.beginning + item.stockIn) - item.ending);
-        
+        let soldQty = 0;
+        transactions.forEach(t => {
+          if (t.itemsList) {
+            t.itemsList.forEach(p => {
+              if (p.name.toLowerCase() === item.name.toLowerCase()) {
+                soldQty += p.qty;
+              }
+            });
+          }
+        });
+
+        const currentEnding = (item.beginning + item.stockIn) - soldQty;
+        item.ending = currentEnding;
+
         totBeginning += item.beginning;
         totStockIn += item.stockIn;
-        totSold += sold;
-        totEnding += item.ending;
+        totSold += soldQty;
+        totEnding += currentEnding;
 
         tbody.innerHTML += `
           <tr>
-            <td><input type="text" class="form-control form-control-sm fw-bold" value="${item.name}" onchange="updateInventory(${index}, 'name', this.value)"></td>
-            <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.qty}" min="0" onchange="updateInventory(${index}, 'qty', this.value)"></td>
-            <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.beginning}" min="0" onchange="updateInventory(${index}, 'beginning', this.value)"></td>
-            <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.stockIn}" min="0" onchange="updateInventory(${index}, 'stockIn', this.value)"></td>
-            <td class="text-center align-middle fw-semibold text-primary fs-6">${sold}</td>
-            <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.ending}" min="0" onchange="updateInventory(${index}, 'ending', this.value)"></td>
-            <td class="col-action align-middle">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
+            <td class="fw-bold">${item.name}</td>
+            <td class="text-center">${item.qty || 1}</td>
+            <td class="text-center">
+              <input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto" value="${item.beginning}" onchange="updateInventoryStock(${index}, 'beginning', this.value)">
+            </td>
+            <td class="text-center">
+              <input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto text-success fw-bold" value="${item.stockIn}" onchange="updateInventoryStock(${index}, 'stockIn', this.value)">
+            </td>
+            <td class="text-center fw-bold text-danger">${soldQty}</td>
+            <td class="text-center fs-6 fw-bold ${currentEnding < 5 ? 'text-danger' : 'text-primary'}">${currentEnding}</td>
+            <td class="col-action">
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})"><i class="fa-solid fa-trash-can"></i></button>
             </td>
           </tr>
         `;
       });
 
-      // End of Day Totals Row
       tfoot.innerHTML = `
         <tr>
-          <td class="text-start text-uppercase">End of Day Total:</td>
+          <td class="text-start fw-bold">TOTAL:</td>
           <td>-</td>
           <td>${totBeginning}</td>
-          <td>${totStockIn}</td>
-          <td class="text-primary">${totSold}</td>
-          <td class="text-success">${totEnding}</td>
+          <td class="text-success">+${totStockIn}</td>
+          <td class="text-danger">${totSold}</td>
+          <td class="text-primary fs-6">${totEnding}</td>
           <td></td>
         </tr>
       `;
     }
 
-    function updateInventory(index, key, value) {
-      inventory[index][key] = key === 'name' ? value : (parseInt(value) || 0);
+    function updateInventoryStock(index, field, value) {
+      const val = parseInt(value) || 0;
+      inventory[index][field] = val;
       renderInventoryTable();
     }
 
     function deleteInventoryItem(index) {
-      if(confirm('Sigurado ka bang gusto mong burahin ang produktong ito?')) {
+      if (confirm('Sigurado ka bang gusto mong burahin ang produktong ito sa inventory?')) {
         inventory.splice(index, 1);
         renderInventoryTable();
       }
     }
 
-    // Modal Add Product Logic
     document.getElementById('addProductForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const pName = document.getElementById('newProdName').value.trim();
-      const pQty = parseInt(document.getElementById('newProdQty').value) || 1;
-      const pStock = parseInt(document.getElementById('newProdStock').value) || 0;
+      const name = document.getElementById('newProdName').value.trim();
+      const qty = parseInt(document.getElementById('newProdQty').value) || 1;
+      const stock = parseInt(document.getElementById('newProdStock').value) || 0;
 
       inventory.push({
-        name: pName,
-        qty: pQty,
-        beginning: pStock,
+        name: name,
+        qty: qty,
+        beginning: stock,
         stockIn: 0,
-        ending: pStock
+        ending: stock
       });
 
-      alert('Matagumpay na naidagdag ang bagong produkto!');
-      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
       this.reset();
+      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
       renderInventoryTable();
     });
 
-    // CUSTOMER PURCHASES LOG IN INVENTORY
     function renderCustomerSalesLog() {
       const tbody = document.getElementById('customerSalesLogBody');
       tbody.innerHTML = '';
 
       if (transactions.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakatalang transaksyon o benta.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Walang mga na-record na pagbili.</td></tr>`;
         return;
       }
 
       transactions.forEach(t => {
-        if(t.itemsList && t.itemsList.length > 0) {
+        if (t.itemsList) {
           t.itemsList.forEach(item => {
             tbody.innerHTML += `
               <tr>
                 <td>${t.date}</td>
                 <td class="fw-bold">${t.customer}</td>
                 <td>${item.name}</td>
-                <td class="text-center fw-semibold text-primary">${item.qty}</td>
+                <td class="text-center fw-bold text-primary">${item.qty}</td>
               </tr>
             `;
           });
-        } else {
-          tbody.innerHTML += `
-            <tr>
-              <td>${t.date}</td>
-              <td class="fw-bold">${t.customer}</td>
-              <td>${t.product}</td>
-              <td class="text-center fw-semibold text-primary">-</td>
-            </tr>
-          `;
         }
       });
     }

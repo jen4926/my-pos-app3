@@ -77,6 +77,11 @@
           </button>
         </li>
         <li class="nav-item">
+          <button class="nav-link" id="search-tab" data-bs-toggle="pill" data-bs-target="#search-content" type="button">
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup
+          </button>
+        </li>
+        <li class="nav-item">
           <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable()">
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
@@ -250,6 +255,91 @@
             </div>
           </div>
 
+          <!-- MONEY BREAKDOWN & AUDIT SECTION -->
+          <div class="card p-3 bg-light border mb-4">
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-money-bill-wave me-2"></i>Daily Cash Money Breakdown (Denominations)</h6>
+            <div class="row g-3">
+              <div class="col-md-7">
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered bg-white align-middle m-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>Denomination</th>
+                        <th style="width: 130px;">Count / Pcs</th>
+                        <th style="width: 150px;">Subtotal (₱)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="fw-semibold text-primary">₱1,000</td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="1000" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-primary">₱500</td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="500" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-primary">₱200</td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="200" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-primary">₱100</td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="100" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-primary">₱50</td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="50" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-primary">₱20</td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="20" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-primary">Coins / Barya</td>
+                        <td><span class="text-muted small">Kabuuang Barya</span></td>
+                        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- CASH VERIFICATION / DISCREPANCY COMPARISON -->
+              <div class="col-md-5 d-flex flex-column justify-content-between">
+                <div class="card p-3 bg-white h-100 border">
+                  <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fa-solid fa-scale-balanced me-2"></i>Cash Audit & Comparison</h6>
+                  
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold">Total Cash Counted:</span>
+                    <span class="fs-5 fw-bold text-dark" id="totalCountedCash">₱0.00</span>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold">Daily Cash Collected:</span>
+                    <span class="fs-5 fw-bold text-success" id="breakdownTargetSales">₱0.00</span>
+                  </div>
+
+                  <hr class="my-2">
+
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold text-dark">Discrepancy / Over-Short:</span>
+                    <span class="fs-5 fw-bold" id="cashDiscrepancy">₱0.00</span>
+                  </div>
+
+                  <div id="cashStatusAlert" class="alert alert-secondary text-center p-2 fw-bold mb-0">
+                    <i class="fa-solid fa-calculator me-1"></i> Magpasok ng breakdown para ma-audit.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>List of Encoded Transactions Today</h6>
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
@@ -299,6 +389,91 @@
         </div>
       </div>
 
+      <!-- ================= 3.5 CUSTOMER ORDER LOOKUP TAB ================= -->
+      <div class="tab-pane fade" id="search-content">
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-magnifying-glass me-2"></i>Track Customer Last Order</h4>
+          
+          <div class="row g-2 mb-4">
+            <div class="col-md-9">
+              <input type="text" id="searchCustomerInput" class="form-control form-control-lg" placeholder="I-type ang pangalan ng Customer (e.g. Juan Dela Cruz)">
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="searchCustomerOrder()">
+                <i class="fa-solid fa-search me-2"></i>Search Order
+              </button>
+            </div>
+          </div>
+
+          <!-- Result Display Area -->
+          <div id="searchResultContainer" style="display: none;">
+            <div class="card bg-light border-primary mb-4">
+              <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                <span><i class="fa-solid fa-receipt me-2"></i>Huling Order (Last Order Details)</span>
+                <span id="lastOrderBadge" class="badge bg-warning text-dark fs-6">Status</span>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">CUSTOMER NAME:</p>
+                    <h5 class="fw-bold text-dark" id="lastOrderCustomer">-</h5>
+                  </div>
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">DATE OF PURCHASE:</p>
+                    <h5 class="fw-bold text-dark" id="lastOrderDate">-</h5>
+                  </div>
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">CONTAINER STATUS:</p>
+                    <h5 class="fw-bold text-dark" id="lastOrderContainer">-</h5>
+                  </div>
+                  <div class="col-md-12">
+                    <p class="mb-1 text-muted small fw-bold">ITEMS / PRODUCTS BOUGHT:</p>
+                    <p class="fs-5 text-dark fw-semibold mb-0" id="lastOrderProducts">-</p>
+                  </div>
+                  <hr class="my-2">
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">TOTAL AMOUNT:</p>
+                    <h4 class="fw-bold text-primary" id="lastOrderTotal">₱0.00</h4>
+                  </div>
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">PAID AMOUNT:</p>
+                    <h4 class="fw-bold text-success" id="lastOrderPaid">₱0.00</h4>
+                  </div>
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">REMAINING BALANCE:</p>
+                    <h4 class="fw-bold text-danger" id="lastOrderBalance">₱0.00</h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lahat ng Naging Transaksyon ni Customer</h6>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle bg-white">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Date</th>
+                    <th>Products</th>
+                    <th>Container</th>
+                    <th>Total (₱)</th>
+                    <th>Paid (₱)</th>
+                    <th>Balance (₱)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="customerHistoryBody">
+                  <!-- Dynamic History Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="noCustomerFound" class="alert alert-warning text-center p-3 d-none">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> Walang nahanap na record para sa customer na ito.
+          </div>
+        </div>
+      </div>
+
       <!-- ================= 4. INVENTORY TAB ================= -->
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
@@ -334,7 +509,7 @@
       <div class="tab-pane fade" id="audit-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit Computation</h4>
             <div class="d-flex gap-2 align-items-center">
               <button class="btn btn-warning fw-bold text-dark me-2" data-bs-toggle="modal" data-bs-target="#bossModal">
                 <i class="fa-solid fa-user-tie me-1"></i> Add D/Eco Boss Adjustment
@@ -345,28 +520,34 @@
           </div>
 
           <div class="row g-3 mb-4">
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="card p-3 stat-card bg-light">
-                <span class="text-muted small fw-bold">TOTAL GROSS SALES</span>
-                <h4 class="text-primary mt-1 mb-0" id="auditTotalSales">₱0.00</h4>
+                <span class="text-muted small fw-bold">GROSS SALES</span>
+                <h5 class="text-primary mt-1 mb-0" id="auditTotalSales">₱0.00</h5>
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">TOTAL CASH COLLECTED</span>
-                <h4 class="text-success mt-1 mb-0" id="auditTotalCollected">₱0.00</h4>
+            <div class="col-md-2">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #6c757d;">
+                <span class="text-muted small fw-bold">TOTAL COGS (Puhunan)</span>
+                <h5 class="text-secondary mt-1 mb-0" id="auditTotalCost">₱0.00</h5>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #00897b;">
+                <span class="text-muted small fw-bold">GROSS PROFIT</span>
+                <h5 class="text-teal mt-1 mb-0" id="auditGrossProfit" style="color: #00897b;">₱0.00</h5>
               </div>
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #c62828;">
-                <span class="text-muted small fw-bold">TOTAL SALARIES / EXPENSES</span>
-                <h4 class="text-danger mt-1 mb-0" id="auditExpenses">₱0.00</h4>
+                <span class="text-muted small fw-bold">EXPENSES / SALARIES</span>
+                <h5 class="text-danger mt-1 mb-0" id="auditExpenses">₱0.00</h5>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card bg-light" style="border-left-color: #0d47a1;">
-                <span class="text-muted small fw-bold">NET PROFIT (Incl. Boss)</span>
-                <h4 class="text-primary fw-bold mt-1 mb-0" id="auditNetProfit">₱0.00</h4>
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
+                <span class="text-muted small fw-bold">NET PROFIT (Final Kita)</span>
+                <h4 class="text-success fw-bold mt-1 mb-0" id="auditNetProfit">₱0.00</h4>
               </div>
             </div>
           </div>
@@ -547,7 +728,7 @@
           <input type="hidden" id="payTransactionId">
           <div class="mb-3">
             <label class="form-label fw-semibold">Customer Name:</label>
-            <input type="text" id="payCustomerName" class="form-control bg-light" readonly>
+            <input type="text" id="payCustomerName" class="form-control" placeholder="e.g., Juan Dela Cruz" required>
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold">Current Balance (₱):</label>
@@ -616,25 +797,11 @@
     ];
     let currentUser = null;
 
-    // Database Objects
-    let transactions = [
-      { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (x1)", containerInfo: "Hiram (1 pc)", total: 250.00, paid: 100.00, balance: 150.00, dueDate: "2026-09-30", status: "PARTIAL", payments: [{ amount: 100.00, method: "Cash", date: "2026-09-20" }] },
-      { id: 2, date: "2026-09-20", customer: "Maria Clara", product: "Pintura Red (x1)", containerInfo: "May Deposito (₱50.00)", total: 500.00, paid: 500.00, balance: 0.00, dueDate: "N/A", status: "PAID", payments: [{ amount: 500.00, method: "GCash", date: "2026-09-20" }] }
-    ];
-
-    let inventory = [
-      { id: 1, name: "Semento (1 Bag)", qty: 100, beginning: 100, stockIn: 20, ending: 80 },
-      { id: 2, name: "Pintura Red", qty: 50, beginning: 50, stockIn: 0, ending: 45 }
-    ];
-
+    // Empty Initial Databases
+    let transactions = [];
+    let inventory = [];
     let bossAdjustments = [];
-    
-    let monthlyExpensesData = {
-      "2026-09": [
-        { name: "Sahod ni Juan", amount: 5000.00 },
-        { name: "Kuryente at Tubig", amount: 1500.00 }
-      ]
-    };
+    let monthlyExpensesData = {};
 
     // Initial Date Configurations
     const today = new Date();
@@ -743,7 +910,7 @@
         <tr id="row-${rowId}">
           <td><input type="text" class="form-control form-control-sm pos-name" placeholder="Product Name" required></td>
           <td><input type="number" class="form-control form-control-sm pos-qty" value="1" min="1" oninput="calculateTotal()" required></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" required></td>
+          <td><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" required></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" required></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm bg-light pos-subtotal" placeholder="0.00" readonly></td>
           <td class="col-action">
@@ -854,9 +1021,14 @@
 
       const itemRows = document.querySelectorAll('#posItemsBody tr');
       let productSummary = [];
+      let totalCostOfGoods = 0;
+
       itemRows.forEach(row => {
         const name = row.querySelector('.pos-name').value;
-        const qty = row.querySelector('.pos-qty').value;
+        const qty = parseFloat(row.querySelector('.pos-qty').value) || 0;
+        const cost = parseFloat(row.querySelector('.pos-cost').value) || 0;
+
+        totalCostOfGoods += (qty * cost);
         if(name) productSummary.push(`${name} (x${qty})`);
       });
 
@@ -883,6 +1055,7 @@
         product: productSummary.join(', '),
         containerInfo: cInfo,
         total: total,
+        totalCost: totalCostOfGoods,
         paid: paid,
         balance: balance,
         dueDate: document.getElementById('dueDate').value || 'N/A',
@@ -899,7 +1072,9 @@
       toggleCreditFields();
     });
 
-    // ================= DAILY REPORT LOGIC =================
+    // ================= DAILY REPORT & MONEY BREAKDOWN LOGIC =================
+    let currentDailyCollected = 0;
+
     function generateDailyReport() {
       const selectedDate = document.getElementById('dailyReportDate').value;
       const tbody = document.getElementById('dailyTableBody');
@@ -934,9 +1109,59 @@
         tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
       }
 
+      currentDailyCollected = dayCollected;
+
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;
+      document.getElementById('breakdownTargetSales').innerText = `₱${dayCollected.toFixed(2)}`;
+
+      calculateMoneyBreakdown();
+    }
+
+    function calculateMoneyBreakdown() {
+      let totalCashCounted = 0;
+      const denomInputs = document.querySelectorAll('.denom-count');
+
+      denomInputs.forEach(input => {
+        const denom = parseFloat(input.getAttribute('data-denom')) || 0;
+        const count = parseFloat(input.value) || 0;
+        const subtotal = denom * count;
+        
+        const row = input.closest('tr');
+        row.querySelector('.denom-subtotal').value = subtotal.toFixed(2);
+        
+        totalCashCounted += subtotal;
+      });
+
+      const coins = parseFloat(document.querySelector('.denom-coins').value) || 0;
+      totalCashCounted += coins;
+
+      document.getElementById('totalCountedCash').innerText = `₱${totalCashCounted.toFixed(2)}`;
+
+      const diff = totalCashCounted - currentDailyCollected;
+      const diffElem = document.getElementById('cashDiscrepancy');
+      const alertElem = document.getElementById('cashStatusAlert');
+
+      diffElem.innerText = `₱${Math.abs(diff).toFixed(2)}`;
+
+      if (totalCashCounted === 0 && currentDailyCollected === 0) {
+        diffElem.className = "fs-5 fw-bold text-dark";
+        alertElem.className = "alert alert-secondary text-center p-2 fw-bold mb-0";
+        alertElem.innerHTML = `<i class="fa-solid fa-calculator me-1"></i> Walang koleksyon o breakdown.`;
+      } else if (Math.abs(diff) < 0.01) {
+        diffElem.className = "fs-5 fw-bold text-success";
+        alertElem.className = "alert alert-success text-center p-2 fw-bold mb-0";
+        alertElem.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> PANTAY! Tugma ang pera sa Daily Collection.`;
+      } else if (diff > 0) {
+        diffElem.className = "fs-5 fw-bold text-primary";
+        alertElem.className = "alert alert-info text-center p-2 fw-bold mb-0";
+        alertElem.innerHTML = `<i class="fa-solid fa-circle-exclamation me-1"></i> OVER: Mas sobra ang pera sa drawer nang ₱${diff.toFixed(2)}.`;
+      } else {
+        diffElem.className = "fs-5 fw-bold text-danger";
+        alertElem.className = "alert alert-danger text-center p-2 fw-bold mb-0";
+        alertElem.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> SHORT: Kulang ang pera sa drawer nang ₱${Math.abs(diff).toFixed(2)}.`;
+      }
     }
 
     // ================= D/ECO BOSS LOGIC =================
@@ -958,11 +1183,11 @@
     // ================= DETAILED EXPENSES LOGIC =================
     function addExpenseRow(name = '', amount = '') {
       const tbody = document.getElementById('expenseTableBody');
-      const rowId = Date.now();
+      const rowId = Date.now() + Math.random().toString(36).substring(2, 7);
       const rowHTML = `
         <tr id="exp-${rowId}">
-          <td><input type="text" class="form-control form-control-sm exp-name" placeholder="e.g., Sahod ni Juan, Kuryente, etc." value="${name}" oninput="saveCurrentMonthExpenses()"></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${amount}" oninput="saveCurrentMonthExpenses()"></td>
+          <td><input type="text" class="form-control form-control-sm exp-name" placeholder="e.g., Sahod ni Juan, Kuryente, etc." value="${name}" onchange="saveCurrentMonthExpenses()"></td>
+          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${amount}" onchange="saveCurrentMonthExpenses()" oninput="updateCalculationsOnly()"></td>
           <td class="col-action">
             <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
               <i class="fa-solid fa-trash-can"></i>
@@ -991,27 +1216,50 @@
       });
 
       monthlyExpensesData[selectedMonth] = expList;
-      generateMonthlyAudit();
+      updateCalculationsOnly();
+    }
+
+    function updateCalculationsOnly() {
+      const selectedMonth = document.getElementById('auditMonth').value;
+      if (!selectedMonth) return;
+
+      let grossSales = 0;
+      let totalCost = 0;
+
+      transactions.forEach(tx => {
+        if (tx.date.startsWith(selectedMonth)) {
+          grossSales += tx.total;
+          totalCost += (tx.totalCost || 0);
+        }
+      });
+
+      let grossProfit = grossSales - totalCost;
+
+      let totalExpenses = 0;
+      const rows = document.querySelectorAll('#expenseTableBody tr');
+      rows.forEach(row => {
+        totalExpenses += parseFloat(row.querySelector('.exp-amount').value) || 0;
+      });
+
+      let bossTotal = 0;
+      bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).forEach(b => {
+        const val = b.type === 'ADD' ? b.amount : -b.amount;
+        bossTotal += val;
+      });
+
+      const netProfit = grossProfit - totalExpenses + bossTotal;
+
+      document.getElementById('auditTotalSales').innerText = `₱${grossSales.toFixed(2)}`;
+      document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
+      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
+      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
     }
 
     // ================= MONTHLY AUDIT & NET PROFIT =================
     function generateMonthlyAudit() {
       const selectedMonth = document.getElementById('auditMonth').value;
       if (!selectedMonth) return;
-
-      let grossSales = 0;
-      let totalCollected = 0;
-
-      transactions.forEach(tx => {
-        if (tx.date.startsWith(selectedMonth)) {
-          grossSales += tx.total;
-        }
-        tx.payments.forEach(p => {
-          if (p.date.startsWith(selectedMonth)) {
-            totalCollected += p.amount;
-          }
-        });
-      });
 
       const expBody = document.getElementById('expenseTableBody');
       expBody.innerHTML = '';
@@ -1021,11 +1269,11 @@
         addExpenseRow();
       } else {
         monthExp.forEach(exp => {
-          const rowId = Date.now() + Math.random();
+          const rowId = Date.now() + Math.random().toString(36).substring(2, 7);
           expBody.innerHTML += `
             <tr id="exp-${rowId}">
-              <td><input type="text" class="form-control form-control-sm exp-name" placeholder="Expense Name" value="${exp.name}" oninput="saveCurrentMonthExpenses()"></td>
-              <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${exp.amount || ''}" oninput="saveCurrentMonthExpenses()"></td>
+              <td><input type="text" class="form-control form-control-sm exp-name" placeholder="Expense Name" value="${exp.name}" onchange="saveCurrentMonthExpenses()"></td>
+              <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${exp.amount || ''}" onchange="saveCurrentMonthExpenses()" oninput="updateCalculationsOnly()"></td>
               <td class="col-action">
                 <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
                   <i class="fa-solid fa-trash-can"></i>
@@ -1036,19 +1284,10 @@
         });
       }
 
-      let totalExpenses = 0;
-      (monthlyExpensesData[selectedMonth] || []).forEach(e => {
-        totalExpenses += e.amount;
-      });
-
-      let bossTotal = 0;
       const bossBody = document.getElementById('bossLogsBody');
       bossBody.innerHTML = '';
 
       bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).forEach(b => {
-        const val = b.type === 'ADD' ? b.amount : -b.amount;
-        bossTotal += val;
-
         bossBody.innerHTML += `
           <tr>
             <td>${b.date}</td>
@@ -1064,12 +1303,76 @@
         bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Walang na-record na D/Eco Boss adjustment sa buwang ito.</td></tr>`;
       }
 
-      const netProfit = totalCollected - totalExpenses + bossTotal;
+      updateCalculationsOnly();
+    }
 
-      document.getElementById('auditTotalSales').innerText = `₱${grossSales.toFixed(2)}`;
-      document.getElementById('auditTotalCollected').innerText = `₱${totalCollected.toFixed(2)}`;
-      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+    // ================= SEARCH & TRACK CUSTOMER ORDER =================
+    function searchCustomerOrder() {
+      const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
+      const resultContainer = document.getElementById('searchResultContainer');
+      const noResultAlert = document.getElementById('noCustomerFound');
+      const historyBody = document.getElementById('customerHistoryBody');
+
+      if (!query) {
+        alert('Mangyaring maglagay ng pangalan ng customer.');
+        return;
+      }
+
+      // Filter transactions matching customer name
+      const customerTxs = transactions.filter(t => t.customer.toLowerCase().includes(query));
+
+      if (customerTxs.length === 0) {
+        resultContainer.style.display = 'none';
+        noResultAlert.classList.remove('d-none');
+        return;
+      }
+
+      noResultAlert.classList.add('d-none');
+      resultContainer.style.display = 'block';
+
+      // Sort by latest transaction first
+      customerTxs.sort((a, b) => b.id - a.id);
+
+      const lastOrder = customerTxs[0];
+
+      // Populate Last Order Card
+      document.getElementById('lastOrderCustomer').innerText = lastOrder.customer;
+      document.getElementById('lastOrderDate').innerText = lastOrder.date;
+      document.getElementById('lastOrderContainer').innerText = lastOrder.containerInfo || 'Wala';
+      document.getElementById('lastOrderProducts').innerText = lastOrder.product;
+      document.getElementById('lastOrderTotal').innerText = `₱${lastOrder.total.toFixed(2)}`;
+      document.getElementById('lastOrderPaid').innerText = `₱${lastOrder.paid.toFixed(2)}`;
+      document.getElementById('lastOrderBalance').innerText = `₱${lastOrder.balance.toFixed(2)}`;
+
+      const badgeElem = document.getElementById('lastOrderBadge');
+      badgeElem.innerText = lastOrder.status;
+      if (lastOrder.status === 'PAID') {
+        badgeElem.className = 'badge bg-success fs-6';
+      } else if (lastOrder.status === 'PARTIAL') {
+        badgeElem.className = 'badge bg-warning text-dark fs-6';
+      } else {
+        badgeElem.className = 'badge bg-danger fs-6';
+      }
+
+      // Populate History Table
+      historyBody.innerHTML = '';
+      customerTxs.forEach(t => {
+        let badge = t.status === 'PAID' 
+          ? `<span class="badge bg-success">PAID</span>` 
+          : (t.status === 'PARTIAL' ? `<span class="badge bg-warning text-dark">PARTIAL</span>` : `<span class="badge bg-danger">UNPAID</span>`);
+
+        historyBody.innerHTML += `
+          <tr>
+            <td>${t.date}</td>
+            <td class="fw-semibold">${t.product}</td>
+            <td>${t.containerInfo || 'Wala'}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
+            <td>${badge}</td>
+          </tr>
+        `;
+      });
     }
 
     // ================= UTANG & PAYMENTS =================
@@ -1121,14 +1424,23 @@
 
     function submitUtangPayment() {
       const txId = parseInt(document.getElementById('payTransactionId').value);
+      const newCustomerName = document.getElementById('payCustomerName').value.trim();
       const payAmount = parseFloat(document.getElementById('payAmountInput').value) || 0;
       const method = document.getElementById('payMethod').value;
       const tx = transactions.find(t => t.id === txId);
+
+      if (!newCustomerName) {
+        alert('Mangyaring maglagay ng pangalan ng customer.');
+        return;
+      }
 
       if (payAmount <= 0 || payAmount > tx.balance) {
         alert('Mangyaring maglagay ng tamang halaga ng ibabayad.');
         return;
       }
+
+      // Update customer name if modified
+      tx.customer = newCustomerName;
 
       tx.paid += payAmount;
       tx.balance -= payAmount;

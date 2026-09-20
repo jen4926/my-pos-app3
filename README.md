@@ -767,7 +767,7 @@
           <input type="hidden" id="payTransactionId">
           <div class="mb-3">
             <label class="form-label fw-semibold">Customer Name:</label>
-            <input type="text" id="payCustomerName" class="form-control" placeholder="e.g., Juan Dela Cruz" required>
+            <input type="text" id="payCustomerName" class="form-control bg-light" readonly required>
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold">Current Balance (₱):</label>
@@ -1165,19 +1165,22 @@
       let totalBT = 0;
       let totalCheque = 0;
 
-      const filtered = transactions.filter(t => t.date === selectedDate);
+      const filtered = transactions.filter(t => t.date === selectedDate || t.payments.some(p => p.date === selectedDate));
 
       filtered.forEach((t, index) => {
-        daySales += t.total;
-        dayCollected += t.paid;
-        count++;
-
-        // Compute Payment Methods
+        if(t.date === selectedDate) daySales += t.total;
+        
+        // Sum collections made on selectedDate
         t.payments.forEach(p => {
-          if (p.method === 'GCash') totalGCash += p.amount;
-          else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
-          else if (p.method === 'Cheque') totalCheque += p.amount;
+          if (p.date === selectedDate) {
+            dayCollected += p.amount;
+            if (p.method === 'GCash') totalGCash += p.amount;
+            else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
+            else if (p.method === 'Cheque') totalCheque += p.amount;
+          }
         });
+        
+        count++;
 
         tbody.innerHTML += `
           <tr>
@@ -1188,7 +1191,7 @@
             <td>₱${t.total.toFixed(2)}</td>
             <td class="text-success">₱${t.paid.toFixed(2)}</td>
             <td class="text-danger">₱${t.balance.toFixed(2)}</td>
-            <td>${t.payments.length > 0 ? t.payments[0].method : 'N/A'}</td>
+            <td>${t.payments.length > 0 ? t.payments[t.payments.length - 1].method : 'N/A'}</td>
           </tr>
         `;
       });
@@ -1489,11 +1492,11 @@
             <td>₱${t.total.toFixed(2)}</td>
             <td class="text-success">₱${t.paid.toFixed(2)}</td>
             <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
-            <td>${t.dueDate}</td>
+            <td>${t.dueDate || 'N/A'}</td>
             <td>${statusBadge}</td>
             <td>
-              <button class="btn btn-sm btn-primary" onclick="openPaymentModal(${t.id})">
-                <i class="fa-solid fa-receipt me-1"></i> Pay
+              <button class="btn btn-sm btn-success fw-bold" onclick="openPaymentModal(${t.id})">
+                <i class="fa-solid fa-hand-holding-dollar me-1"></i> Magbayad
               </button>
             </td>
           </tr>
@@ -1501,103 +1504,133 @@
       });
     }
 
-    let selectedModal;
     function openPaymentModal(txId) {
       const tx = transactions.find(t => t.id === txId);
       if (!tx) return;
+
       document.getElementById('payTransactionId').value = tx.id;
       document.getElementById('payCustomerName').value = tx.customer;
       document.getElementById('payCurrentBalance').value = tx.balance.toFixed(2);
       document.getElementById('payAmountInput').value = '';
-      selectedModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-      selectedModal.show();
+
+      new bootstrap.Modal(document.getElementById('paymentModal')).show();
     }
 
     function submitUtangPayment() {
       const txId = parseInt(document.getElementById('payTransactionId').value);
-      const newCustomerName = document.getElementById('payCustomerName').value.trim();
       const payAmount = parseFloat(document.getElementById('payAmountInput').value) || 0;
       const method = document.getElementById('payMethod').value;
+
       const tx = transactions.find(t => t.id === txId);
+      if (!tx) return;
 
-      if (!newCustomerName) {
-        alert('Mangyaring maglagay ng pangalan ng customer.');
+      if (payAmount <= 0) {
+        alert('Mangyaring maglagay ng tamang halaga ng bayad.');
         return;
       }
 
-      if (payAmount <= 0 || payAmount > tx.balance) {
-        alert('Mangyaring maglagay ng tamang halaga ng ibabayad.');
+      if (payAmount > tx.balance) {
+        alert('Sobra ang ibinabayad sa natitirang utang!');
         return;
       }
-
-      tx.customer = newCustomerName;
 
       tx.paid += payAmount;
       tx.balance -= payAmount;
-      tx.status = tx.balance <= 0 ? 'PAID' : 'PARTIAL';
-      
+
+      if (tx.balance <= 0) {
+        tx.balance = 0;
+        tx.status = 'PAID';
+      } else {
+        tx.status = 'PARTIAL';
+      }
+
+      // Record payment history entry with payment date
       tx.payments.push({
         amount: payAmount,
         method: method,
-        date: new Date().toISOString().split('T')[0]
+        date: todayFormatted
       });
 
-      alert('Na-record nang matagumpay ang bayad!');
-      selectedModal.hide();
+      alert(`Matagumpay na na-record ang bayad na ₱${payAmount.toFixed(2)} para kay ${tx.customer}!`);
+      
+      bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
       renderCreditTable();
     }
 
-    // ================= INVENTORY & END OF DAY TOTALS =================
+    // ================= INVENTORY LOGIC =================
+    document.getElementById('addProductForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newProdName').value.trim();
+      const qty = parseInt(document.getElementById('newProdQty').value) || 1;
+      const stock = parseInt(document.getElementById('newProdStock').value) || 0;
+
+      const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        alert('Ang produktong ito ay nasa listahan na!');
+        return;
+      }
+
+      inventory.push({
+        name: name,
+        qty: qty,
+        beginning: stock,
+        stockIn: 0,
+        ending: stock
+      });
+
+      alert('Bagong produkto matagumpay na naidagdag!');
+      this.reset();
+      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+      renderInventoryTable();
+    });
+
     function renderInventoryTable() {
       const tbody = document.getElementById('inventoryTableBody');
       const tfoot = document.getElementById('inventoryTableFooter');
       tbody.innerHTML = '';
-      
+
       if (inventory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang laman ang inventory. Mag-add ng produkto sa ibabaw.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang produkto sa inventory. Magnet-add ng produkto.</td></tr>`;
         tfoot.innerHTML = '';
         return;
       }
 
-      let totBeginning = 0;
-      let totStockIn = 0;
-      let totSold = 0;
-      let totEnding = 0;
+      let totalBeg = 0, totalIn = 0, totalSold = 0, totalEnd = 0;
 
       inventory.forEach((item, index) => {
-        let soldQty = 0;
+        let sold = 0;
         transactions.forEach(t => {
           if (t.itemsList) {
-            t.itemsList.forEach(p => {
-              if (p.name.toLowerCase() === item.name.toLowerCase()) {
-                soldQty += p.qty;
+            t.itemsList.forEach(i => {
+              if (i.name.toLowerCase() === item.name.toLowerCase()) {
+                sold += i.qty;
               }
             });
           }
         });
 
-        const currentEnding = (item.beginning + item.stockIn) - soldQty;
+        const currentEnding = (item.beginning + item.stockIn) - sold;
         item.ending = currentEnding;
 
-        totBeginning += item.beginning;
-        totStockIn += item.stockIn;
-        totSold += soldQty;
-        totEnding += currentEnding;
+        totalBeg += item.beginning;
+        totalIn += item.stockIn;
+        totalSold += sold;
+        totalEnd += currentEnding;
 
         tbody.innerHTML += `
           <tr>
-            <td class="fw-bold">${item.name}</td>
-            <td class="text-center">${item.qty || 1}</td>
+            <td class="fw-bold text-start">${item.name}</td>
+            <td class="text-center">${item.qty}</td>
+            <td class="text-center">${item.beginning}</td>
             <td class="text-center">
-              <input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto" value="${item.beginning}" onchange="updateInventoryStock(${index}, 'beginning', this.value)">
+              <input type="number" min="0" class="form-control form-control-sm inventory-input d-inline" value="${item.stockIn}" onchange="updateStockIn(${index}, this.value)">
             </td>
-            <td class="text-center">
-              <input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto text-success fw-bold" value="${item.stockIn}" onchange="updateInventoryStock(${index}, 'stockIn', this.value)">
-            </td>
-            <td class="text-center fw-bold text-danger">${soldQty}</td>
-            <td class="text-center fs-6 fw-bold ${currentEnding < 5 ? 'text-danger' : 'text-primary'}">${currentEnding}</td>
+            <td class="text-center text-danger fw-bold">${sold}</td>
+            <td class="text-center text-success fw-bold fs-6">${currentEnding}</td>
             <td class="col-action">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})"><i class="fa-solid fa-trash-can"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
             </td>
           </tr>
         `;
@@ -1605,20 +1638,19 @@
 
       tfoot.innerHTML = `
         <tr>
-          <td class="text-start fw-bold">TOTAL:</td>
+          <td class="text-start">KABUUAN (TOTAL)</td>
           <td>-</td>
-          <td>${totBeginning}</td>
-          <td class="text-success">+${totStockIn}</td>
-          <td class="text-danger">${totSold}</td>
-          <td class="text-primary fs-6">${totEnding}</td>
+          <td>${totalBeg}</td>
+          <td>${totalIn}</td>
+          <td class="text-danger">${totalSold}</td>
+          <td class="text-success">${totalEnd}</td>
           <td></td>
         </tr>
       `;
     }
 
-    function updateInventoryStock(index, field, value) {
-      const val = parseInt(value) || 0;
-      inventory[index][field] = val;
+    function updateStockIn(index, val) {
+      inventory[index].stockIn = parseInt(val) || 0;
       renderInventoryTable();
     }
 
@@ -1629,47 +1661,38 @@
       }
     }
 
-    document.getElementById('addProductForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('newProdName').value.trim();
-      const qty = parseInt(document.getElementById('newProdQty').value) || 1;
-      const stock = parseInt(document.getElementById('newProdStock').value) || 0;
-
-      inventory.push({
-        name: name,
-        qty: qty,
-        beginning: stock,
-        stockIn: 0,
-        ending: stock
-      });
-
-      this.reset();
-      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-      renderInventoryTable();
-    });
-
     function renderCustomerSalesLog() {
       const tbody = document.getElementById('customerSalesLogBody');
       tbody.innerHTML = '';
 
-      if (transactions.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Walang mga na-record na pagbili.</td></tr>`;
-        return;
-      }
-
+      let logs = [];
       transactions.forEach(t => {
         if (t.itemsList) {
           t.itemsList.forEach(item => {
-            tbody.innerHTML += `
-              <tr>
-                <td>${t.date}</td>
-                <td class="fw-bold">${t.customer}</td>
-                <td>${item.name}</td>
-                <td class="text-center fw-bold text-primary">${item.qty}</td>
-              </tr>
-            `;
+            logs.push({
+              date: t.date,
+              customer: t.customer,
+              product: item.name,
+              qty: item.qty
+            });
           });
         }
+      });
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Walang pumasok na pagbili.</td></tr>`;
+        return;
+      }
+
+      logs.forEach(log => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${log.date}</td>
+            <td class="fw-bold">${log.customer}</td>
+            <td>${log.product}</td>
+            <td class="text-center fw-bold text-primary">${log.qty}</td>
+          </tr>
+        `;
       });
     }
   </script>

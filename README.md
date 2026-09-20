@@ -98,6 +98,11 @@
           </button>
         </li>
         <li class="nav-item">
+          <button class="nav-link" id="petty-tab" data-bs-toggle="pill" data-bs-target="#petty-content" type="button" onclick="renderPettyCashTable()">
+            <i class="fa-solid fa-wallet me-1"></i> Petty Cash Fund
+          </button>
+        </li>
+        <li class="nav-item">
           <button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable()">
             <i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments
           </button>
@@ -424,6 +429,64 @@
                 </tr>
               </thead>
               <tbody id="dailyTableBody">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 2.5 PETTY CASH TAB ================= -->
+      <div class="tab-pane fade" id="petty-content">
+        <div class="card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-wallet me-2"></i>Petty Cash Fund Management</h4>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i> Print Petty Cash Log
+              </button>
+              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPettyCashModal">
+                <i class="fa-solid fa-plus me-1"></i> Add Petty Cash Transaction
+              </button>
+            </div>
+          </div>
+
+          <!-- Petty Cash Summary Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="card p-3 stat-card bg-light">
+                <span class="text-muted small fw-bold">TOTAL PETTY CASH FUND (Cash In)</span>
+                <h4 class="text-primary mt-1 mb-0" id="pettyTotalIn">₱0.00</h4>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #c62828;">
+                <span class="text-muted small fw-bold">TOTAL EXPENSES (Cash Out)</span>
+                <h4 class="text-danger mt-1 mb-0" id="pettyTotalOut">₱0.00</h4>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
+                <span class="text-muted small fw-bold">CURRENT PETTY CASH BALANCE</span>
+                <h4 class="text-success mt-1 mb-0" id="pettyCurrentBalance">₱0.00</h4>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>Petty Cash History / Ledger</h6>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Description / Remarks</th>
+                  <th>Amount In (₱)</th>
+                  <th>Amount Out (₱)</th>
+                  <th class="text-center no-print" style="width: 80px;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="pettyTableBody">
                 <!-- Dynamic Content -->
               </tbody>
             </table>
@@ -815,6 +878,45 @@
     </div>
   </div>
 
+  <!-- MODAL: ADD PETTY CASH -->
+  <div class="modal fade" id="addPettyCashModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-wallet me-2"></i>Add Petty Cash Entry</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="addPettyCashForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Date:</label>
+              <input type="date" id="pettyDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Transaction Type:</label>
+              <select id="pettyType" class="form-select">
+                <option value="IN">Cash In / Fund Replenishment / Dagdag Pondo</option>
+                <option value="OUT">Cash Out / Expenses (Bili Mirienda, Gas, etc.)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Description / Remarks:</label>
+              <input type="text" id="pettyDesc" class="form-control" placeholder="e.g., Pang-meryenda ng staff / Dagdag pondo" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount (₱):</label>
+              <input type="number" step="0.01" id="pettyAmount" class="form-control" placeholder="0.00" min="0.01" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Entry</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: CHANGE PROFILE (Name & Password) -->
   <div class="modal fade" id="changeProfileModal" tabindex="-1">
     <div class="modal-dialog">
@@ -1037,6 +1139,7 @@
     let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpenses')) || {};
     let utangPaymentsLog = JSON.parse(localStorage.getItem('rmv_utangPaymentsLog')) || [];
+    let pettyCashList = JSON.parse(localStorage.getItem('rmv_pettyCash')) || [];
 
     function saveData() {
       localStorage.setItem('rmv_users', JSON.stringify(users));
@@ -1046,6 +1149,7 @@
       localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
       localStorage.setItem('rmv_monthlyExpenses', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_utangPaymentsLog', JSON.stringify(utangPaymentsLog));
+      localStorage.setItem('rmv_pettyCash', JSON.stringify(pettyCashList));
     }
 
     // Initial Date Configurations
@@ -1054,6 +1158,7 @@
     document.getElementById('saleDate').value = todayFormatted;
     document.getElementById('dailyReportDate').value = todayFormatted;
     document.getElementById('bossDate').value = todayFormatted;
+    document.getElementById('pettyDate').value = todayFormatted;
     document.getElementById('auditMonth').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     document.getElementById('auditYear').value = today.getFullYear();
 
@@ -1063,6 +1168,7 @@
       renderExpenseTable();
       renderCreditTable();
       renderUtangPaymentsLog();
+      renderPettyCashTable();
       renderInventoryTable();
       renderCustomerSalesLog();
      
@@ -1081,6 +1187,23 @@
         document.getElementById('bossDate').value = todayFormatted;
         bootstrap.Modal.getInstance(document.getElementById('bossModal')).hide();
         generateMonthlyAudit();
+      });
+
+      // Event listener for Petty Cash Form Modal submission
+      document.getElementById('addPettyCashForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const date = document.getElementById('pettyDate').value;
+        const type = document.getElementById('pettyType').value;
+        const description = document.getElementById('pettyDesc').value;
+        const amount = parseFloat(document.getElementById('pettyAmount').value) || 0;
+
+        pettyCashList.push({ id: Date.now(), date, type, description, amount });
+        saveData();
+        alert('Petty cash entry successfully saved!');
+        this.reset();
+        document.getElementById('pettyDate').value = todayFormatted;
+        bootstrap.Modal.getInstance(document.getElementById('addPettyCashModal')).hide();
+        renderPettyCashTable();
       });
     };
 
@@ -1102,6 +1225,63 @@
           inputs[currentIndex + 1].focus();
           inputs[currentIndex + 1].select();
         }
+      }
+    }
+
+    // ================= PETTY CASH LOGIC =================
+    function renderPettyCashTable() {
+      const tbody = document.getElementById('pettyTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let totalIn = 0;
+      let totalOut = 0;
+
+      pettyCashList.sort((a, b) => b.id - a.id).forEach((item, index) => {
+        let amountInStr = '-';
+        let amountOutStr = '-';
+
+        if (item.type === 'IN') {
+          totalIn += item.amount;
+          amountInStr = `₱${item.amount.toFixed(2)}`;
+        } else {
+          totalOut += item.amount;
+          amountOutStr = `₱${item.amount.toFixed(2)}`;
+        }
+
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.date}</td>
+            <td><span class="badge ${item.type === 'IN' ? 'bg-success' : 'bg-danger'}">${item.type === 'IN' ? 'Cash In (Pondo)' : 'Cash Out (Expense)'}</span></td>
+            <td>${item.description}</td>
+            <td class="text-success">${amountInStr}</td>
+            <td class="text-danger">${amountOutStr}</td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deletePettyCash(${item.id})">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (pettyCashList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang naitalang petty cash transaction.</td></tr>`;
+      }
+
+      const balance = totalIn - totalOut;
+      document.getElementById('pettyTotalIn').innerText = `₱${totalIn.toFixed(2)}`;
+      document.getElementById('pettyTotalOut').innerText = `₱${totalOut.toFixed(2)}`;
+      const balanceEl = document.getElementById('pettyCurrentBalance');
+      balanceEl.innerText = `₱${balance.toFixed(2)}`;
+      balanceEl.className = balance >= 0 ? "text-success mt-1 mb-0 fw-bold" : "text-danger mt-1 mb-0 fw-bold";
+    }
+
+    function deletePettyCash(id) {
+      if (confirm('Sigurado ka bang nais mong tanggalin ang entry na ito?')) {
+        pettyCashList = pettyCashList.filter(item => item.id !== id);
+        saveData();
+        renderPettyCashTable();
       }
     }
 
@@ -1858,84 +2038,81 @@
     });
 
     function renderInventoryTable() {
-      const searchKeyword = document.getElementById('inventorySearchInput') ? document.getElementById('inventorySearchInput').value.trim().toLowerCase() : '';
+      const searchKeyword = document.getElementById('inventorySearchInput').value.trim().toLowerCase();
       const tbody = document.getElementById('inventoryTableBody');
       const tfoot = document.getElementById('inventoryTableFooter');
-      if (!tbody) return;
       tbody.innerHTML = '';
 
       let totalBeginning = 0;
       let totalStockIn = 0;
       let totalSold = 0;
       let totalEnding = 0;
+      let totalInventoryCostVal = 0;
 
-      const filteredInventory = inventory.filter(item => {
-        return searchKeyword === '' ||
-          item.name.toLowerCase().includes(searchKeyword) ||
-          (item.description && item.description.toLowerCase().includes(searchKeyword));
-      });
+      const filtered = inventory.filter(item => 
+        searchKeyword === '' || 
+        item.name.toLowerCase().includes(searchKeyword) || 
+        (item.description && item.description.toLowerCase().includes(searchKeyword))
+      );
 
-      filteredInventory.forEach((item, index) => {
-        // Calculate sold quantity dynamically from transactions/customerPurchases
-        let soldQty = 0;
-        customerPurchases.forEach(cp => {
-          if (cp.name.toLowerCase() === item.name.toLowerCase()) {
-            soldQty += cp.qty;
-          }
-        });
-        item.sold = soldQty;
-        item.ending = (item.beginning + item.stockIn) - item.sold;
-
+      filtered.forEach((item, index) => {
+        const soldQty = (item.beginning + item.stockIn) - item.ending;
         totalBeginning += item.beginning;
         totalStockIn += item.stockIn;
-        totalSold += item.sold;
+        totalSold += soldQty;
         totalEnding += item.ending;
+        totalInventoryCostVal += (item.ending * item.cost);
 
         tbody.innerHTML += `
           <tr>
-            <td class="text-start">${item.description || '-'}</td>
-            <td class="text-start fw-semibold">${item.name}</td>
-            <td class="text-center">₱${item.cost.toFixed(2)}</td>
-            <td class="text-center">₱${item.price.toFixed(2)}</td>
-            <td class="text-center">${item.beginning}</td>
-            <td class="text-center">
-              <input type="number" min="0" class="form-control form-control-sm inventory-input mx-auto" value="${item.stockIn}" onchange="updateInventoryStock(${index}, 'stockIn', this.value)">
-            </td>
-            <td class="text-center fw-bold text-primary">${item.sold}</td>
-            <td class="text-center fw-bold text-success">${item.ending}</td>
+            <td><input type="text" class="form-control form-control-sm" value="${item.description || ''}" onchange="updateInventoryField(${index}, 'description', this.value)"></td>
+            <td class="fw-bold">${item.name}</td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm text-center" value="${item.cost}" onchange="updateInventoryField(${index}, 'cost', this.value)"></td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm text-center" value="${item.price}" onchange="updateInventoryField(${index}, 'price', this.value)"></td>
+            <td><input type="number" class="form-control form-control-sm text-center inventory-input" value="${item.beginning}" onchange="updateInventoryField(${index}, 'beginning', this.value)"></td>
+            <td><input type="number" class="form-control form-control-sm text-center inventory-input" value="${item.stockIn}" onchange="updateInventoryField(${index}, 'stockIn', this.value)"></td>
+            <td class="text-center fw-semibold text-primary">${soldQty}</td>
+            <td><input type="number" class="form-control form-control-sm text-center inventory-input" value="${item.ending}" onchange="updateInventoryField(${index}, 'ending', this.value)"></td>
             <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})"><i class="fa-solid fa-trash-can"></i></button>
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
             </td>
           </tr>
         `;
       });
 
-      if (filteredInventory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang nahanap na produkto.</td></tr>`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang nakitang produkto sa inventory.</td></tr>`;
       }
 
-      if (tfoot) {
-        tfoot.innerHTML = `
-          <tr>
-            <td colspan="4" class="text-end">TOTALS:</td>
-            <td>${totalBeginning}</td>
-            <td>${totalStockIn}</td>
-            <td>${totalSold}</td>
-            <td>${totalEnding}</td>
-            <td class="no-print"></td>
-          </tr>
-        `;
-      }
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="4" class="text-end">TOTALS & OVERALL INVENTORY VALUE:</td>
+          <td>${totalBeginning}</td>
+          <td>${totalStockIn}</td>
+          <td>${totalSold}</td>
+          <td>${totalEnding} (₱${totalInventoryCostVal.toFixed(2)})</td>
+          <td class="no-print"></td>
+        </tr>
+      `;
     }
 
-    function updateInventoryStock(index, field, value) {
-      inventory[index][field] = parseInt(value) || 0;
+    function updateInventoryField(index, field, value) {
+      if (field === 'description') {
+        inventory[index][field] = value;
+      } else {
+        inventory[index][field] = parseFloat(value) || 0;
+        if (field === 'beginning' || field === 'stockIn') {
+          inventory[index].ending = inventory[index].beginning + inventory[index].stockIn;
+        }
+      }
       saveData();
       renderInventoryTable();
     }
 
     function deleteInventoryItem(index) {
-      if(confirm('Sigurado ka bang gusto mong tanggalin ang produktong ito sa inventory?')) {
+      if (confirm('Sigurado ka bang nais mong tanggalin ang produktong ito sa inventory?')) {
         inventory.splice(index, 1);
         saveData();
         renderInventoryTable();
@@ -1945,23 +2122,21 @@
 
     function renderCustomerSalesLog() {
       const tbody = document.getElementById('customerSalesLogBody');
-      if (!tbody) return;
+      if(!tbody) return;
       tbody.innerHTML = '';
 
       if (customerPurchases.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-2">Wala pang naitalang benta ng mga produkto.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitalang pagbili ng mga customer.</td></tr>`;
         return;
       }
 
       customerPurchases.slice().reverse().forEach(cp => {
-        const descText = cp.description ? ` (${cp.description})` : '';
-        const locBadge = cp.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
         tbody.innerHTML += `
           <tr>
             <td>${cp.date}</td>
             <td class="fw-bold">${cp.customer}</td>
-            <td>${locBadge}</td>
-            <td>${cp.name}${descText}</td>
+            <td><span class="badge ${cp.location === 'Hiway' ? 'bg-primary' : 'bg-info text-dark'}">${cp.location}</span></td>
+            <td>${cp.name} ${cp.description ? `(${cp.description})` : ''}</td>
             <td class="text-center">${cp.qty}</td>
             <td class="text-end">₱${cp.cost.toFixed(2)}</td>
             <td class="text-end">₱${cp.price.toFixed(2)}</td>
@@ -1971,10 +2146,10 @@
       });
     }
 
-    // ================= MONTHLY / YEARLY AUDIT & EXPENSES =================
+    // ================= MONTHLY / YEARLY AUDIT LOGIC =================
     function toggleAuditMode() {
       const mode = document.getElementById('auditMode').value;
-      if (mode === 'MONTH') {
+      if(mode === 'MONTH') {
         document.getElementById('monthFilterContainer').style.display = 'block';
         document.getElementById('yearFilterContainer').style.display = 'none';
       } else {
@@ -1988,131 +2163,140 @@
       const mode = document.getElementById('auditMode').value;
       const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
       const tbody = document.getElementById('expenseTableBody');
-      if (!tbody) return;
       tbody.innerHTML = '';
 
-      if (!monthlyExpensesData[key]) {
+      if(!monthlyExpensesData[key]) {
         monthlyExpensesData[key] = [
-          { name: "Rent / Upa", amount: 0 },
-          { name: "Kuryente at Tubig", amount: 0 },
-          { name: "Pasahod sa Tauhan", amount: 0 }
+          { name: 'Kuryente / Tubig', amount: 0 },
+          { name: 'Sahod ng Tao', amount: 0 },
+          { name: 'Iba pang Gastusin', amount: 0 }
         ];
       }
 
       monthlyExpensesData[key].forEach((exp, index) => {
         tbody.innerHTML += `
           <tr>
-            <td><input type="text" class="form-control form-control-sm exp-name" value="${exp.name}" oninput="updateExpenseData(${index}, 'name', this.value)"></td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" value="${exp.amount}" oninput="updateExpenseData(${index}, 'amount', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${exp.name}" onchange="updateExpenseItem(${index}, 'name', this.value)"></td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm" value="${exp.amount}" onchange="updateExpenseItem(${index}, 'amount', this.value)"></td>
             <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow(${index})"><i class="fa-solid fa-trash-can"></i></button>
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow(${index})">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
             </td>
           </tr>
         `;
       });
+      generateMonthlyAudit();
     }
 
     function addExpenseRow() {
       const mode = document.getElementById('auditMode').value;
       const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      if (!monthlyExpensesData[key]) monthlyExpensesData[key] = [];
-      monthlyExpensesData[key].push({ name: "Iba pang Gastusin", amount: 0 });
+      if(!monthlyExpensesData[key]) monthlyExpensesData[key] = [];
+      monthlyExpensesData[key].push({ name: 'Bagong Gastusin', amount: 0 });
       saveData();
       renderExpenseTable();
+    }
+
+    function updateExpenseItem(index, field, value) {
+      const mode = document.getElementById('auditMode').value;
+      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+      if(field === 'amount') {
+        monthlyExpensesData[key][index][field] = parseFloat(value) || 0;
+      } else {
+        monthlyExpensesData[key][index][field] = value;
+      }
+      saveData();
       generateMonthlyAudit();
     }
 
-    function updateExpenseData(index, field, value) {
+    function deleteExpenseRow(index) {
       const mode = document.getElementById('auditMode').value;
       const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      if (monthlyExpensesData[key] && monthlyExpensesData[key][index]) {
-        if (field === 'amount') {
-          monthlyExpensesData[key][index][field] = parseFloat(value) || 0;
-        } else {
-          monthlyExpensesData[key][index][field] = value;
-        }
-        saveData();
-        generateMonthlyAudit();
-      }
-    }
-
-    function removeExpenseRow(index) {
-      const mode = document.getElementById('auditMode').value;
-      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      if (monthlyExpensesData[key]) {
-        monthlyExpensesData[key].splice(index, 1);
-        saveData();
-        renderExpenseTable();
-        generateMonthlyAudit();
-      }
+      monthlyExpensesData[key].splice(index, 1);
+      saveData();
+      renderExpenseTable();
     }
 
     function generateMonthlyAudit() {
-      renderExpenseTable();
       const mode = document.getElementById('auditMode').value;
-      const selectedKey = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+      const filterKey = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+
+      if(!monthlyExpensesData[filterKey]) {
+        monthlyExpensesData[filterKey] = [
+          { name: 'Kuryente / Tubig', amount: 0 },
+          { name: 'Sahod ng Tao', amount: 0 },
+          { name: 'Iba pang Gastusin', amount: 0 }
+        ];
+      }
 
       let totalSales = 0;
       let totalCost = 0;
+      let totalExpenses = 0;
 
       transactions.forEach(t => {
         let match = false;
-        if (mode === 'MONTH') {
-          if (t.date.startsWith(selectedKey)) match = true;
+        if(mode === 'MONTH') {
+          if(t.date.startsWith(filterKey)) match = true;
         } else {
-          if (t.date.startsWith(selectedKey)) match = true;
+          if(t.date.startsWith(filterKey)) match = true;
         }
 
-        if (match) {
+        if(match) {
           totalSales += t.total;
           totalCost += (t.totalCost || 0);
         }
       });
 
-      const grossProfit = totalSales - totalCost;
+      monthlyExpensesData[filterKey].forEach(exp => {
+        totalExpenses += exp.amount;
+      });
 
-      // Calculate total expenses for the period
-      let totalExpenses = 0;
-      if (monthlyExpensesData[selectedKey]) {
-        monthlyExpensesData[selectedKey].forEach(exp => {
-          totalExpenses += (parseFloat(exp.amount) || 0);
-        });
-      }
-
-      let netProfit = grossProfit - totalExpenses;
-
-      // Factor in D/Eco Boss Adjustments
-      const bossBody = document.getElementById('bossLogsBody');
-      if(bossBody) bossBody.innerHTML = '';
-      let bossNetEffect = 0;
-
+      let bossNetAdjustment = 0;
       bossAdjustments.forEach(b => {
-        if (b.date.startsWith(selectedKey)) {
-          const effect = b.type === 'ADD' ? b.amount : -b.amount;
-          bossNetEffect += effect;
-          if(bossBody) {
-            bossBody.innerHTML += `
-              <tr>
-                <td>${b.date}</td>
-                <td><span class="badge ${b.type === 'ADD' ? 'bg-success' : 'bg-danger'}">${b.type === 'ADD' ? 'Boss Addition (+)' : 'Boss Withdrawal (-)'}</span> ${b.notes ? '('+b.notes+')' : ''}</td>
-                <td class="${b.type === 'ADD' ? 'text-success' : 'text-danger'} fw-bold">₱${b.amount.toFixed(2)}</td>
-              </tr>
-            `;
-          }
+        let matchBoss = false;
+        if(mode === 'MONTH') {
+          if(b.date.startsWith(filterKey)) matchBoss = true;
+        } else {
+          if(b.date.startsWith(filterKey)) matchBoss = true;
+        }
+
+        if(matchBoss) {
+          if(b.type === 'ADD') bossNetAdjustment += b.amount;
+          else bossNetAdjustment -= b.amount;
         }
       });
 
-      if (bossBody && bossBody.innerHTML === '') {
-        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Wala pang D/Eco Boss Adjustment para sa panahong ito.</td></tr>`;
-      }
-
-      netProfit += bossNetEffect;
+      const grossProfit = totalSales - totalCost;
+      const netProfit = grossProfit - totalExpenses + bossNetAdjustment;
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
       document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
       document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+      
+      const netProfitElem = document.getElementById('auditNetProfit');
+      netProfitElem.innerText = `₱${netProfit.toFixed(2)}`;
+      netProfitElem.className = netProfit >= 0 ? "text-success fw-bold mt-1 mb-0" : "text-danger fw-bold mt-1 mb-0";
+
+      // Render Boss Logs
+      const bossBody = document.getElementById('bossLogsBody');
+      bossBody.innerHTML = '';
+      const filteredBoss = bossAdjustments.filter(b => b.date.startsWith(filterKey));
+      
+      filteredBoss.forEach(b => {
+        bossBody.innerHTML += `
+          <tr>
+            <td>${b.date}</td>
+            <td><span class="badge ${b.type === 'ADD' ? 'bg-success' : 'bg-danger'}">${b.type === 'ADD' ? 'Addition (+)' : 'Withdrawal (-)'}</span> ${b.notes}</td>
+            <td class="fw-bold ${b.type === 'ADD' ? 'text-success' : 'text-danger'}">₱${b.amount.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      if(filteredBoss.length === 0) {
+        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Wala pang Boss Adjustment para sa panahong ito.</td></tr>`;
+      }
     }
   </script>
 </body>

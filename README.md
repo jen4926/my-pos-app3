@@ -443,7 +443,8 @@
           <div class="mb-3">
             <input type="text" id="creditSearchInput" class="form-control" placeholder="🔍 Maghanap ng Utang (Pangalan ng Customer, Produkto, atbp.)..." oninput="renderCreditTable()">
           </div>
-          <div class="table-responsive">
+          <div class="table-responsive mb-5">
+            <h5 class="fw-bold text-danger mb-3"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Aktibong Utang (Unpaid / Partial Balances)</h5>
             <table class="table table-hover align-middle">
               <thead class="table-dark">
                 <tr>
@@ -463,6 +464,27 @@
               </tbody>
             </table>
           </div>
+
+          <!-- DEDICATED SECTION: UTANG PAYMENTS HISTORY LOG -->
+          <div class="card p-3 bg-light border">
+            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt me-2"></i>Kasaysayan ng mga Nagbayad ng Utang (Debt Payment History Logs)</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle bg-white">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date Paid</th>
+                    <th>Customer Name</th>
+                    <th>Payment Method</th>
+                    <th>Amount Paid (₱)</th>
+                  </tr>
+                </thead>
+                <tbody id="utangPaymentsLogBody">
+                  <!-- Dynamic History Logs -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -1001,19 +1023,30 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // System Users Database
-    let users = [
+    // System Users Database (Loaded/Saved via localStorage)
+    let users = JSON.parse(localStorage.getItem('rmv_users')) || [
       { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
       { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
     ];
     let currentUser = null;
 
-    // Empty Initial Databases
-    let transactions = [];
-    let inventory = [];
-    let customerPurchases = [];
-    let bossAdjustments = [];
-    let monthlyExpensesData = {};
+    // Databases with LocalStorage Persistence
+    let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
+    let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
+    let customerPurchases = JSON.parse(localStorage.getItem('rmv_customerPurchases')) || [];
+    let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
+    let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpenses')) || {};
+    let utangPaymentsLog = JSON.parse(localStorage.getItem('rmv_utangPaymentsLog')) || [];
+
+    function saveData() {
+      localStorage.setItem('rmv_users', JSON.stringify(users));
+      localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
+      localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
+      localStorage.setItem('rmv_customerPurchases', JSON.stringify(customerPurchases));
+      localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
+      localStorage.setItem('rmv_monthlyExpenses', JSON.stringify(monthlyExpensesData));
+      localStorage.setItem('rmv_utangPaymentsLog', JSON.stringify(utangPaymentsLog));
+    }
 
     // Initial Date Configurations
     const today = new Date();
@@ -1028,6 +1061,8 @@
       updateProductDatalist();
       addPosRow();
       renderExpenseTable();
+      renderCreditTable();
+      renderUtangPaymentsLog();
       
       // Event listener for Boss Form Modal submission
       document.getElementById('bossForm').addEventListener('submit', function(e) {
@@ -1038,6 +1073,7 @@
         const notes = document.getElementById('bossNotes').value;
 
         bossAdjustments.push({ date, type, amount, notes });
+        saveData();
         alert('D/Eco Boss Adjustment successfully saved!');
         this.reset();
         document.getElementById('bossDate').value = todayFormatted;
@@ -1110,6 +1146,7 @@
       const newPass = document.getElementById('profPassword').value;
       if(newPass) currentUser.password = newPass;
 
+      saveData();
       document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
       alert('Profile successfully updated!');
       bootstrap.Modal.getInstance(document.getElementById('changeProfileModal')).hide();
@@ -1146,6 +1183,7 @@
         password: document.getElementById('newAccPass').value,
         role: document.getElementById('newAccRole').value
       });
+      saveData();
       this.reset();
       renderUserList();
     });
@@ -1153,6 +1191,7 @@
     function deleteUser(index) {
       if(confirm('Sigurado ka bang gusto mong alisin ang user na ito?')) {
         users.splice(index, 1);
+        saveData();
         renderUserList();
       }
     }
@@ -1379,6 +1418,7 @@
         payments: paymentHistory
       });
 
+      saveData();
       alert('Transaction saved successfully! Naka-deduct na rin sa Inventory.');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
@@ -1387,6 +1427,7 @@
       toggleContainerFields();
       toggleCreditFields();
       renderCustomerSalesLog();
+      renderCreditTable();
     });
 
     // ================= DAILY REPORT & SEARCHABLE LOGIC =================
@@ -1532,9 +1573,11 @@
           tx.payments.push({ amount: tx.paid, method: 'Cash', date: tx.date });
         }
 
+        saveData();
         alert('Transaction and Cost successfully updated!');
         bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
         generateDailyReport();
+        renderCreditTable();
       }
     });
 
@@ -1543,7 +1586,9 @@
         const index = transactions.findIndex(t => t.id === id);
         if(index > -1) {
           transactions.splice(index, 1);
+          saveData();
           generateDailyReport();
+          renderCreditTable();
         }
       }
     }
@@ -1658,7 +1703,7 @@
       });
     }
 
-    // ================= UTANG LEDGER =================
+    // ================= UTANG LEDGER & PAYMENTS SECTION =================
     function renderCreditTable() {
       const searchKeyword = document.getElementById('creditSearchInput') ? document.getElementById('creditSearchInput').value.trim().toLowerCase() : '';
       const tbody = document.getElementById('creditTableBody');
@@ -1695,6 +1740,29 @@
       if (unpaidTxs.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang nakitang utang na tumutugma sa iyong paghahanap.</td></tr>`;
       }
+      renderUtangPaymentsLog();
+    }
+
+    function renderUtangPaymentsLog() {
+      const tbody = document.getElementById('utangPaymentsLogBody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+
+      if (utangPaymentsLog.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-2">Wala pang naitalang pagbabayad ng utang.</td></tr>`;
+        return;
+      }
+
+      utangPaymentsLog.slice().reverse().forEach(log => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${log.date}</td>
+            <td class="fw-bold">${log.customer}</td>
+            <td><span class="badge bg-secondary">${log.method}</span></td>
+            <td class="text-success fw-bold text-end">₱${log.amount.toFixed(2)}</td>
+          </tr>
+        `;
+      });
     }
 
     function openPaymentModal(id) {
@@ -1739,12 +1807,21 @@
         date: todayFormatted
       });
 
+      // Record in dedicated Utang Payments Log for tracking
+      utangPaymentsLog.push({
+        date: todayFormatted,
+        customer: tx.customer,
+        method: method,
+        amount: payAmount
+      });
+
+      saveData();
       alert('Tagumpay na nai-record ang kabayaran sa utang!');
       bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
       renderCreditTable();
     }
 
-    // ================= INVENTORY MANAGEMENT (WITH DESCRIPTION) =================
+    // ================= INVENTORY MANAGEMENT =================
     document.getElementById('addProductForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const name = document.getElementById('newProdName').value.trim();
@@ -1769,6 +1846,7 @@
         ending: stock
       });
 
+      saveData();
       alert('Matagumpay na naidagdag ang bagong produkto!');
       this.reset();
       bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
@@ -1836,14 +1914,16 @@
       `;
     }
 
-    function updateInventoryValue(index, field, val) {
-      inventory[index][field] = parseFloat(val) || 0;
+    function updateInventoryValue(index, field, value) {
+      inventory[index][field] = parseFloat(value) || 0;
+      saveData();
       renderInventoryTable();
     }
 
     function deleteInventoryItem(index) {
-      if(confirm('Sigurado ka bang gusto mong tanggalin ang produktong ito sa inventory?')) {
+      if(confirm('Sigurado ka bang gusto mong tanggalin ang produktong ito?')) {
         inventory.splice(index, 1);
+        saveData();
         renderInventoryTable();
         updateProductDatalist();
       }
@@ -1851,148 +1931,174 @@
 
     function renderCustomerSalesLog() {
       const tbody = document.getElementById('customerSalesLogBody');
+      if(!tbody) return;
       tbody.innerHTML = '';
 
-      customerPurchases.forEach(cp => {
+      customerPurchases.slice().reverse().forEach(cp => {
         tbody.innerHTML += `
           <tr>
             <td>${cp.date}</td>
             <td class="fw-bold">${cp.customer}</td>
             <td><span class="badge ${cp.location === 'Hiway' ? 'bg-primary' : 'bg-info text-dark'}">${cp.location}</span></td>
             <td>${cp.name} ${cp.description ? '(' + cp.description + ')' : ''}</td>
-            <td class="text-center">${cp.qty}</td>
+            <td class="text-center fw-bold">${cp.qty}</td>
             <td class="text-end">₱${cp.cost.toFixed(2)}</td>
             <td class="text-end">₱${cp.price.toFixed(2)}</td>
-            <td class="text-end fw-bold text-primary">₱${cp.totalAmount.toFixed(2)}</td>
+            <td class="text-end fw-bold text-success">₱${cp.totalAmount.toFixed(2)}</td>
           </tr>
         `;
       });
 
-      if (customerPurchases.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitalang customer purchase.</td></tr>`;
+      if(customerPurchases.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitatalang customer purchase.</td></tr>`;
       }
     }
 
-    // ================= MONTHLY & YEARLY AUDIT LOGIC =================
+    // ================= MONTHLY / YEARLY AUDIT & EXPENSES =================
     function toggleAuditMode() {
       const mode = document.getElementById('auditMode').value;
-      const monthCont = document.getElementById('monthFilterContainer');
-      const yearCont = document.getElementById('yearFilterContainer');
-
       if (mode === 'MONTH') {
-        monthCont.style.display = 'block';
-        yearCont.style.display = 'none';
+        document.getElementById('monthFilterContainer').style.display = 'block';
+        document.getElementById('yearFilterContainer').style.display = 'none';
       } else {
-        monthCont.style.display = 'none';
-        yearCont.style.display = 'block';
+        document.getElementById('monthFilterContainer').style.display = 'none';
+        document.getElementById('yearFilterContainer').style.display = 'block';
       }
       generateMonthlyAudit();
     }
 
     function renderExpenseTable() {
+      const mode = document.getElementById('auditMode').value;
+      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+      
+      if(!monthlyExpensesData[key]) {
+        monthlyExpensesData[key] = [
+          { name: "Kuryente / Tubig", amount: 0 },
+          { name: "Sahod ng Tao", amount: 0 },
+          { name: "Iba pang Gastusin", amount: 0 }
+        ];
+      }
+
       const tbody = document.getElementById('expenseTableBody');
-      tbody.innerHTML = `
-        <tr>
-          <td><input type="text" class="form-control form-control-sm exp-name" value="Kuryente & Tubig" oninput="generateMonthlyAudit()"></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" value="0.00" oninput="generateMonthlyAudit()"></td>
-          <td class="text-center no-print"><button type="button" class="btn btn-sm btn-outline-danger border-0 p-0" onclick="this.closest('tr').remove(); generateMonthlyAudit();"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>
-        <tr>
-          <td><input type="text" class="form-control form-control-sm exp-name" value="Sahod ng Manggagawa" oninput="generateMonthlyAudit()"></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" value="0.00" oninput="generateMonthlyAudit()"></td>
-          <td class="text-center no-print"><button type="button" class="btn btn-sm btn-outline-danger border-0 p-0" onclick="this.closest('tr').remove(); generateMonthlyAudit();"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>
-      `;
+      tbody.innerHTML = '';
+
+      monthlyExpensesData[key].forEach((exp, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="text" class="form-control form-control-sm" value="${exp.name}" onchange="updateExpense(${index}, 'name', this.value)"></td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm" value="${exp.amount}" onchange="updateExpense(${index}, 'amount', this.value)"></td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteExpenseRow(${index})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      generateMonthlyAudit();
     }
 
     function addExpenseRow() {
-      const tbody = document.getElementById('expenseTableBody');
-      tbody.innerHTML += `
-        <tr>
-          <td><input type="text" class="form-control form-control-sm exp-name" placeholder="Pangalan ng Gastusin" oninput="generateMonthlyAudit()"></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" value="0.00" oninput="generateMonthlyAudit()"></td>
-          <td class="text-center no-print"><button type="button" class="btn btn-sm btn-outline-danger border-0 p-0" onclick="this.closest('tr').remove(); generateMonthlyAudit();"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>
-      `;
+      const mode = document.getElementById('auditMode').value;
+      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+      
+      if(!monthlyExpensesData[key]) monthlyExpensesData[key] = [];
+      monthlyExpensesData[key].push({ name: "Bagong Gastusin", amount: 0 });
+      saveData();
+      renderExpenseTable();
+    }
+
+    function updateExpense(index, field, value) {
+      const mode = document.getElementById('auditMode').value;
+      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+      
+      if(field === 'amount') {
+        monthlyExpensesData[key][index][field] = parseFloat(value) || 0;
+      } else {
+        monthlyExpensesData[key][index][field] = value;
+      }
+      saveData();
       generateMonthlyAudit();
+    }
+
+    function deleteExpenseRow(index) {
+      const mode = document.getElementById('auditMode').value;
+      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+      
+      monthlyExpensesData[key].splice(index, 1);
+      saveData();
+      renderExpenseTable();
     }
 
     function generateMonthlyAudit() {
       const mode = document.getElementById('auditMode').value;
-      const selectedMonth = document.getElementById('auditMonth').value; // e.g. "2026-06"
-      const selectedYear = document.getElementById('auditYear').value;   // e.g. "2026"
+      const filterKey = mode === 'MONTH' ? document.getElementById('auditMonth').value : String(document.getElementById('auditYear').value);
 
       let totalSales = 0;
       let totalCost = 0;
+      let totalDebtPaymentsCollected = 0;
 
+      // Filter transactions for the selected month or year
       transactions.forEach(t => {
-        let match = false;
-        if (mode === 'MONTH') {
-          if (t.date.startsWith(selectedMonth)) match = true;
-        } else {
-          if (t.date.startsWith(selectedYear)) match = true;
-        }
-
-        if (match) {
+        const matchesPeriod = mode === 'MONTH' ? t.date.startsWith(filterKey) : t.date.startsWith(filterKey);
+        if (matchesPeriod) {
           totalSales += t.total;
           totalCost += (t.totalCost || 0);
         }
+
+        // Include debt payments collected during this period
+        t.payments.forEach(p => {
+          const matchesPaymentPeriod = mode === 'MONTH' ? p.date.startsWith(filterKey) : p.date.startsWith(filterKey);
+          // If payment was made after the initial transaction date, count it as collected cash/revenue flow
+          if (matchesPaymentPeriod && p.date !== t.date) {
+            totalDebtPaymentsCollected += p.amount;
+          }
+        });
       });
 
       const grossProfit = totalSales - totalCost;
 
       // Calculate Expenses
-      let totalExpenses = 0;
-      const expRows = document.querySelectorAll('#expenseTableBody tr');
-      expRows.forEach(row => {
-        const amt = parseFloat(row.querySelector('.exp-amount').value) || 0;
-        totalExpenses += amt;
-      });
+      const expensesArr = monthlyExpensesData[filterKey] || [];
+      let totalExpenses = expensesArr.reduce((sum, exp) => sum + exp.amount, 0);
 
-      // Boss Adjustments computation
-      let bossNetAdjustment = 0;
-      const bossBody = document.getElementById('bossLogsBody');
-      bossBody.innerHTML = '';
-
+      // Boss Adjustments
+      let bossAdd = 0;
+      let bossSub = 0;
       bossAdjustments.forEach(b => {
-        let bMatch = false;
-        if (mode === 'MONTH') {
-          if (b.date.startsWith(selectedMonth)) bMatch = true;
-        } else {
-          if (b.date.startsWith(selectedYear)) bMatch = true;
-        }
-
-        if (bMatch) {
-          if (b.type === 'ADD') {
-            bossNetAdjustment += b.amount;
-          } else {
-            bossNetAdjustment -= b.amount;
-          }
-
-          bossBody.innerHTML += `
-            <tr>
-              <td>${b.date}</td>
-              <td><span class="badge ${b.type === 'ADD' ? 'bg-success' : 'bg-danger'}">${b.type === 'ADD' ? 'Capital Addition (+)' : 'Withdrawal (-)'}</span> ${b.notes ? ' - ' + b.notes : ''}</td>
-              <td class="fw-bold ${b.type === 'ADD' ? 'text-success' : 'text-danger'}">₱${b.amount.toFixed(2)}</td>
-            </tr>
-          `;
+        const matchesBossPeriod = mode === 'MONTH' ? b.date.startsWith(filterKey) : b.date.startsWith(filterKey);
+        if (matchesBossPeriod) {
+          if (b.type === 'ADD') bossAdd += b.amount;
+          else bossSub += b.amount;
         }
       });
 
-      if (bossAdjustments.filter(b => mode === 'MONTH' ? b.date.startsWith(selectedMonth) : b.date.startsWith(selectedYear)).length === 0) {
-        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang naitalang Boss Adjustment para sa panahong ito.</td></tr>`;
-      }
-
-      const netProfit = grossProfit - totalExpenses + bossNetAdjustment;
+      // Net Profit computation: Gross Profit + Debt Payments Collected + Boss Additions - Expenses - Boss Withdrawals
+      let netProfit = grossProfit + totalDebtPaymentsCollected + bossAdd - totalExpenses - bossSub;
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
       document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
       document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      
-      const netProfitElem = document.getElementById('auditNetProfit');
-      netProfitElem.innerText = `₱${netProfit.toFixed(2)}`;
-      netProfitElem.className = netProfit >= 0 ? 'text-success fw-bold mt-1 mb-0' : 'text-danger fw-bold mt-1 mb-0';
+      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+
+      // Render Boss Logs
+      const bossBody = document.getElementById('bossLogsBody');
+      bossBody.innerHTML = '';
+      bossAdjustments.forEach(b => {
+        const matchesBossPeriod = mode === 'MONTH' ? b.date.startsWith(filterKey) : b.date.startsWith(filterKey);
+        if (matchesBossPeriod) {
+          bossBody.innerHTML += `
+            <tr>
+              <td>${b.date}</td>
+              <td><span class="badge ${b.type === 'ADD' ? 'bg-success' : 'bg-danger'}">${b.type === 'ADD' ? 'Boss Addition (+)' : 'Boss Withdrawal (-)'}</span> ${b.notes ? '- ' + b.notes : ''}</td>
+              <td class="fw-bold">₱${b.amount.toFixed(2)}</td>
+            </tr>
+          `;
+        }
+      });
+
+      if (bossBody.innerHTML === '') {
+        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang naitalang Boss Adjustment sa panahong ito.</td></tr>`;
+      }
     }
   </script>
 </body>

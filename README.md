@@ -1140,6 +1140,7 @@
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpenses')) || {};
     let utangPaymentsLog = JSON.parse(localStorage.getItem('rmv_utangPaymentsLog')) || [];
     let pettyCashList = JSON.parse(localStorage.getItem('rmv_pettyCash')) || [];
+    let cashBreakdowns = JSON.parse(localStorage.getItem('rmv_cashBreakdowns')) || {};
 
     function saveData() {
       localStorage.setItem('rmv_users', JSON.stringify(users));
@@ -1150,6 +1151,7 @@
       localStorage.setItem('rmv_monthlyExpenses', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_utangPaymentsLog', JSON.stringify(utangPaymentsLog));
       localStorage.setItem('rmv_pettyCash', JSON.stringify(pettyCashList));
+      localStorage.setItem('rmv_cashBreakdowns', JSON.stringify(cashBreakdowns));
     }
 
     // Initial Date Configurations
@@ -1171,6 +1173,7 @@
       renderPettyCashTable();
       renderInventoryTable();
       renderCustomerSalesLog();
+      generateDailyReport(); // load cash breakdown for initial date
      
       // Event listener for Boss Form Modal submission
       document.getElementById('bossForm').addEventListener('submit', function(e) {
@@ -1702,6 +1705,8 @@
       document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
 
+      // Load saved cash breakdown for this selected date
+      loadCashBreakdownForDate(selectedDate);
       calculateMoneyBreakdown();
     }
 
@@ -1776,9 +1781,28 @@
       }
     }
 
+    // --- CASH BREAKDOWN PERSISTENCE FUNCTIONS ---
+    function loadCashBreakdownForDate(dateStr) {
+      const denomInputs = document.querySelectorAll('.denom-count');
+      const coinsInput = document.querySelector('.denom-coins');
+      
+      const savedData = cashBreakdowns[dateStr] || {};
+      
+      denomInputs.forEach(input => {
+        const denom = input.getAttribute('data-denom');
+        input.value = savedData[denom] !== undefined ? savedData[denom] : '';
+      });
+      
+      coinsInput.value = savedData['coins'] !== undefined ? savedData['coins'] : '';
+    }
+
     function calculateMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
       let totalCashCounted = 0;
       const denomInputs = document.querySelectorAll('.denom-count');
+      const coinsInput = document.querySelector('.denom-coins');
+      
+      let currentDayData = {};
 
       denomInputs.forEach(input => {
         const denom = parseFloat(input.getAttribute('data-denom')) || 0;
@@ -1789,10 +1813,20 @@
         row.querySelector('.denom-subtotal').value = subtotal.toFixed(2);
        
         totalCashCounted += subtotal;
+        if (input.value !== '') {
+          currentDayData[denom] = input.value;
+        }
       });
 
-      const coins = parseFloat(document.querySelector('.denom-coins').value) || 0;
+      const coins = parseFloat(coinsInput.value) || 0;
       totalCashCounted += coins;
+      if (coinsInput.value !== '') {
+        currentDayData['coins'] = coinsInput.value;
+      }
+
+      // Save to cashBreakdowns storage object per date
+      cashBreakdowns[selectedDate] = currentDayData;
+      saveData();
 
       document.getElementById('totalCountedCash').innerText = `₱${totalCashCounted.toFixed(2)}`;
 
@@ -1818,484 +1852,6 @@
         diffElem.className = "fs-5 fw-bold text-danger";
         alertElem.className = "alert alert-danger text-center p-2 fw-bold mb-0";
         alertElem.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> SHORT: Kulang ang pera sa drawer nang ₱${Math.abs(diff).toFixed(2)}.`;
-      }
-    }
-
-    // ================= CUSTOMER ORDER LOOKUP =================
-    function searchCustomerOrder() {
-      const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
-      const resultContainer = document.getElementById('searchResultContainer');
-      const noFound = document.getElementById('noCustomerFound');
-
-      if (!query) {
-        alert('Mangyaring maglagay ng pangalan ng customer.');
-        return;
-      }
-
-      const matchedTxs = transactions.filter(t => t.customer.toLowerCase().includes(query) || t.product.toLowerCase().includes(query));
-
-      if (matchedTxs.length === 0) {
-        resultContainer.style.display = 'none';
-        noFound.classList.remove('d-none');
-        return;
-      }
-
-      noFound.classList.add('d-none');
-      resultContainer.style.display = 'block';
-
-      matchedTxs.sort((a, b) => b.id - a.id);
-      const last = matchedTxs[0];
-
-      document.getElementById('lastOrderCustomer').innerText = last.customer;
-      document.getElementById('lastOrderDate').innerText = last.date;
-      document.getElementById('lastOrderContainer').innerText = last.containerInfo || 'Wala';
-      document.getElementById('lastOrderProducts').innerText = last.product;
-      document.getElementById('lastOrderTotal').innerText = `₱${last.total.toFixed(2)}`;
-      document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
-      document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
-
-      const badge = document.getElementById('lastOrderBadge');
-      if (last.status === 'PAID') {
-        badge.className = 'badge bg-success fs-6';
-        badge.innerText = 'PAID (Fully Paid)';
-      } else if (last.status === 'PARTIAL') {
-        badge.className = 'badge bg-warning text-dark fs-6';
-        badge.innerText = 'PARTIAL (May Utang)';
-      } else {
-        badge.className = 'badge bg-danger fs-6';
-        badge.innerText = 'UNPAID (Purong Utang)';
-      }
-
-      const historyBody = document.getElementById('customerHistoryBody');
-      historyBody.innerHTML = '';
-      matchedTxs.forEach(t => {
-        const netProf = t.netProfit || (t.total - (t.totalCost || 0));
-        historyBody.innerHTML += `
-          <tr>
-            <td>${t.date}</td>
-            <td><span class="badge ${t.location === 'Hiway' ? 'bg-primary' : 'bg-info text-dark'}">${t.location}</span></td>
-            <td>${t.product}</td>
-            <td>${t.containerInfo || 'Wala'}</td>
-            <td>₱${t.total.toFixed(2)}</td>
-            <td class="text-success">₱${t.paid.toFixed(2)}</td>
-            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
-            <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
-            <td><span class="badge ${t.status === 'PAID' ? 'bg-success' : (t.status === 'PARTIAL' ? 'bg-warning text-dark' : 'bg-danger')}">${t.status}</span></td>
-          </tr>
-        `;
-      });
-    }
-
-    // ================= UTANG LEDGER & PAYMENTS SECTION =================
-    function renderCreditTable() {
-      const searchKeyword = document.getElementById('creditSearchInput') ? document.getElementById('creditSearchInput').value.trim().toLowerCase() : '';
-      const tbody = document.getElementById('creditTableBody');
-      tbody.innerHTML = '';
-
-      const unpaidTxs = transactions.filter(t => {
-        const isUnpaid = t.balance > 0;
-        const matchesSearch = searchKeyword === '' ||
-          t.customer.toLowerCase().includes(searchKeyword) ||
-          t.product.toLowerCase().includes(searchKeyword);
-        return isUnpaid && matchesSearch;
-      });
-
-      unpaidTxs.forEach(t => {
-        tbody.innerHTML += `
-          <tr>
-            <td class="fw-bold">${t.customer}</td>
-            <td><span class="badge ${t.location === 'Hiway' ? 'bg-primary' : 'bg-info text-dark'}">${t.location}</span></td>
-            <td>${t.product}</td>
-            <td class="text-secondary">₱${(t.totalCost || 0).toFixed(2)}</td>
-            <td class="text-success">₱${t.paid.toFixed(2)}</td>
-            <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
-            <td>${t.dueDate}</td>
-            <td><span class="badge ${t.status === 'PARTIAL' ? 'bg-warning text-dark' : 'bg-danger'}">${t.status}</span></td>
-            <td class="no-print">
-              <button class="btn btn-sm btn-success py-0 px-2" onclick="openPaymentModal(${t.id})">
-                <i class="fa-solid fa-hand-holding-dollar me-1"></i>Magbayad
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      if (unpaidTxs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang nakitang utang na tumutugma sa iyong paghahanap.</td></tr>`;
-      }
-      renderUtangPaymentsLog();
-    }
-
-    function renderUtangPaymentsLog() {
-      const tbody = document.getElementById('utangPaymentsLogBody');
-      if(!tbody) return;
-      tbody.innerHTML = '';
-
-      if (utangPaymentsLog.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-2">Wala pang naitalang pagbabayad ng utang.</td></tr>`;
-        return;
-      }
-
-      utangPaymentsLog.slice().reverse().forEach(log => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${log.date}</td>
-            <td class="fw-bold">${log.customer}</td>
-            <td><span class="badge bg-secondary">${log.method}</span></td>
-            <td class="text-success fw-bold text-end">₱${log.amount.toFixed(2)}</td>
-          </tr>
-        `;
-      });
-    }
-
-    function openPaymentModal(id) {
-      const tx = transactions.find(t => t.id === id);
-      if(!tx) return;
-
-      document.getElementById('payTransactionId').value = tx.id;
-      document.getElementById('payCustomerName').value = tx.customer;
-      document.getElementById('payCurrentBalance').value = tx.balance.toFixed(2);
-      document.getElementById('payAmountInput').value = '';
-
-      new bootstrap.Modal(document.getElementById('paymentModal')).show();
-    }
-
-    function submitUtangPayment() {
-      const id = parseInt(document.getElementById('payTransactionId').value);
-      const payAmount = parseFloat(document.getElementById('payAmountInput').value) || 0;
-      const method = document.getElementById('payMethod').value;
-      const tx = transactions.find(t => t.id === id);
-
-      if (!tx) return;
-      if (payAmount <= 0) {
-        alert('Mangyaring maglagay ng wastong halaga ng kabayaran.');
-        return;
-      }
-      if (payAmount > tx.balance) {
-        alert('Ang ibinayad ay mas malaki kaysa sa natitirang balanse.');
-        return;
-      }
-
-      tx.paid += payAmount;
-      tx.balance = Math.max(0, tx.total - tx.paid);
-      if (tx.balance === 0) {
-        tx.status = 'PAID';
-      } else {
-        tx.status = 'PARTIAL';
-      }
-
-      tx.payments.push({
-        amount: payAmount,
-        method: method,
-        date: todayFormatted
-      });
-
-      // Record in dedicated Utang Payments Log for tracking
-      utangPaymentsLog.push({
-        date: todayFormatted,
-        customer: tx.customer,
-        method: method,
-        amount: payAmount
-      });
-
-      saveData();
-      alert('Tagumpay na nai-record ang kabayaran sa utang!');
-      bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
-      renderCreditTable();
-    }
-
-    // ================= INVENTORY MANAGEMENT =================
-    document.getElementById('addProductForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('newProdName').value.trim();
-      const desc = document.getElementById('newProdDesc').value.trim();
-      const cost = parseFloat(document.getElementById('newProdCost').value) || 0;
-      const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
-      const stock = parseInt(document.getElementById('newProdStock').value) || 0;
-
-      const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-      if (existing) {
-        alert('Ang produktong ito ay umiiral na sa inventory!');
-        return;
-      }
-
-      inventory.push({
-        name: name,
-        description: desc,
-        cost: cost,
-        price: price,
-        beginning: stock,
-        stockIn: 0,
-        ending: stock
-      });
-
-      saveData();
-      alert('Matagumpay na naidagdag ang bagong produkto!');
-      this.reset();
-      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-      renderInventoryTable();
-      updateProductDatalist();
-    });
-
-    function renderInventoryTable() {
-      const searchKeyword = document.getElementById('inventorySearchInput').value.trim().toLowerCase();
-      const tbody = document.getElementById('inventoryTableBody');
-      const tfoot = document.getElementById('inventoryTableFooter');
-      tbody.innerHTML = '';
-
-      let totalBeginning = 0;
-      let totalStockIn = 0;
-      let totalSold = 0;
-      let totalEnding = 0;
-      let totalInventoryCostVal = 0;
-
-      const filtered = inventory.filter(item => 
-        searchKeyword === '' || 
-        item.name.toLowerCase().includes(searchKeyword) || 
-        (item.description && item.description.toLowerCase().includes(searchKeyword))
-      );
-
-      filtered.forEach((item, index) => {
-        const soldQty = (item.beginning + item.stockIn) - item.ending;
-        totalBeginning += item.beginning;
-        totalStockIn += item.stockIn;
-        totalSold += soldQty;
-        totalEnding += item.ending;
-        totalInventoryCostVal += (item.ending * item.cost);
-
-        tbody.innerHTML += `
-          <tr>
-            <td><input type="text" class="form-control form-control-sm" value="${item.description || ''}" onchange="updateInventoryField(${index}, 'description', this.value)"></td>
-            <td class="fw-bold">${item.name}</td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm text-center" value="${item.cost}" onchange="updateInventoryField(${index}, 'cost', this.value)"></td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm text-center" value="${item.price}" onchange="updateInventoryField(${index}, 'price', this.value)"></td>
-            <td><input type="number" class="form-control form-control-sm text-center inventory-input" value="${item.beginning}" onchange="updateInventoryField(${index}, 'beginning', this.value)"></td>
-            <td><input type="number" class="form-control form-control-sm text-center inventory-input" value="${item.stockIn}" onchange="updateInventoryField(${index}, 'stockIn', this.value)"></td>
-            <td class="text-center fw-semibold text-primary">${soldQty}</td>
-            <td><input type="number" class="form-control form-control-sm text-center inventory-input" value="${item.ending}" onchange="updateInventoryField(${index}, 'ending', this.value)"></td>
-            <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang nakitang produkto sa inventory.</td></tr>`;
-      }
-
-      tfoot.innerHTML = `
-        <tr>
-          <td colspan="4" class="text-end">TOTALS & OVERALL INVENTORY VALUE:</td>
-          <td>${totalBeginning}</td>
-          <td>${totalStockIn}</td>
-          <td>${totalSold}</td>
-          <td>${totalEnding} (₱${totalInventoryCostVal.toFixed(2)})</td>
-          <td class="no-print"></td>
-        </tr>
-      `;
-    }
-
-    function updateInventoryField(index, field, value) {
-      if (field === 'description') {
-        inventory[index][field] = value;
-      } else {
-        inventory[index][field] = parseFloat(value) || 0;
-        if (field === 'beginning' || field === 'stockIn') {
-          inventory[index].ending = inventory[index].beginning + inventory[index].stockIn;
-        }
-      }
-      saveData();
-      renderInventoryTable();
-    }
-
-    function deleteInventoryItem(index) {
-      if (confirm('Sigurado ka bang nais mong tanggalin ang produktong ito sa inventory?')) {
-        inventory.splice(index, 1);
-        saveData();
-        renderInventoryTable();
-        updateProductDatalist();
-      }
-    }
-
-    function renderCustomerSalesLog() {
-      const tbody = document.getElementById('customerSalesLogBody');
-      if(!tbody) return;
-      tbody.innerHTML = '';
-
-      if (customerPurchases.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitalang pagbili ng mga customer.</td></tr>`;
-        return;
-      }
-
-      customerPurchases.slice().reverse().forEach(cp => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${cp.date}</td>
-            <td class="fw-bold">${cp.customer}</td>
-            <td><span class="badge ${cp.location === 'Hiway' ? 'bg-primary' : 'bg-info text-dark'}">${cp.location}</span></td>
-            <td>${cp.name} ${cp.description ? `(${cp.description})` : ''}</td>
-            <td class="text-center">${cp.qty}</td>
-            <td class="text-end">₱${cp.cost.toFixed(2)}</td>
-            <td class="text-end">₱${cp.price.toFixed(2)}</td>
-            <td class="text-end fw-bold text-success">₱${cp.totalAmount.toFixed(2)}</td>
-          </tr>
-        `;
-      });
-    }
-
-    // ================= MONTHLY / YEARLY AUDIT LOGIC =================
-    function toggleAuditMode() {
-      const mode = document.getElementById('auditMode').value;
-      if(mode === 'MONTH') {
-        document.getElementById('monthFilterContainer').style.display = 'block';
-        document.getElementById('yearFilterContainer').style.display = 'none';
-      } else {
-        document.getElementById('monthFilterContainer').style.display = 'none';
-        document.getElementById('yearFilterContainer').style.display = 'block';
-      }
-      generateMonthlyAudit();
-    }
-
-    function renderExpenseTable() {
-      const mode = document.getElementById('auditMode').value;
-      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      const tbody = document.getElementById('expenseTableBody');
-      tbody.innerHTML = '';
-
-      if(!monthlyExpensesData[key]) {
-        monthlyExpensesData[key] = [
-          { name: 'Kuryente / Tubig', amount: 0 },
-          { name: 'Sahod ng Tao', amount: 0 },
-          { name: 'Iba pang Gastusin', amount: 0 }
-        ];
-      }
-
-      monthlyExpensesData[key].forEach((exp, index) => {
-        tbody.innerHTML += `
-          <tr>
-            <td><input type="text" class="form-control form-control-sm" value="${exp.name}" onchange="updateExpenseItem(${index}, 'name', this.value)"></td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm" value="${exp.amount}" onchange="updateExpenseItem(${index}, 'amount', this.value)"></td>
-            <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow(${index})">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-      generateMonthlyAudit();
-    }
-
-    function addExpenseRow() {
-      const mode = document.getElementById('auditMode').value;
-      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      if(!monthlyExpensesData[key]) monthlyExpensesData[key] = [];
-      monthlyExpensesData[key].push({ name: 'Bagong Gastusin', amount: 0 });
-      saveData();
-      renderExpenseTable();
-    }
-
-    function updateExpenseItem(index, field, value) {
-      const mode = document.getElementById('auditMode').value;
-      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      if(field === 'amount') {
-        monthlyExpensesData[key][index][field] = parseFloat(value) || 0;
-      } else {
-        monthlyExpensesData[key][index][field] = value;
-      }
-      saveData();
-      generateMonthlyAudit();
-    }
-
-    function deleteExpenseRow(index) {
-      const mode = document.getElementById('auditMode').value;
-      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      monthlyExpensesData[key].splice(index, 1);
-      saveData();
-      renderExpenseTable();
-    }
-
-    function generateMonthlyAudit() {
-      const mode = document.getElementById('auditMode').value;
-      const filterKey = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-
-      if(!monthlyExpensesData[filterKey]) {
-        monthlyExpensesData[filterKey] = [
-          { name: 'Kuryente / Tubig', amount: 0 },
-          { name: 'Sahod ng Tao', amount: 0 },
-          { name: 'Iba pang Gastusin', amount: 0 }
-        ];
-      }
-
-      let totalSales = 0;
-      let totalCost = 0;
-      let totalExpenses = 0;
-
-      transactions.forEach(t => {
-        let match = false;
-        if(mode === 'MONTH') {
-          if(t.date.startsWith(filterKey)) match = true;
-        } else {
-          if(t.date.startsWith(filterKey)) match = true;
-        }
-
-        if(match) {
-          totalSales += t.total;
-          totalCost += (t.totalCost || 0);
-        }
-      });
-
-      monthlyExpensesData[filterKey].forEach(exp => {
-        totalExpenses += exp.amount;
-      });
-
-      let bossNetAdjustment = 0;
-      bossAdjustments.forEach(b => {
-        let matchBoss = false;
-        if(mode === 'MONTH') {
-          if(b.date.startsWith(filterKey)) matchBoss = true;
-        } else {
-          if(b.date.startsWith(filterKey)) matchBoss = true;
-        }
-
-        if(matchBoss) {
-          if(b.type === 'ADD') bossNetAdjustment += b.amount;
-          else bossNetAdjustment -= b.amount;
-        }
-      });
-
-      const grossProfit = totalSales - totalCost;
-      const netProfit = grossProfit - totalExpenses + bossNetAdjustment;
-
-      document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
-      document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
-      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
-      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      
-      const netProfitElem = document.getElementById('auditNetProfit');
-      netProfitElem.innerText = `₱${netProfit.toFixed(2)}`;
-      netProfitElem.className = netProfit >= 0 ? "text-success fw-bold mt-1 mb-0" : "text-danger fw-bold mt-1 mb-0";
-
-      // Render Boss Logs
-      const bossBody = document.getElementById('bossLogsBody');
-      bossBody.innerHTML = '';
-      const filteredBoss = bossAdjustments.filter(b => b.date.startsWith(filterKey));
-      
-      filteredBoss.forEach(b => {
-        bossBody.innerHTML += `
-          <tr>
-            <td>${b.date}</td>
-            <td><span class="badge ${b.type === 'ADD' ? 'bg-success' : 'bg-danger'}">${b.type === 'ADD' ? 'Addition (+)' : 'Withdrawal (-)'}</span> ${b.notes}</td>
-            <td class="fw-bold ${b.type === 'ADD' ? 'text-success' : 'text-danger'}">₱${b.amount.toFixed(2)}</td>
-          </tr>
-        `;
-      });
-
-      if(filteredBoss.length === 0) {
-        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Wala pang Boss Adjustment para sa panahong ito.</td></tr>`;
       }
     }
   </script>

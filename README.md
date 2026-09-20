@@ -3,872 +3,383 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RMVillasis Enterprises POS & Inventory</title>
+  <title>RMVillasis Enterprises POS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* --- GENERAL STYLES (Light Blue Theme) --- */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #e6f2ff;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* --- LOGIN SECTION --- */
-    .login-container {
-      max-width: 380px;
-      margin: 80px auto;
-      padding: 30px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 102, 204, 0.15);
-      text-align: center;
-      border: 1px solid #b3d9ff;
-    }
-
-    .login-container h2 {
-      color: #0056b3;
-      margin-bottom: 5px;
-      font-size: 1.6rem;
-    }
-
-    .login-container p {
-      color: #666;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
-    }
-
-    .login-container input {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #99ccff;
-      border-radius: 6px;
-      box-sizing: border-box;
-      outline: none;
-    }
-
-    .login-container button {
-      width: 100%;
-      padding: 12px;
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .login-container button:hover {
-      background-color: #004080;
-    }
-
-    .error-msg {
-      color: #d9534f;
-      font-size: 0.85rem;
-      margin-top: 10px;
-      display: none;
-    }
-
-    /* --- APP HEADER & NAVIGATION --- */
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #004080;
-      color: white;
-      padding: 15px 25px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .app-header h1 {
-      margin: 0;
-      font-size: 1.3rem;
-    }
-
-    .user-tag {
-      font-size: 0.9rem;
-      background-color: #0056b3;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-left: 10px;
-    }
-
-    .nav-buttons button {
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      margin-left: 8px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .nav-buttons button:hover {
-      background-color: #0056b3;
-    }
-
-    .btn-logout {
-      background-color: #d9534f !important;
-    }
-
-    /* --- MAIN CONTENT AREA --- */
-    main {
-      padding: 25px;
-      max-width: 1150px;
-      margin: 0 auto;
-    }
-
-    .tab-content {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      border: 1px solid #cce5ff;
-    }
-
-    h2, h3 {
-      color: #004080;
-      margin-top: 0;
-    }
-
-    /* --- FORM STYLES --- */
-    .app-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      background-color: #f0f8ff;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #b3d9ff;
-      margin-bottom: 25px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: #0056b3;
-      margin-bottom: 5px;
-    }
-
-    .form-group input, .form-group select {
-      padding: 8px;
-      border: 1px solid #99ccff;
-      border-radius: 4px;
-    }
-
-    /* --- TABLES --- */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    table, th, td {
-      border: 1px solid #cce5ff;
-    }
-
-    th {
-      background-color: #cce5ff;
-      color: #004080;
-      padding: 10px;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-
-    td {
-      padding: 10px;
-      font-size: 0.9rem;
-    }
-
-    /* --- AUDIT CARDS & BREAKDOWN --- */
-    .audit-controls {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .audit-summary-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-
-    .card {
-      background-color: #f0f8ff;
-      border: 1px solid #b3d9ff;
-      border-radius: 8px;
-      padding: 15px;
-      text-align: center;
-    }
-
-    .card h3 {
-      margin: 0 0 10px 0;
-      font-size: 0.8rem;
-      color: #0056b3;
-      text-transform: uppercase;
-    }
-
-    .card p {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: #004080;
-    }
-
-    .card.expense p { color: #d9534f; }
-    .card.profit p { color: #28a745; }
-
-    /* --- MODAL --- */
-    .modal {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 25px;
-      border-radius: 8px;
-      width: 450px;
-      border-top: 5px solid #0066cc;
-    }
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .navbar { background-color: #0d47a1; }
+    .card { border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .nav-pills .nav-link.active { background-color: #1976d2; }
+    .nav-pills .nav-link { color: #fff; margin-right: 5px; }
+    .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
+    .credit-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN CONTAINER -->
-  <div id="login-container" class="login-container">
-    <h2>RMVillasis Enterprises</h2>
-    <p>Please log in to access the POS System</p>
-    <form onsubmit="handleLogin(event)">
-      <input type="text" id="username" placeholder="Username" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="submit">LOGIN</button>
-      <p id="login-error" class="error-msg">Invalid Username or Password!</p>
-    </form>
-  </div>
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark expand-lg mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold fs-4" href="#">
+        <i class="fa-solid fa-store me-2"></i>RMVillasis Enterprises POS
+      </a>
+      <ul class="nav nav-pills me-auto" id="mainTabs" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" id="pos-tab" data-bs-toggle="pill" data-bs-target="#pos-content" type="button">
+            <i class="fa-solid fa-cart-shopping me-1"></i> POS Entry
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button">
+            <i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button">
+            <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="sales-tab" data-bs-toggle="pill" data-bs-target="#sales-content" type="button">
+            <i class="fa-solid fa-chart-line me-1"></i> Sales Management
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
-  <!-- MAIN APP CONTAINER -->
-  <div id="app-container" style="display: none;">
-    
-    <!-- HEADER -->
-    <header class="app-header">
-      <h1>🏬 RMVillasis Enterprises POS <span class="user-tag" id="current-user-display">User</span></h1>
-      <nav class="nav-buttons">
-        <button onclick="showTab('pos')">🛒 POS Entry</button>
-        <button onclick="showTab('inventory')">📦 Inventory</button>
-        <button onclick="showTab('sales')">📝 Sales Management</button>
-        <button onclick="showTab('audit')">📊 Monthly Audit</button>
-        <button onclick="handleLogout()" class="btn-logout">🚪 Logout</button>
-      </nav>
-    </header>
+  <div class="container pb-5">
+    <div class="tab-content" id="mainTabsContent">
 
-    <main>
-      <!-- POS SECTION -->
-      <section id="pos-section" class="tab-content">
-        <h2>🛒 Record New Sale</h2>
-        <form onsubmit="recordSale(event)" class="app-form">
-          <div class="form-group">
-            <label>Date of Sale:</label>
-            <input type="date" id="pos-date" required>
-          </div>
-          <div class="form-group">
-            <label>Customer Name:</label>
-            <input type="text" id="pos-customer" placeholder="e.g., John Doe" required>
-          </div>
-          <div class="form-group">
-            <label>Product Name:</label>
-            <input type="text" id="pos-product" placeholder="Item description" required>
-          </div>
-          <div class="form-group">
-            <label>Quantity:</label>
-            <input type="number" id="pos-qty" min="1" value="1" required>
-          </div>
-          <div class="form-group">
-            <label>Buying Price / Cost (₱):</label>
-            <input type="number" id="pos-buy-price" step="0.01" placeholder="0.00" required>
-          </div>
-          <div class="form-group">
-            <label>Selling Price (₱):</label>
-            <input type="number" id="pos-sell-price" step="0.01" placeholder="0.00" required>
-          </div>
-          <div class="form-group">
-            <label>Payment Method:</label>
-            <select id="pos-payment-method" required>
-              <option value="Cash">Cash</option>
-              <option value="GCash">GCash</option>
-              <option value="Cheque">Cheque</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-            </select>
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <button type="submit" style="padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">+ Add Sale Transaction</button>
-          </div>
-        </form>
-      </section>
+      <!-- ================= 1. POS ENTRY TAB ================= -->
+      <div class="tab-pane fade show active" id="pos-content">
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-cash-register me-2"></i>Record New Sale</h4>
+          <form id="posForm">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Date of Sale:</label>
+                <input type="date" id="saleDate" class="form-control" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Customer Name:</label>
+                <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Product Name:</label>
+                <input type="text" id="productName" class="form-control" placeholder="Item description" required>
+              </div>
 
-      <!-- INVENTORY SECTION -->
-      <section id="inventory-section" class="tab-content" style="display: none;">
-        <h2>📦 Product Inventory</h2>
-        <form onsubmit="saveInventoryProduct(event)" class="app-form">
-          <input type="hidden" id="inv-index">
-          <div class="form-group">
-            <label>Product Name:</label>
-            <input type="text" id="inv-name" placeholder="Item name" required>
-          </div>
-          <div class="form-group">
-            <label>Starting Quantity:</label>
-            <input type="number" id="inv-start-qty" min="0" required>
-          </div>
-          <div class="form-group">
-            <label>Default Buying Price (₱):</label>
-            <input type="number" id="inv-buy-price" step="0.01" placeholder="0.00" required>
-          </div>
-          <div class="form-group">
-            <label>Default Selling Price (₱):</label>
-            <input type="number" id="inv-sell-price" step="0.01" placeholder="0.00" required>
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <button type="submit" id="inv-btn-submit" style="padding: 10px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">+ Add Product to Inventory</button>
-          </div>
-        </form>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Quantity:</label>
+                <input type="number" id="quantity" class="form-control" value="1" min="1" oninput="calculateTotal()" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Buying Price / Cost (₱):</label>
+                <input type="number" step="0.01" id="buyingPrice" class="form-control" placeholder="0.00" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Selling Price (₱):</label>
+                <input type="number" step="0.01" id="sellingPrice" class="form-control" placeholder="0.00" oninput="calculateTotal()" required>
+              </div>
 
-        <h3>Current Inventory Levels</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>Starting Qty</th>
-              <th>Qty Sold</th>
-              <th>Remaining / Ending Qty</th>
-              <th>Buy Price</th>
-              <th>Sell Price</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="inventory-tbody"></tbody>
-        </table>
-      </section>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Total Amount (₱):</label>
+                <input type="number" step="0.01" id="totalAmount" class="form-control bg-light" readonly placeholder="0.00">
+              </div>
 
-      <!-- SALES MANAGEMENT SECTION -->
-      <section id="sales-section" class="tab-content" style="display: none;">
-        <h2>📝 Sales History & Management</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Product (Qty)</th>
-              <th>Payment Method</th>
-              <th>Total Cost</th>
-              <th>Gross Sales</th>
-              <th>Gross Profit</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="sales-history-tbody"></tbody>
-        </table>
-      </section>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Payment Type:</label>
+                <select id="paymentType" class="form-select" onchange="toggleCreditFields()">
+                  <option value="FULL">Cash / Paid in Full</option>
+                  <option value="PARTIAL">Partial Payment (May Natirang Utang)</option>
+                  <option value="CREDIT">Full Credit / Purong Utang</option>
+                </select>
+              </div>
+            </div>
 
-      <!-- MONTHLY AUDIT SECTION -->
-      <section id="audit-section" class="tab-content" style="display: none;">
-        <h2>📊 Financial Audit & Payment Breakdown</h2>
-        
-        <div class="audit-controls">
-          <label for="audit-month">Select Month:</label>
-          <input type="month" id="audit-month" onchange="generateMonthlyAudit()">
-          <button onclick="window.print()">🖨️ Print Report</button>
+            <!-- Conditional Credit Fields -->
+            <div id="creditFieldsSection" class="credit-fields">
+              <h6 class="text-secondary fw-bold mb-3"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Utang / Credit Details</h6>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Amount Paid Now (₱):</label>
+                  <input type="number" step="0.01" id="amountPaidNow" class="form-control" value="0.00" oninput="calculateBalance()">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Remaining Balance (₱):</label>
+                  <input type="number" step="0.01" id="remainingBalance" class="form-control bg-light" readonly value="0.00">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Due Date:</label>
+                  <input type="date" id="dueDate" class="form-control">
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 text-end">
+              <button type="submit" class="btn btn-success btn-lg px-4"><i class="fa-solid fa-check me-2"></i>Save Transaction</button>
+            </div>
+          </form>
         </div>
+      </div>
 
-        <!-- SUMMARY CARDS -->
-        <h3>Overall Summary</h3>
-        <div class="audit-summary-cards">
-          <div class="card">
-            <h3>Total Gross Sales</h3>
-            <p id="audit-total-sales">₱0.00</p>
+      <!-- ================= 2. UTANG & PAYMENTS TAB ================= -->
+      <div class="tab-pane fade" id="credit-content">
+        <div class="card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit & Utang Ledger</h4>
           </div>
-          <div class="card expense">
-            <h3>Total Cost</h3>
-            <p id="audit-total-cost">₱0.00</p>
-          </div>
-          <div class="card expense">
-            <h3>Expenses</h3>
-            <p id="audit-total-expenses">₱0.00</p>
-          </div>
-          <div class="card profit">
-            <h3>Net Profit (Kita)</h3>
-            <p id="audit-net-profit">₱0.00</p>
+          
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Product / Item</th>
+                  <th>Total Cost (₱)</th>
+                  <th>Amount Paid (₱)</th>
+                  <th>Balance (₱)</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="creditTableBody">
+                <!-- Dynamic Content via JS -->
+              </tbody>
+            </table>
           </div>
         </div>
+      </div>
 
-        <h3>Sales Breakdown by Payment Method</h3>
-        <div class="audit-summary-cards">
-          <div class="card">
-            <h3>Cash Sales</h3>
-            <p id="audit-cash-sales">₱0.00</p>
-          </div>
-          <div class="card">
-            <h3>GCash Sales</h3>
-            <p id="audit-gcash-sales">₱0.00</p>
-          </div>
-          <div class="card">
-            <h3>Cheque Sales</h3>
-            <p id="audit-cheque-sales">₱0.00</p>
-          </div>
-          <div class="card">
-            <h3>Bank Transfer</h3>
-            <p id="audit-bank-sales">₱0.00</p>
-          </div>
+      <!-- ================= 3. INVENTORY TAB ================= -->
+      <div class="tab-pane fade" id="inventory-content">
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
+          <p class="text-muted">Talahanayan ng stocks at mga paninda.</p>
         </div>
+      </div>
 
-        <hr style="border: 0; border-top: 1px solid #cce5ff; margin: 25px 0;">
+      <!-- ================= 4. SALES MANAGEMENT TAB ================= -->
+      <div class="tab-pane fade" id="sales-content">
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Sales History</h4>
+          <p class="text-muted">Talaan ng lahat ng nakaraang bentahan.</p>
+        </div>
+      </div>
 
-        <!-- EXPENSE LOGGING SECTION -->
-        <h3>💸 Record Monthly Expense / Salary</h3>
-        <form style="display: flex; gap: 10px; margin-bottom: 15px;" onsubmit="addExpense(event)">
-          <select id="expense-category" required style="padding: 8px;">
-            <option value="Salary">Salary Expense</option>
-            <option value="Utilities">Utilities (Electricity/Water)</option>
-            <option value="Supplies">Supplies & Inventory</option>
-            <option value="Other">Other Expenses</option>
-          </select>
-          <input type="text" id="expense-desc" placeholder="Description / Employee Name" required style="padding: 8px;">
-          <input type="number" id="expense-amount" placeholder="Amount (₱)" step="0.01" required style="padding: 8px;">
-          <button type="submit" style="background:#0066cc; color:white; border:none; border-radius:4px; padding:8px 15px; cursor:pointer;">+ Add Expense</button>
-        </form>
-
-        <!-- EXPENSE TABLE -->
-        <h3>Expense Log</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Description</th>
-              <th>Amount</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="expense-tbody"></tbody>
-        </table>
-      </section>
-    </main>
-
-  </div>
-
-  <!-- EDIT SALE MODAL -->
-  <div id="edit-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h3>Edit Sale Details</h3>
-      <form onsubmit="saveSaleEdit(event)">
-        <input type="hidden" id="edit-index">
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label>Date of Sale:</label>
-          <input type="date" id="edit-date" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label>Customer Name:</label>
-          <input type="text" id="edit-customer" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label>Product Name:</label>
-          <input type="text" id="edit-product" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label>Quantity:</label>
-          <input type="number" id="edit-qty" min="1" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label>Buying Price (Cost):</label>
-          <input type="number" id="edit-buy-price" step="0.01" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 10px;">
-          <label>Selling Price:</label>
-          <input type="number" id="edit-sell-price" step="0.01" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 15px;">
-          <label>Payment Method:</label>
-          <select id="edit-payment-method" required>
-            <option value="Cash">Cash</option>
-            <option value="GCash">GCash</option>
-            <option value="Cheque">Cheque</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-          </select>
-        </div>
-        <button type="submit" style="background:#0066cc; color:white; padding:8px 12px; border:none; border-radius:4px; cursor:pointer;">💾 Save Changes</button>
-        <button type="button" onclick="closeEditModal()" style="background:#6c757d; color:white; padding:8px 12px; border:none; border-radius:4px; cursor:pointer;">❌ Cancel</button>
-      </form>
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- Modal para sa Pagbabayad ng Utang -->
+  <div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Record Utang Payment</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="payTransactionId">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Customer Name:</label>
+            <input type="text" id="payCustomerName" class="form-control bg-light" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Current Balance (₱):</label>
+            <input type="number" id="payCurrentBalance" class="form-control bg-light" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-success">Amount Paying Now (₱):</label>
+            <input type="number" step="0.01" id="payAmountInput" class="form-control" placeholder="0.00" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Payment Method:</label>
+            <select id="payMethod" class="form-select">
+              <option value="Cash">Cash</option>
+              <option value="GCash">GCash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" onclick="submitUtangPayment()"><i class="fa-solid fa-floppy-disk me-1"></i>Save Payment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // 1. AUTHENTICATION SYSTEM
-    const VALID_USERS = {
-      'admin': 'admin123',
-      'cashier': '12345'
-    };
+    // Sample In-Memory Database
+    let transactions = [
+      { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (1 Bag)", total: 250.00, paid: 100.00, balance: 150.00, dueDate: "2026-09-30", status: "PARTIAL" },
+      { id: 2, date: "2026-09-19", customer: "Maria Clara", product: "Pintura Red", total: 450.00, paid: 0.00, balance: 450.00, dueDate: "2026-09-28", status: "UNPAID" }
+    ];
 
-    function handleLogin(event) {
-      event.preventDefault();
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
+    // Set Default Date to Today
+    document.getElementById('saleDate').valueAsDate = new Date();
 
-      if (VALID_USERS[user] && VALID_USERS[user] === pass) {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('currentUser', user);
-        initApp();
-      } else {
-        document.getElementById('login-error').style.display = 'block';
-      }
+    function calculateTotal() {
+      const qty = parseFloat(document.getElementById('quantity').value) || 0;
+      const price = parseFloat(document.getElementById('sellingPrice').value) || 0;
+      const total = qty * price;
+      document.getElementById('totalAmount').value = total.toFixed(2);
+      calculateBalance();
     }
 
-    function handleLogout() {
-      sessionStorage.removeItem('isLoggedIn');
-      sessionStorage.removeItem('currentUser');
-      location.reload();
-    }
-
-    function checkAuthStatus() {
-      if (sessionStorage.getItem('isLoggedIn') === 'true') {
-        initApp();
-      } else {
-        document.getElementById('login-container').style.display = 'block';
-        document.getElementById('app-container').style.display = 'none';
-      }
-    }
-
-    function initApp() {
-      document.getElementById('login-container').style.display = 'none';
-      document.getElementById('app-container').style.display = 'block';
-      document.getElementById('current-user-display').innerText = sessionStorage.getItem('currentUser').toUpperCase();
+    function toggleCreditFields() {
+      const paymentType = document.getElementById('paymentType').value;
+      const creditSection = document.getElementById('creditFieldsSection');
       
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('pos-date').value = today;
-
-      showTab('pos');
-    }
-
-    // 2. NAVIGATION
-    function showTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-      document.getElementById(`${tabName}-section`).style.display = 'block';
-
-      if (tabName === 'inventory') renderInventory();
-      if (tabName === 'sales') renderSalesHistory();
-      if (tabName === 'audit') {
-        const now = new Date();
-        document.getElementById('audit-month').value = now.toISOString().slice(0, 7);
-        generateMonthlyAudit();
-      }
-    }
-
-    // 3. INVENTORY MANAGEMENT LOGIC
-    function saveInventoryProduct(e) {
-      e.preventDefault();
-      const index = document.getElementById('inv-index').value;
-      const name = document.getElementById('inv-name').value.trim();
-      const startingQty = parseInt(document.getElementById('inv-start-qty').value);
-      const buyPrice = parseFloat(document.getElementById('inv-buy-price').value);
-      const sellPrice = parseFloat(document.getElementById('inv-sell-price').value);
-
-      let inventory = JSON.parse(localStorage.getItem('inventoryList')) || [];
-
-      if (index !== "") {
-        // Edit existing product
-        inventory[index] = { name, startingQty, buyPrice, sellPrice };
+      if (paymentType === 'FULL') {
+        creditSection.style.display = 'none';
+        document.getElementById('amountPaidNow').value = document.getElementById('totalAmount').value;
       } else {
-        // Add new product
-        inventory.push({ name, startingQty, buyPrice, sellPrice });
+        creditSection.style.display = 'block';
+        if (paymentType === 'CREDIT') {
+          document.getElementById('amountPaidNow').value = '0.00';
+        }
+      }
+      calculateBalance();
+    }
+
+    function calculateBalance() {
+      const total = parseFloat(document.getElementById('totalAmount').value) || 0;
+      const paymentType = document.getElementById('paymentType').value;
+      let paidNow = parseFloat(document.getElementById('amountPaidNow').value) || 0;
+
+      if (paymentType === 'FULL') {
+        paidNow = total;
+      } else if (paymentType === 'CREDIT') {
+        paidNow = 0;
       }
 
-      localStorage.setItem('inventoryList', JSON.stringify(inventory));
-      alert('Product saved to Inventory!');
-
-      e.target.reset();
-      document.getElementById('inv-index').value = "";
-      document.getElementById('inv-btn-submit').innerText = "+ Add Product to Inventory";
-      renderInventory();
+      const balance = Math.max(0, total - paidNow);
+      document.getElementById('remainingBalance').value = balance.toFixed(2);
     }
 
-    function renderInventory() {
-      const inventory = JSON.parse(localStorage.getItem('inventoryList')) || [];
-      const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-      const tbody = document.getElementById('inventory-tbody');
-      tbody.innerHTML = '';
-
-      if (inventory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No products in inventory yet.</td></tr>';
-        return;
-      }
-
-      inventory.forEach((item, idx) => {
-        // Compute total quantity sold for this product
-        const qtySold = salesHistory
-          .filter(s => s.product.toLowerCase() === item.name.toLowerCase())
-          .reduce((sum, s) => sum + s.qty, 0);
-
-        const remainingQty = item.startingQty - qtySold;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td><b>${item.name}</b></td>
-          <td>${item.startingQty}</td>
-          <td>${qtySold}</td>
-          <td style="color: ${remainingQty <= 5 ? 'red' : 'green'}; font-weight: bold;">${remainingQty}</td>
-          <td>₱${item.buyPrice.toFixed(2)}</td>
-          <td>₱${item.sellPrice.toFixed(2)}</td>
-          <td>
-            <button onclick="editInventoryProduct(${idx})" style="background:#0066cc; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✏️ Edit</button>
-            <button onclick="deleteInventoryProduct(${idx})" style="background:#d9534f; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">🗑️ Delete</button>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function editInventoryProduct(idx) {
-      const inventory = JSON.parse(localStorage.getItem('inventoryList')) || [];
-      const item = inventory[idx];
-
-      document.getElementById('inv-index').value = idx;
-      document.getElementById('inv-name').value = item.name;
-      document.getElementById('inv-start-qty').value = item.startingQty;
-      document.getElementById('inv-buy-price').value = item.buyPrice;
-      document.getElementById('inv-sell-price').value = item.sellPrice;
-      document.getElementById('inv-btn-submit').innerText = "💾 Save Inventory Changes";
-    }
-
-    function deleteInventoryProduct(idx) {
-      if (confirm("Are you sure you want to delete this product from inventory?")) {
-        let inventory = JSON.parse(localStorage.getItem('inventoryList')) || [];
-        inventory.splice(idx, 1);
-        localStorage.setItem('inventoryList', JSON.stringify(inventory));
-        renderInventory();
-      }
-    }
-
-    // 4. POS & SALES RECORDING
-    function recordSale(e) {
+    // Save New Transaction
+    document.getElementById('posForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const saleDate = document.getElementById('pos-date').value;
-      const customer = document.getElementById('pos-customer').value;
-      const product = document.getElementById('pos-product').value;
-      const qty = parseInt(document.getElementById('pos-qty').value);
-      const buyPrice = parseFloat(document.getElementById('pos-buy-price').value);
-      const sellPrice = parseFloat(document.getElementById('pos-sell-price').value);
-      const paymentMethod = document.getElementById('pos-payment-method').value;
+      const total = parseFloat(document.getElementById('totalAmount').value) || 0;
+      const paymentType = document.getElementById('paymentType').value;
+      let paid = parseFloat(document.getElementById('amountPaidNow').value) || 0;
+      
+      if (paymentType === 'FULL') paid = total;
+      if (paymentType === 'CREDIT') paid = 0;
 
-      const totalCost = buyPrice * qty;
-      const grossSales = sellPrice * qty;
-      const profit = grossSales - totalCost;
+      const balance = total - paid;
+      let status = "PAID";
+      if (balance > 0 && paid > 0) status = "PARTIAL";
+      if (balance > 0 && paid === 0) status = "UNPAID";
 
-      const newSale = {
-        date: saleDate,
-        customer,
-        product,
-        qty,
-        buyPrice,
-        sellPrice,
-        paymentMethod,
-        totalCost,
-        grossSales,
-        profit
+      const newTx = {
+        id: transactions.length + 1,
+        date: document.getElementById('saleDate').value,
+        customer: document.getElementById('customerName').value,
+        product: document.getElementById('productName').value,
+        total: total,
+        paid: paid,
+        balance: balance,
+        dueDate: document.getElementById('dueDate').value || 'N/A',
+        status: status
       };
 
-      let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-      salesHistory.push(newSale);
-      localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+      transactions.push(newTx);
+      alert('Transaction saved successfully!');
+      this.reset();
+      document.getElementById('saleDate').valueAsDate = new Date();
+      toggleCreditFields();
+      renderCreditTable();
+    });
 
-      alert('Sale recorded successfully!');
-      e.target.reset();
-      
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('pos-date').value = today;
-      document.getElementById('pos-qty').value = 1;
-    }
-
-    function renderSalesHistory() {
-      const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-      const tbody = document.getElementById('sales-history-tbody');
+    // Render Utang Table
+    function renderCreditTable() {
+      const tbody = document.getElementById('creditTableBody');
       tbody.innerHTML = '';
 
-      if (salesHistory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8">No sales recorded yet.</td></tr>';
+      const utangList = transactions.filter(t => t.balance > 0);
+
+      if (utangList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang nakatalang may utang sa kasalukuyan.</td></tr>`;
         return;
       }
 
-      salesHistory.forEach((sale, idx) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${sale.date}</td>
-          <td>${sale.customer}</td>
-          <td>${sale.product} (x${sale.qty})</td>
-          <td><b>${sale.paymentMethod || 'Cash'}</b></td>
-          <td>₱${sale.totalCost.toFixed(2)}</td>
-          <td>₱${sale.grossSales.toFixed(2)}</td>
-          <td style="color: green; font-weight: bold;">₱${sale.profit.toFixed(2)}</td>
-          <td>
-            <button onclick="openEditModal(${idx})" style="background:#0066cc; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">✏️ Edit</button>
-            <button onclick="deleteSale(${idx})" style="background:#d9534f; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">🗑️ Delete</button>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
+      utangList.forEach(t => {
+        const statusBadge = t.status === 'UNPAID' 
+          ? `<span class="badge bg-danger">UNPAID</span>` 
+          : `<span class="badge bg-warning text-dark">PARTIAL</span>`;
 
-    // 5. EDIT & DELETE SALES
-    function openEditModal(idx) {
-      const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-      const sale = salesHistory[idx];
-
-      document.getElementById('edit-index').value = idx;
-      document.getElementById('edit-date').value = sale.date;
-      document.getElementById('edit-customer').value = sale.customer;
-      document.getElementById('edit-product').value = sale.product;
-      document.getElementById('edit-qty').value = sale.qty;
-      document.getElementById('edit-buy-price').value = sale.buyPrice;
-      document.getElementById('edit-sell-price').value = sale.sellPrice;
-      document.getElementById('edit-payment-method').value = sale.paymentMethod || 'Cash';
-
-      document.getElementById('edit-modal').style.display = 'flex';
-    }
-
-    function closeEditModal() {
-      document.getElementById('edit-modal').style.display = 'none';
-    }
-
-    function saveSaleEdit(e) {
-      e.preventDefault();
-      const idx = document.getElementById('edit-index').value;
-      let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-
-      const qty = parseInt(document.getElementById('edit-qty').value);
-      const buyPrice = parseFloat(document.getElementById('edit-buy-price').value);
-      const sellPrice = parseFloat(document.getElementById('edit-sell-price').value);
-
-      salesHistory[idx].date = document.getElementById('edit-date').value;
-      salesHistory[idx].customer = document.getElementById('edit-customer').value;
-      salesHistory[idx].product = document.getElementById('edit-product').value;
-      salesHistory[idx].qty = qty;
-      salesHistory[idx].buyPrice = buyPrice;
-      salesHistory[idx].sellPrice = sellPrice;
-      salesHistory[idx].paymentMethod = document.getElementById('edit-payment-method').value;
-      salesHistory[idx].totalCost = buyPrice * qty;
-      salesHistory[idx].grossSales = sellPrice * qty;
-      salesHistory[idx].profit = (sellPrice * qty) - (buyPrice * qty);
-
-      localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
-      closeEditModal();
-      renderSalesHistory();
-    }
-
-    function deleteSale(idx) {
-      if (confirm("Are you sure you want to delete this sale record?")) {
-        let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-        salesHistory.splice(idx, 1);
-        localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
-        renderSalesHistory();
-      }
-    }
-
-    // 6. EXPENSES & MONTHLY AUDIT LOGIC
-    function addExpense(e) {
-      e.preventDefault();
-      const category = document.getElementById('expense-category').value;
-      const desc = document.getElementById('expense-desc').value;
-      const amount = parseFloat(document.getElementById('expense-amount').value);
-      const month = document.getElementById('audit-month').value;
-
-      let expenses = JSON.parse(localStorage.getItem('expensesHistory')) || [];
-      expenses.push({ category, desc, amount, month, date: new Date().toISOString() });
-      localStorage.setItem('expensesHistory', JSON.stringify(expenses));
-
-      document.getElementById('expense-desc').value = '';
-      document.getElementById('expense-amount').value = '';
-      generateMonthlyAudit();
-    }
-
-    function deleteExpense(index) {
-      let expenses = JSON.parse(localStorage.getItem('expensesHistory')) || [];
-      expenses.splice(index, 1);
-      localStorage.setItem('expensesHistory', JSON.stringify(expenses));
-      generateMonthlyAudit();
-    }
-
-    function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('audit-month').value;
-      if (!selectedMonth) return;
-
-      const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-      const filteredSales = salesHistory.filter(s => s.date.slice(0, 7) === selectedMonth);
-      
-      const totalSales = filteredSales.reduce((sum, s) => sum + s.grossSales, 0);
-      const totalProductCost = filteredSales.reduce((sum, s) => sum + s.totalCost, 0);
-
-      // Separate payments calculation
-      let cashTotal = 0;
-      let gcashTotal = 0;
-      let chequeTotal = 0;
-      let bankTotal = 0;
-
-      filteredSales.forEach(s => {
-        const method = s.paymentMethod || 'Cash';
-        if (method === 'Cash') cashTotal += s.grossSales;
-        else if (method === 'GCash') gcashTotal += s.grossSales;
-        else if (method === 'Cheque') chequeTotal += s.grossSales;
-        else if (method === 'Bank Transfer') bankTotal += s.grossSales;
-      });
-
-      const expensesHistory = JSON.parse(localStorage.getItem('expensesHistory')) || [];
-      const filteredExpenses = expensesHistory.filter(e => e.month === selectedMonth);
-      const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
-
-      const tbody = document.getElementById('expense-tbody');
-      tbody.innerHTML = '';
-
-      filteredExpenses.forEach((exp, idx) => {
         tbody.innerHTML += `
           <tr>
-            <td>${exp.category}</td>
-            <td>${exp.desc}</td>
-            <td>₱${exp.amount.toFixed(2)}</td>
-            <td><button onclick="deleteExpense(${idx})" style="background:#d9534f; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer;">Delete</button></td>
+            <td class="fw-bold">${t.customer}</td>
+            <td>${t.product}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
+            <td>${t.dueDate}</td>
+            <td>${statusBadge}</td>
+            <td>
+              <button class="btn btn-sm btn-primary" onclick="openPaymentModal(${t.id})">
+                <i class="fa-solid fa-receipt me-1"></i> Pay
+              </button>
+            </td>
           </tr>
         `;
       });
-
-      if (filteredExpenses.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No expenses logged for this month.</td></tr>';
-      }
-
-      // Compute Net Profit
-      const netProfit = totalSales - totalProductCost - totalExpenses;
-
-      document.getElementById('audit-total-sales').innerText = `₱${totalSales.toFixed(2)}`;
-      document.getElementById('audit-total-cost').innerText = `₱${totalProductCost.toFixed(2)}`;
-      document.getElementById('audit-total-expenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      document.getElementById('audit-net-profit').innerText = `₱${netProfit.toFixed(2)}`;
-
-      document.getElementById('audit-cash-sales').innerText = `₱${cashTotal.toFixed(2)}`;
-      document.getElementById('audit-gcash-sales').innerText = `₱${gcashTotal.toFixed(2)}`;
-      document.getElementById('audit-cheque-sales').innerText = `₱${chequeTotal.toFixed(2)}`;
-      document.getElementById('audit-bank-sales').innerText = `₱${bankTotal.toFixed(2)}`;
     }
 
-    // Run Auth check on page load
-    window.onload = checkAuthStatus;
+    // Modal Control for Utang Payment
+    let selectedModal;
+    function openPaymentModal(txId) {
+      const tx = transactions.find(t => t.id === txId);
+      if (!tx) return;
+
+      document.getElementById('payTransactionId').value = tx.id;
+      document.getElementById('payCustomerName').value = tx.customer;
+      document.getElementById('payCurrentBalance').value = tx.balance.toFixed(2);
+      document.getElementById('payAmountInput').value = '';
+
+      selectedModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+      selectedModal.show();
+    }
+
+    function submitUtangPayment() {
+      const txId = parseInt(document.getElementById('payTransactionId').value);
+      const payAmount = parseFloat(document.getElementById('payAmountInput').value) || 0;
+      const tx = transactions.find(t => t.id === txId);
+
+      if (payAmount <= 0) {
+        alert('Mangyaring maglagay ng tamang halaga ng ibabayad.');
+        return;
+      }
+
+      if (payAmount > tx.balance) {
+        alert('Ang ibinabayad ay higit sa natitirang utang!');
+        return;
+      }
+
+      tx.paid += payAmount;
+      tx.balance -= payAmount;
+
+      if (tx.balance <= 0) {
+        tx.balance = 0;
+        tx.status = 'PAID';
+      } else {
+        tx.status = 'PARTIAL';
+      }
+
+      alert('Na-record nang matagumpay ang bayad!');
+      selectedModal.hide();
+      renderCreditTable();
+    }
+
+    // Initial Render
+    renderCreditTable();
   </script>
 </body>
 </html>

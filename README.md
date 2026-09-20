@@ -171,10 +171,11 @@
                 <thead class="table-light">
                   <tr>
                     <th>Product Name</th>
-                    <th style="width: 120px;">Qty</th>
-                    <th style="width: 150px;">Cost / Unit (₱)</th>
-                    <th style="width: 150px;">Price / Unit (₱)</th>
-                    <th style="width: 150px;">Subtotal (₱)</th>
+                    <th>Description</th>
+                    <th style="width: 100px;">Qty</th>
+                    <th style="width: 130px;">Cost / Unit (₱)</th>
+                    <th style="width: 130px;">Price / Unit (₱)</th>
+                    <th style="width: 130px;">Subtotal (₱)</th>
                     <th class="col-action"><i class="fa-solid fa-trash"></i></th>
                   </tr>
                 </thead>
@@ -298,7 +299,12 @@
 
           <!-- MONEY BREAKDOWN & AUDIT SECTION -->
           <div class="card p-3 bg-light border mb-4">
-            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-money-bill-wave me-2"></i>Daily Cash Money Breakdown (Denominations)</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-money-bill-wave me-2"></i>Daily Cash Money Breakdown (Denominations)</h6>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearMoneyBreakdown()">
+                <i class="fa-solid fa-rotate-right me-1"></i> I-refresh / Clear Breakdown
+              </button>
+            </div>
             <div class="row g-3">
               <div class="col-md-7">
                 <div class="table-responsive">
@@ -434,7 +440,7 @@
               <i class="fa-solid fa-print me-1"></i> Print Utang List
             </button>
           </div>
-          <div class="table-responsive">
+          <div class="table-responsive mb-5">
             <table class="table table-hover align-middle">
               <thead class="table-dark">
                 <tr>
@@ -454,6 +460,28 @@
               </tbody>
             </table>
           </div>
+
+          <!-- LISTAHAN NG MGA NAGBAYAD (HINDI KASAMA SA TOTAL NG PERA / COLLECTION) -->
+          <div class="border-top pt-4">
+            <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>Listahan ng mga Nakapagbayad na (Paid Accounts History) <small class="text-muted fs-6">(Para sa record lamang, hindi kasama sa kabuuang pera)</small></h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle bg-white">
+                <thead class="table-light">
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Product(s)</th>
+                    <th>Total Amount (₱)</th>
+                    <th>Total Paid (₱)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="paidHistoryTableBody">
+                  <!-- Dynamic Content -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -598,6 +626,9 @@
                   <th>Location</th>
                   <th>Product Name</th>
                   <th class="text-center">Quantity (Ilan)</th>
+                  <th class="text-end">Cost (₱)</th>
+                  <th class="text-end">Price (₱)</th>
+                  <th class="text-end">Total Amount (₱)</th>
                 </tr>
               </thead>
               <tbody id="customerSalesLogBody">
@@ -964,17 +995,17 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // System Users Database
-    let users = [
+    let users = JSON.parse(localStorage.getItem('rmv_users')) || [
       { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
       { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
     ];
-    let currentUser = null;
+    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
 
-    // Empty Initial Databases
-    let transactions = [];
-    let inventory = [];
-    let bossAdjustments = [];
-    let monthlyExpensesData = {};
+    // Databases loaded from localStorage (para hindi mawala kahit mag-refresh o mag-logout)
+    let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
+    let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
+    let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
+    let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
 
     // Initial Date Configurations
     const today = new Date();
@@ -986,7 +1017,36 @@
 
     window.onload = function() {
       addPosRow();
+      
+      // I-check kung may nakaloge-in nang user para hindi na bumalik sa Login screen pagka-refresh
+      if (currentUser) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
+        const adminElements = document.querySelectorAll('.admin-only');
+        adminElements.forEach(el => {
+          el.style.display = currentUser.role === 'Admin' ? 'block' : 'none';
+        });
+      }
+
+      // I-load ang na-save na money breakdown batay sa napiling petsa sa Daily Report
+      loadMoneyBreakdown();
+      generateDailyReport();
+      renderCreditTable();
     };
+
+    // Auto-save function para sa buong data
+    function saveData() {
+      localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
+      localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
+      localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
+      localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
+      localStorage.setItem('rmv_users', JSON.stringify(users));
+      if (currentUser) {
+        localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('rmv_current_user');
+      }
+    }
 
     // ================= ENTER KEY FOCUS NEXT =================
     function handleEnterNext(event, currentInput) {
@@ -1011,6 +1071,7 @@
 
       if (found) {
         currentUser = found;
+        saveData();
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('loginError').classList.add('d-none');
         document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
@@ -1028,6 +1089,7 @@
 
     function logout() {
       currentUser = null;
+      localStorage.removeItem('rmv_current_user');
       document.getElementById('loginOverlay').style.display = 'flex';
     }
 
@@ -1044,6 +1106,11 @@
       const newPass = document.getElementById('profPassword').value;
       if(newPass) currentUser.password = newPass;
 
+      // Update in users array as well
+      const uIndex = users.findIndex(u => u.id === currentUser.id);
+      if(uIndex > -1) users[uIndex] = currentUser;
+
+      saveData();
       document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
       alert('Profile successfully updated!');
       bootstrap.Modal.getInstance(document.getElementById('changeProfileModal')).hide();
@@ -1080,6 +1147,7 @@
         password: document.getElementById('newAccPass').value,
         role: document.getElementById('newAccRole').value
       });
+      saveData();
       this.reset();
       renderUserList();
     });
@@ -1087,6 +1155,7 @@
     function deleteUser(index) {
       if(confirm('Sigurado ka bang gusto mong alisin ang user na ito?')) {
         users.splice(index, 1);
+        saveData();
         renderUserList();
       }
     }
@@ -1098,10 +1167,10 @@
       const rowHTML = `
         <tr id="row-${rowId}">
           <td>
-            <select class="form-control form-control-sm pos-name" onchange="onProductSelect(this)" required>
-              <option value="">-- Piliin ang Produkto --</option>
-              ${inventory.map(i => `<option value="${i.name}" data-cost="${i.cost}" data-price="${i.price}">${i.name} (Stock:${i.ending})</option>`).join('')}
-            </select>
+            <input type="text" class="form-control form-control-sm pos-name" placeholder="Pangalan ng Produkto" required>
+          </td>
+          <td>
+            <input type="text" class="form-control form-control-sm pos-desc" placeholder="Description / Specification">
           </td>
           <td><input type="number" class="form-control form-control-sm pos-qty" value="1" min="1" oninput="calculateTotal()" required></td>
           <td><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" required></td>
@@ -1115,16 +1184,6 @@
         </tr>
       `;
       tbody.insertAdjacentHTML('beforeend', rowHTML);
-      calculateTotal();
-    }
-
-    function onProductSelect(selectElement) {
-      const selectedOption = selectElement.options[selectElement.selectedIndex];
-      const cost = selectedOption.getAttribute('data-cost') || 0;
-      const price = selectedOption.getAttribute('data-price') || 0;
-      const row = selectElement.closest('tr');
-      row.querySelector('.pos-cost').value = cost;
-      row.querySelector('.pos-price').value = price;
       calculateTotal();
     }
 
@@ -1232,13 +1291,26 @@
 
       itemRows.forEach(row => {
         const name = row.querySelector('.pos-name').value.trim();
+        const desc = row.querySelector('.pos-desc').value.trim();
         const qty = parseFloat(row.querySelector('.pos-qty').value) || 0;
         const cost = parseFloat(row.querySelector('.pos-cost').value) || 0;
+        const price = parseFloat(row.querySelector('.pos-price').value) || 0;
 
         totalCostOfGoods += (qty * cost);
         if(name) {
-          productSummary.push(`${name} (x${qty})`);
-          itemsPurchasedList.push({ name: name, qty: qty, location: location });
+          let itemString = desc ? `${name} (${desc}) (x${qty})` : `${name} (x${qty})`;
+          productSummary.push(itemString);
+          itemsPurchasedList.push({ 
+            name: name, 
+            desc: desc, 
+            qty: qty, 
+            cost: cost, 
+            price: price, 
+            subtotal: qty * price, 
+            location: location, 
+            date: saleDate, 
+            customer: custName 
+          });
 
           const invItem = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
           if(invItem) {
@@ -1247,7 +1319,7 @@
             inventory.push({
               name: name,
               cost: cost,
-              price: parseFloat(row.querySelector('.pos-price').value) || 0,
+              price: price,
               beginning: qty,
               stockIn: 0,
               ending: 0
@@ -1290,6 +1362,7 @@
         payments: paymentHistory
       });
 
+      saveData();
       alert('Transaction saved successfully! Naka-deduct na rin sa Inventory.');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
@@ -1377,7 +1450,52 @@
       document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
 
-      calculateMoneyBreakdown();
+      loadMoneyBreakdown();
+    }
+
+    // --- MONEY BREAKDOWN LOCALSTORAGE FUNCTIONS ---
+    function getBreakdownStorageKey() {
+      const selectedDate = document.getElementById('dailyReportDate').value || todayFormatted;
+      return `rmv_breakdown_${selectedDate}`;
+    }
+
+    function saveMoneyBreakdown() {
+      const breakdownData = {};
+      document.querySelectorAll('.denom-count').forEach(input => {
+        breakdownData[input.getAttribute('data-denom')] = input.value;
+      });
+      breakdownData['coins'] = document.querySelector('.denom-coins').value;
+      localStorage.setItem(getBreakdownStorageKey(), JSON.stringify(breakdownData));
+    }
+
+    function loadMoneyBreakdown() {
+      const saved = JSON.parse(localStorage.getItem(getBreakdownStorageKey()));
+      if (saved) {
+        document.querySelectorAll('.denom-count').forEach(input => {
+          const denom = input.getAttribute('data-denom');
+          input.value = saved[denom] || '';
+        });
+        document.querySelector('.denom-coins').value = saved['coins'] || '';
+      } else {
+        clearMoneyBreakdownInputs(false);
+      }
+      calculateMoneyBreakdown(false);
+    }
+
+    function clearMoneyBreakdownInputs(shouldClearStorage = true) {
+      document.querySelectorAll('.denom-count').forEach(input => input.value = '');
+      document.querySelector('.denom-coins').value = '';
+      document.querySelectorAll('.denom-subtotal').forEach(input => input.value = '0.00');
+      if (shouldClearStorage) {
+        localStorage.removeItem(getBreakdownStorageKey());
+      }
+      calculateMoneyBreakdown(false);
+    }
+
+    function clearMoneyBreakdown() {
+      if (confirm('Gusto mo bang i-refresh/burahin ang nakatalang breakdown sa araw na ito?')) {
+        clearMoneyBreakdownInputs(true);
+      }
     }
 
     // --- EDIT & DELETE FUNCTIONS FOR ENCODED TRANSACTIONS ---
@@ -1431,6 +1549,7 @@
           tx.payments.push({ amount: tx.paid, method: 'Cash', date: tx.date });
         }
 
+        saveData();
         alert('Transaction and Cost successfully updated!');
         bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
         generateDailyReport();
@@ -1442,12 +1561,13 @@
         const index = transactions.findIndex(t => t.id === id);
         if(index > -1) {
           transactions.splice(index, 1);
+          saveData();
           generateDailyReport();
         }
       }
     }
 
-    function calculateMoneyBreakdown() {
+    function calculateMoneyBreakdown(saveToStorage = true) {
       let totalCashCounted = 0;
       const denomInputs = document.querySelectorAll('.denom-count');
 
@@ -1490,9 +1610,13 @@
         alertElem.className = "alert alert-danger text-center p-2 fw-bold mb-0";
         alertElem.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> SHORT: Kulang ang pera sa drawer nang ₱${Math.abs(diff).toFixed(2)}.`;
       }
+
+      if (saveToStorage) {
+        saveMoneyBreakdown();
+      }
     }
 
-    // ================= CUSTOMER ORDER LOOKUP (SEARCH ORDER FIX) =================
+    // ================= CUSTOMER ORDER LOOKUP =================
     function searchCustomerOrder() {
       const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
       const resultContainer = document.getElementById('searchResultContainer');
@@ -1503,7 +1627,6 @@
         return;
       }
 
-      // Hanapin ang lahat ng transaksyon ng customer
       const customerTransactions = transactions.filter(t => t.customer.toLowerCase().includes(query));
 
       if (customerTransactions.length === 0) {
@@ -1515,7 +1638,6 @@
       noFound.classList.add('d-none');
       resultContainer.style.display = 'block';
 
-      // Kunin ang huling (latest) order para sa top summary card
       const lastOrder = customerTransactions[customerTransactions.length - 1];
 
       document.getElementById('lastOrderCustomer').innerText = lastOrder.customer;
@@ -1530,7 +1652,6 @@
       badge.innerText = lastOrder.status;
       badge.className = `badge fs-6 ${lastOrder.status === 'PAID' ? 'bg-success' : lastOrder.status === 'PARTIAL' ? 'bg-warning text-dark' : 'bg-danger'}`;
 
-      // I-populate ang Lahat ng Naging Transaksyon ni Customer (History Table)
       const historyBody = document.getElementById('customerHistoryBody');
       historyBody.innerHTML = '';
 
@@ -1558,10 +1679,15 @@
     // ================= UTANG & PAYMENTS LOGIC =================
     function renderCreditTable() {
       const tbody = document.getElementById('creditTableBody');
+      const paidHistoryBody = document.getElementById('paidHistoryTableBody');
+      
       tbody.innerHTML = '';
+      paidHistoryBody.innerHTML = '';
 
       const unpaidList = transactions.filter(t => t.balance > 0);
+      const paidList = transactions.filter(t => t.balance === 0);
 
+      // Render Active Utang
       unpaidList.forEach(t => {
         const locBadge = t.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
         tbody.innerHTML += `
@@ -1585,6 +1711,23 @@
 
       if (unpaidList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang aktibong utang sa kasalukuyan.</td></tr>`;
+      }
+
+      // Render Paid Accounts History (Hindi kasama sa kalkulasyon ng total pera/collection)
+      paidList.forEach(t => {
+        paidHistoryBody.innerHTML += `
+          <tr>
+            <td class="fw-bold">${t.customer}</td>
+            <td>${t.product}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td><span class="badge bg-success">PAID</span></td>
+          </tr>
+        `;
+      });
+
+      if (paidList.length === 0) {
+        paidHistoryBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Wala pang nakatalang fully paid na customer records.</td></tr>`;
       }
     }
 
@@ -1622,6 +1765,7 @@
           date: todayFormatted
         });
 
+        saveData();
         alert('Tagumpay na naitala ang pagbabayad ng utang!');
         bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
         renderCreditTable();
@@ -1651,6 +1795,7 @@
         ending: stock
       });
 
+      saveData();
       alert('Bagong produkto ay matagumpay na naidagdag!');
       this.reset();
       bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
@@ -1707,23 +1852,24 @@
 
     function updateInventoryCost(index, el) {
       inventory[index].cost = parseFloat(el.value) || 0;
+      saveData();
     }
 
     function updateInventoryPrice(index, el) {
       inventory[index].price = parseFloat(el.value) || 0;
+      saveData();
     }
 
     function updateInventoryStock(index, field, el) {
       inventory[index][field] = parseInt(el.value) || 0;
-      if(field === 'beginning' || field === 'stockIn') {
-        inventory[index].ending = inventory[index].beginning + inventory[index].stockIn;
-      }
+      saveData();
       renderInventoryTable();
     }
 
     function deleteInventoryItem(index) {
-      if(confirm('Sigurado ka bang gusto mong tanggalin ang produktong ito?')) {
+      if(confirm('Sigurado ka bang gusto mong tanggalin ang produktong ito sa inventory?')) {
         inventory.splice(index, 1);
+        saveData();
         renderInventoryTable();
       }
     }
@@ -1732,114 +1878,86 @@
       const tbody = document.getElementById('customerSalesLogBody');
       tbody.innerHTML = '';
 
-      let count = 0;
+      let allPurchases = [];
       transactions.forEach(t => {
-        if(t.itemsList && t.itemsList.length > 0) {
+        if (t.itemsList && t.itemsList.length > 0) {
           t.itemsList.forEach(item => {
-            count++;
-            const locBadge = item.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
-            tbody.innerHTML += `
-              <tr>
-                <td>${t.date}</td>
-                <td class="fw-bold">${t.customer}</td>
-                <td>${locBadge}</td>
-                <td>${item.name}</td>
-                <td class="text-center">${item.qty}</td>
-              </tr>
-            `;
+            allPurchases.push({
+              date: t.date,
+              customer: t.customer,
+              location: t.location,
+              name: item.name,
+              desc: item.desc,
+              qty: item.qty,
+              cost: item.cost || 0,
+              price: item.price || 0,
+              subtotal: item.subtotal || (item.qty * (item.price || 0))
+            });
           });
         }
       });
 
-      if(count === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Wala pang naitalang benta sa mga customer.</td></tr>`;
+      allPurchases.forEach(p => {
+        const locBadge = p.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
+        const prodDisplay = p.desc ? `${p.name} (${p.desc})` : p.name;
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.date}</td>
+            <td class="fw-bold">${p.customer}</td>
+            <td>${locBadge}</td>
+            <td>${prodDisplay}</td>
+            <td class="text-center fw-semibold">${p.qty}</td>
+            <td class="text-end text-secondary">₱${p.cost.toFixed(2)}</td>
+            <td class="text-end">₱${p.price.toFixed(2)}</td>
+            <td class="text-end text-success fw-bold">₱${p.subtotal.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      if (allPurchases.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitalang benta sa mga customer.</td></tr>`;
       }
     }
 
-    // ================= D/ECO BOSS LOGIC =================
-    document.getElementById('bossForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const date = document.getElementById('bossDate').value;
-      const type = document.getElementById('bossType').value;
-      const amount = parseFloat(document.getElementById('bossAmount').value) || 0;
-      const notes = document.getElementById('bossNotes').value || 'D/Eco Boss Adjustment';
+    // ================= MONTHLY AUDIT LOGIC =================
+    function generateMonthlyAudit() {
+      const selectedMonth = document.getElementById('auditMonth').value; // Format: YYYY-MM
+      if (!selectedMonth) return;
 
-      bossAdjustments.push({ date, type, amount, notes });
+      const filteredTx = transactions.filter(t => t.date && t.date.startsWith(selectedMonth));
 
-      alert('D/Eco Boss Adjustment saved!');
-      bootstrap.Modal.getInstance(document.getElementById('bossModal')).hide();
-      this.reset();
-      generateMonthlyAudit();
-    });
-
-    // ================= DETAILED EXPENSES LOGIC =================
-    function addExpenseRow(name = '', amount = '') {
-      const tbody = document.getElementById('expenseTableBody');
-      const rowId = Date.now() + Math.random().toString(36).substring(2, 7);
-      const rowHTML = `
-        <tr id="exp-${rowId}">
-          <td><input type="text" class="form-control form-control-sm exp-name" placeholder="e.g., Sahod ni Juan, Kuryente, etc." value="${name}" onchange="saveCurrentMonthExpenses()"></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" value="${amount}" onchange="saveCurrentMonthExpenses()" oninput="updateCalculationsOnly()"></td>
-          <td class="col-action no-print">
-            <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removeExpenseRow('exp-${rowId}')">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </td>
-        </tr>
-      `;
-      tbody.insertAdjacentHTML('beforeend', rowHTML);
-      saveCurrentMonthExpenses();
-    }
-
-    function removeExpenseRow(rowId) {
-      document.getElementById(rowId).remove();
-      saveCurrentMonthExpenses();
-    }
-
-    function saveCurrentMonthExpenses() {
-      const selectedMonth = document.getElementById('auditMonth').value;
-      const rows = document.querySelectorAll('#expenseTableBody tr');
-      let expList = [];
-
-      rows.forEach(r => {
-        const name = r.querySelector('.exp-name').value;
-        const amount = parseFloat(r.querySelector('.exp-amount').value) || 0;
-        if(name || amount > 0) {
-          expList.push({ name, amount });
-        }
-      });
-
-      monthlyExpensesData[selectedMonth] = expList;
-      generateMonthlyAudit();
-    }
-
-    function updateCalculationsOnly() {
-      const selectedMonth = document.getElementById('auditMonth').value;
       let totalSales = 0;
       let totalCost = 0;
 
-      transactions.forEach(t => {
-        if(t.date.startsWith(selectedMonth)) {
-          totalSales += t.total;
-          totalCost += (t.totalCost || 0);
-        }
-      });
-
-      let totalExpenses = 0;
-      document.querySelectorAll('.exp-amount').forEach(inp => {
-        totalExpenses += parseFloat(inp.value) || 0;
-      });
-
-      let bossNetAdj = 0;
-      bossAdjustments.forEach(b => {
-        if(b.date.startsWith(selectedMonth)) {
-          if(b.type === 'ADD') bossNetAdj += b.amount;
-          else bossNetAdj -= b.amount;
-        }
+      filteredTx.forEach(t => {
+        totalSales += t.total;
+        totalCost += (t.totalCost || 0);
       });
 
       const grossProfit = totalSales - totalCost;
-      const netProfit = grossProfit - totalExpenses + bossNetAdj;
+
+      // Expenses
+      if (!monthlyExpensesData[selectedMonth]) {
+        monthlyExpensesData[selectedMonth] = [
+          { name: "Kuryente / Tubig", amount: 0 },
+          { name: "Sahod ng Manggagawa", amount: 0 }
+        ];
+      }
+
+      renderExpenseTable(selectedMonth);
+      let totalExpenses = calculateTotalExpenses(selectedMonth);
+
+      // Boss Adjustments
+      let bossNet = 0;
+      bossAdjustments.forEach(b => {
+        if (b.date && b.date.startsWith(selectedMonth)) {
+          if (b.type === 'ADD') bossNet += b.amount;
+          else bossNet -= b.amount;
+        }
+      });
+      renderBossLogs(selectedMonth);
+
+      const netProfit = grossProfit - totalExpenses + bossNet;
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
@@ -1848,43 +1966,92 @@
       document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
     }
 
-    function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value;
-      
-      // Load expenses for selected month
+    function renderExpenseTable(monthKey) {
       const tbody = document.getElementById('expenseTableBody');
       tbody.innerHTML = '';
-      
-      const savedExp = monthlyExpensesData[selectedMonth] || [];
-      if(savedExp.length > 0) {
-        savedExp.forEach(ex => addExpenseRow(ex.name, ex.amount));
-      } else {
-        // Default rows if empty
-        addExpenseRow('Sahod / Labor', 0);
-        addExpenseRow('Kuryente at Tubig', 0);
-      }
+      const expenses = monthlyExpensesData[monthKey] || [];
 
-      // Load Boss Adjustments Log
-      const bossBody = document.getElementById('bossLogsBody');
-      bossBody.innerHTML = '';
-      const filteredBoss = bossAdjustments.filter(b => b.date.startsWith(selectedMonth));
-      
-      filteredBoss.forEach(b => {
-        const typeBadge = b.type === 'ADD' ? '<span class="badge bg-success">Addition (+Net)</span>' : '<span class="badge bg-danger">Withdrawal (-Net)</span>';
-        bossBody.innerHTML += `
+      expenses.forEach((exp, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="text" class="form-control form-control-sm" value="${exp.name}" onchange="updateExpenseName('${monthKey}', ${index}, this)"></td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm text-end" value="${exp.amount}" oninput="updateExpenseAmount('${monthKey}', ${index}, this)"></td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteExpenseRow('${monthKey}', ${index})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function addExpenseRow() {
+      const selectedMonth = document.getElementById('auditMonth').value;
+      if (!selectedMonth) return;
+      if (!monthlyExpensesData[selectedMonth]) monthlyExpensesData[selectedMonth] = [];
+      monthlyExpensesData[selectedMonth].push({ name: "Iba pang Gastusin", amount: 0 });
+      saveData();
+      generateMonthlyAudit();
+    }
+
+    function updateExpenseName(monthKey, index, el) {
+      monthlyExpensesData[monthKey][index].name = el.value;
+      saveData();
+    }
+
+    function updateExpenseAmount(monthKey, index, el) {
+      monthlyExpensesData[monthKey][index].amount = parseFloat(el.value) || 0;
+      saveData();
+      generateMonthlyAudit();
+    }
+
+    function deleteExpenseRow(monthKey, index) {
+      monthlyExpensesData[monthKey].splice(index, 1);
+      saveData();
+      generateMonthlyAudit();
+    }
+
+    function calculateTotalExpenses(monthKey) {
+      const expenses = monthlyExpensesData[monthKey] || [];
+      return expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
+    }
+
+    // Boss Modal Handler
+    document.getElementById('bossForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      bossAdjustments.push({
+        id: Date.now(),
+        date: document.getElementById('bossDate').value,
+        type: document.getElementById('bossType').value,
+        amount: parseFloat(document.getElementById('bossAmount').value) || 0,
+        notes: document.getElementById('bossNotes').value
+      });
+      saveData();
+      alert('Boss adjustment successfully saved!');
+      this.reset();
+      document.getElementById('bossDate').value = todayFormatted;
+      bootstrap.Modal.getInstance(document.getElementById('bossModal')).hide();
+      generateMonthlyAudit();
+    });
+
+    function renderBossLogs(selectedMonth) {
+      const tbody = document.getElementById('bossLogsBody');
+      tbody.innerHTML = '';
+      const filtered = bossAdjustments.filter(b => b.date && b.date.startsWith(selectedMonth));
+
+      filtered.forEach(b => {
+        const typeBadge = b.type === 'ADD' ? '<span class="badge bg-success">Addition (+)</span>' : '<span class="badge bg-danger">Withdrawal (-)</span>';
+        tbody.innerHTML += `
           <tr>
             <td>${b.date}</td>
-            <td>${typeBadge} - ${b.notes}</td>
-            <td>₱${b.amount.toFixed(2)}</td>
+            <td>${typeBadge} ${b.notes ? '- ' + b.notes : ''}</td>
+            <td class="fw-bold">₱${b.amount.toFixed(2)}</td>
           </tr>
         `;
       });
 
-      if(filteredBoss.length === 0) {
-        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Walang D/Eco Boss adjustment sa buwang ito.</td></tr>`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang Boss adjustment ngayong buwan.</td></tr>`;
       }
-
-      updateCalculationsOnly();
     }
   </script>
 </body>

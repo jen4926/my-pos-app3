@@ -94,7 +94,7 @@
         </li>
         <li class="nav-item">
           <button class="nav-link" id="daily-tab" data-bs-toggle="pill" data-bs-target="#daily-content" type="button" onclick="generateDailyReport()">
-            <i class="fa-solid fa-calendar-day me-1"></i> Daily Report
+            <i class="fa-solid fa-calendar-day me-1"></i> Daily Report & Audit
           </button>
         </li>
         <li class="nav-item">
@@ -262,11 +262,11 @@
         </div>
       </div>
 
-      <!-- ================= 2. DAILY REPORT TAB ================= -->
+      <!-- ================= 2. DAILY REPORT & AUDIT TAB ================= -->
       <div class="tab-pane fade" id="daily-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales & Encoded Logs</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales & Encoded Logs Audit</h4>
             <div class="d-flex gap-2 align-items-center">
               <label class="fw-bold me-1">Select Date:</label>
               <input type="date" id="dailyReportDate" class="form-control" onchange="generateDailyReport()">
@@ -276,9 +276,9 @@
             </div>
           </div>
 
-          <!-- Search Bar for Daily Log Table -->
+          <!-- Search Bar for Daily Log & Audit -->
           <div class="mb-3">
-            <input type="text" id="dailySearchInput" class="form-control" placeholder="🔍 Hanapin sa Daily Log (Customer, Product, Description, etc.)..." oninput="generateDailyReport()">
+            <input type="text" id="dailySearchInput" class="form-control" placeholder="🔍 Maghanap sa Daily Log & Audit (Customer, Product, Description, Payment Method, Location)..." oninput="generateDailyReport()">
           </div>
 
           <div class="row g-3 mb-4">
@@ -613,6 +613,9 @@
                   <th>Location</th>
                   <th>Product Name & Description</th>
                   <th class="text-center">Quantity (Ilan)</th>
+                  <th class="text-end">Cost / Unit (₱)</th>
+                  <th class="text-end">Price / Unit (₱)</th>
+                  <th class="text-end">Total Amount (₱)</th>
                 </tr>
               </thead>
               <tbody id="customerSalesLogBody">
@@ -1308,7 +1311,17 @@
         if(name) {
           const displayLabel = desc ? `${name} (${desc}) [x${qty}]` : `${name} [x${qty}]`;
           productSummary.push(displayLabel);
-          itemsPurchasedList.push({ name: name, description: desc, qty: qty, location: location });
+          itemsPurchasedList.push({ 
+            date: saleDate,
+            customer: custName,
+            location: location,
+            name: name, 
+            description: desc, 
+            qty: qty, 
+            cost: cost,
+            price: price,
+            totalAmount: qty * price
+          });
 
           const invItem = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
           if(invItem) {
@@ -1325,6 +1338,14 @@
             });
           }
         }
+      });
+
+      // Save to global customer purchases log
+      if (typeof customerPurchases === 'undefined') {
+        window.customerPurchases = [];
+      }
+      itemsPurchasedList.forEach(item => {
+        window.customerPurchases.push(item);
       });
 
       const cStatus = document.getElementById('containerStatus').value;
@@ -1368,6 +1389,7 @@
       document.getElementById('saleDate').value = todayFormatted;
       toggleContainerFields();
       toggleCreditFields();
+      renderCustomerSalesLog();
     });
 
     // ================= DAILY REPORT & SEARCHABLE LOGIC =================
@@ -1389,10 +1411,13 @@
 
       const filtered = transactions.filter(t => {
         const matchesDate = (t.date === selectedDate || t.payments.some(p => p.date === selectedDate));
+        const lastMethod = t.payments.length > 0 ? t.payments[t.payments.length - 1].method : '';
         const matchesSearch = searchKeyword === '' || 
           t.customer.toLowerCase().includes(searchKeyword) || 
           t.product.toLowerCase().includes(searchKeyword) || 
-          t.location.toLowerCase().includes(searchKeyword);
+          t.location.toLowerCase().includes(searchKeyword) ||
+          lastMethod.toLowerCase().includes(searchKeyword) ||
+          (t.containerInfo && t.containerInfo.toLowerCase().includes(searchKeyword));
         return matchesDate && matchesSearch;
       });
 
@@ -1830,36 +1855,36 @@
 
     function renderCustomerSalesLog() {
       const tbody = document.getElementById('customerSalesLogBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
-      let hasLogs = false;
-      transactions.forEach(t => {
-        if (t.itemsList && t.itemsList.length > 0) {
-          t.itemsList.forEach(item => {
-            hasLogs = true;
-            const descLabel = item.description ? ` (${item.description})` : '';
-            tbody.innerHTML += `
-              <tr>
-                <td>${t.date}</td>
-                <td class="fw-bold">${t.customer}</td>
-                <td><span class="badge ${t.location === 'Hiway' ? 'bg-primary' : 'bg-info text-dark'}">${t.location}</span></td>
-                <td>${item.name}${descLabel}</td>
-                <td class="text-center fw-bold">${item.qty}</td>
-              </tr>
-            `;
-          });
-        }
-      });
-
-      if (!hasLogs) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Wala pang nakatalang benta ng produkto.</td></tr>`;
+      if (typeof customerPurchases === 'undefined' || customerPurchases.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitalang bumili ng item.</td></tr>`;
+        return;
       }
+
+      customerPurchases.forEach((item) => {
+        const locBadge = item.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
+        const descText = item.description ? ` (${item.description})` : '';
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.date}</td>
+            <td class="fw-semibold">${item.customer}</td>
+            <td>${locBadge}</td>
+            <td>${item.name}${descText}</td>
+            <td class="text-center fw-bold">${item.qty}</td>
+            <td class="text-end">₱${(item.cost || 0).toFixed(2)}</td>
+            <td class="text-end">₱${(item.price || 0).toFixed(2)}</td>
+            <td class="text-end fw-bold text-primary">₱${(item.totalAmount || (item.qty * item.price)).toFixed(2)}</td>
+          </tr>
+        `;
+      });
     }
 
-    // ================= MONTHLY & YEARLY AUDIT LOGIC =================
+    // ================= MONTHLY / YEARLY AUDIT LOGIC =================
     function toggleAuditMode() {
       const mode = document.getElementById('auditMode').value;
-      if (mode === 'MONTH') {
+      if(mode === 'MONTH') {
         document.getElementById('monthFilterContainer').style.display = 'block';
         document.getElementById('yearFilterContainer').style.display = 'none';
       } else {
@@ -1869,134 +1894,111 @@
       generateMonthlyAudit();
     }
 
+    function addExpenseRow() {
+      const tbody = document.getElementById('expenseTableBody');
+      const rowId = 'exp-' + Date.now();
+      tbody.innerHTML += `
+        <tr id="${rowId}">
+          <td><input type="text" class="form-control form-control-sm exp-name" placeholder="e.g., Kuryente, Sahod..." oninput="calculateMonthlyAuditTotals()"></td>
+          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" placeholder="0.00" oninput="calculateMonthlyAuditTotals()"></td>
+          <td class="text-center no-print">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="document.getElementById('${rowId}').remove(); calculateMonthlyAuditTotals();">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+
     function generateMonthlyAudit() {
       const mode = document.getElementById('auditMode').value;
-      let filteredTxs = [];
-      let filteredBoss = [];
-      let currentKey = '';
-
-      if (mode === 'MONTH') {
-        currentKey = document.getElementById('auditMonth').value; // e.g. "2026-06"
-        filteredTxs = transactions.filter(t => t.date.startsWith(currentKey));
-        filteredBoss = bossAdjustments.filter(b => b.date.startsWith(currentKey));
+      const tbody = document.getElementById('expenseTableBody');
+      const bossBody = document.getElementById('bossLogsBody');
+      
+      let filterKey = '';
+      if(mode === 'MONTH') {
+        filterKey = document.getElementById('auditMonth').value; // YYYY-MM
       } else {
-        currentKey = document.getElementById('auditYear').value; // e.g. "2026"
-        filteredTxs = transactions.filter(t => t.date.startsWith(currentKey));
-        filteredBoss = bossAdjustments.filter(b => b.date.startsWith(currentKey));
+        filterKey = document.getElementById('auditYear').value; // YYYY
       }
 
-      let totalSales = 0;
+      // Filter transactions
+      const matchedTxs = transactions.filter(t => {
+        if(!t.date) return false;
+        return mode === 'MONTH' ? t.date.startsWith(filterKey) : t.date.startsWith(filterKey);
+      });
+
+      let grossSales = 0;
       let totalCost = 0;
 
-      filteredTxs.forEach(t => {
-        totalSales += t.total;
+      matchedTxs.forEach(t => {
+        grossSales += t.total;
         totalCost += (t.totalCost || 0);
       });
 
-      const grossProfit = totalSales - totalCost;
+      const grossProfit = grossSales - totalCost;
 
-      // Expense list for this period or fallback
-      if (!monthlyExpensesData[currentKey]) {
-        monthlyExpensesData[currentKey] = [
-          { name: 'Sweldo / Staff Salary', amount: 0 },
-          { name: 'Kuryente at Tubig', amount: 0 },
-          { name: 'Iba pang Gastusin', amount: 0 }
-        ];
+      document.getElementById('auditTotalSales').innerText = `₱${grossSales.toFixed(2)}`;
+      document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
+
+      // Render Boss Adjustments
+      bossBody.innerHTML = '';
+      const matchedBoss = bossAdjustments.filter(b => b.date.startsWith(filterKey));
+      let bossNetAdjustment = 0;
+
+      if(matchedBoss.length > 0) {
+        matchedBoss.forEach(b => {
+          const sign = b.type === 'ADD' ? '+' : '-';
+          const badgeColor = b.type === 'ADD' ? 'bg-success' : 'bg-danger';
+          if(b.type === 'ADD') bossNetAdjustment += b.amount;
+          else bossNetAdjustment -= b.amount;
+
+          bossBody.innerHTML += `
+            <tr>
+              <td>${b.date}</td>
+              <td><span class="badge ${badgeColor}">${b.type === 'ADD' ? 'Boss Addition' : 'Boss Withdrawal'}</span> ${b.notes ? '- ' + b.notes : ''}</td>
+              <td class="fw-bold ${b.type === 'ADD' ? 'text-success' : 'text-danger'}">${sign}₱${b.amount.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+      } else {
+        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang Boss adjustment para sa panahong ito.</td></tr>`;
       }
 
-      renderExpenseTable(currentKey);
+      calculateMonthlyAuditTotals();
+    }
 
+    function calculateMonthlyAuditTotals() {
+      const expRows = document.querySelectorAll('#expenseTableBody tr');
       let totalExpenses = 0;
-      monthlyExpensesData[currentKey].forEach(exp => {
-        totalExpenses += exp.amount;
+
+      expRows.forEach(row => {
+        const amt = parseFloat(row.querySelector('.exp-amount').value) || 0;
+        totalExpenses += amt;
       });
 
-      let netProfit = grossProfit - totalExpenses;
+      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
 
-      // Apply Boss adjustments
-      filteredBoss.forEach(b => {
-        if (b.type === 'ADD') {
-          netProfit += b.amount;
-        } else {
-          netProfit -= b.amount;
+      const grossProfitStr = document.getElementById('auditGrossProfit').innerText.replace('₱', '').replace(/,/g, '');
+      const grossProfit = parseFloat(grossProfitStr) || 0;
+
+      // Calculate Boss adjustments for current filter
+      const mode = document.getElementById('auditMode').value;
+      const filterKey = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
+      
+      let bossNetAdjustment = 0;
+      bossAdjustments.forEach(b => {
+        if(b.date.startsWith(filterKey)) {
+          if(b.type === 'ADD') bossNetAdjustment += b.amount;
+          else bossNetAdjustment -= b.amount;
         }
       });
 
-      document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
-      document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
-      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
-      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
-
-      renderBossLogs(filteredBoss);
-    }
-
-    function renderExpenseTable(key) {
-      const tbody = document.getElementById('expenseTableBody');
-      tbody.innerHTML = '';
-
-      const expenses = monthlyExpensesData[key] || [];
-
-      expenses.forEach((exp, index) => {
-        tbody.innerHTML += `
-          <tr>
-            <td><input type="text" class="form-control form-control-sm" value="${exp.name}" oninput="updateExpenseName('${key}', ${index}, this.value)"></td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm" value="${exp.amount}" oninput="updateExpenseAmount('${key}', ${index}, this.value)"></td>
-            <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow('${key}', ${index})"><i class="fa-solid fa-trash"></i></button>
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    function addExpenseRow() {
-      const mode = document.getElementById('auditMode').value;
-      const key = mode === 'MONTH' ? document.getElementById('auditMonth').value : document.getElementById('auditYear').value;
-      
-      if (!monthlyExpensesData[key]) monthlyExpensesData[key] = [];
-      monthlyExpensesData[key].push({ name: 'Bagong Gastusin', amount: 0 });
-      generateMonthlyAudit();
-    }
-
-    function updateExpenseName(key, index, val) {
-      if (monthlyExpensesData[key] && monthlyExpensesData[key][index]) {
-        monthlyExpensesData[key][index].name = val;
-      }
-    }
-
-    function updateExpenseAmount(key, index, val) {
-      if (monthlyExpensesData[key] && monthlyExpensesData[key][index]) {
-        monthlyExpensesData[key][index].amount = parseFloat(val) || 0;
-        generateMonthlyAudit();
-      }
-    }
-
-    function deleteExpenseRow(key, index) {
-      if (monthlyExpensesData[key]) {
-        monthlyExpensesData[key].splice(index, 1);
-        generateMonthlyAudit();
-      }
-    }
-
-    function renderBossLogs(logs) {
-      const tbody = document.getElementById('bossLogsBody');
-      tbody.innerHTML = '';
-
-      logs.forEach(l => {
-        const typeBadge = l.type === 'ADD' ? '<span class="badge bg-success">+ Boss Addition</span>' : '<span class="badge bg-danger">- Boss Withdrawal</span>';
-        tbody.innerHTML += `
-          <tr>
-            <td>${l.date}</td>
-            <td>${typeBadge} <small class="text-muted ms-2">${l.notes || ''}</small></td>
-            <td class="fw-bold">₱${l.amount.toFixed(2)}</td>
-          </tr>
-        `;
-      });
-
-      if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang Boss adjustment para sa panahong ito.</td></tr>`;
-      }
+      const netProfit = grossProfit - totalExpenses + bossNetAdjustment;
+      const netProfitElem = document.getElementById('auditNetProfit');
+      netProfitElem.innerText = `₱${netProfit.toFixed(2)}`;
+      netProfitElem.className = netProfit >= 0 ? 'text-success fw-bold mt-1 mb-0' : 'text-danger fw-bold mt-1 mb-0';
     }
   </script>
 </body>

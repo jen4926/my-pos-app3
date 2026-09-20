@@ -14,7 +14,6 @@
     .nav-pills .nav-link { color: #fff; margin-right: 5px; }
     .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
     .credit-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
-    .profit-card { background-color: #e8f5e9; border: 1px solid #c8e6c9; }
   </style>
 </head>
 <body>
@@ -37,8 +36,13 @@
           </button>
         </li>
         <li class="nav-item">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button">
+            <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
+          </button>
+        </li>
+        <li class="nav-item">
           <button class="nav-link" id="sales-tab" data-bs-toggle="pill" data-bs-target="#sales-content" type="button">
-            <i class="fa-solid fa-chart-line me-1"></i> Sales & Net Profit
+            <i class="fa-solid fa-chart-line me-1"></i> Sales Management
           </button>
         </li>
       </ul>
@@ -67,46 +71,25 @@
                 <input type="text" id="productName" class="form-control" placeholder="Item description" required>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label class="form-label fw-semibold">Quantity:</label>
-                <input type="number" id="quantity" class="form-control" value="1" min="1" oninput="calculateCalculations()" required>
+                <input type="number" id="quantity" class="form-control" value="1" min="1" oninput="calculateTotal()" required>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label class="form-label fw-semibold">Buying Price / Cost (₱):</label>
-                <input type="number" step="0.01" id="buyingPrice" class="form-control" placeholder="0.00" oninput="calculateCalculations()" required>
+                <input type="number" step="0.01" id="buyingPrice" class="form-control" placeholder="0.00" required>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label class="form-label fw-semibold">Selling Price (₱):</label>
-                <input type="number" step="0.01" id="sellingPrice" class="form-control" placeholder="0.00" oninput="calculateCalculations()" required>
+                <input type="number" step="0.01" id="sellingPrice" class="form-control" placeholder="0.00" oninput="calculateTotal()" required>
               </div>
-              <div class="col-md-3">
+
+              <div class="col-md-6">
                 <label class="form-label fw-semibold">Total Amount (₱):</label>
                 <input type="number" step="0.01" id="totalAmount" class="form-control bg-light" readonly placeholder="0.00">
               </div>
 
-              <!-- Add D/E and c/o Boss Section -->
               <div class="col-md-6">
-                <label class="form-label fw-semibold text-primary">Delivery Expense / D/E (₱):</label>
-                <input type="number" step="0.01" id="deliveryExpense" class="form-control" value="0.00" placeholder="Idadagdag sa Net Profit" oninput="calculateCalculations()">
-                <small class="text-muted">Awtomatikong idinaragdag sa Net Profit.</small>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold text-danger">c/o Boss (₱):</label>
-                <input type="number" step="0.01" id="coBoss" class="form-control" value="0.00" placeholder="Ibawas sa Gross Profit" oninput="calculateCalculations()">
-                <small class="text-muted">Gastos/Kinuha ni Boss (Ibina-bawas sa Profit).</small>
-              </div>
-
-              <!-- Computed Profit Preview -->
-              <div class="col-12">
-                <div class="p-3 profit-card rounded d-flex justify-content-between align-items-center">
-                  <div>
-                    <span class="fw-bold text-success fs-5">Estimated Net Profit: ₱<span id="netProfitPreview">0.00</span></span>
-                    <br><small class="text-muted">(Total Sales - Total Cost) + D/E - c/o Boss</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-12">
                 <label class="form-label fw-semibold">Payment Type:</label>
                 <select id="paymentType" class="form-select" onchange="toggleCreditFields()">
                   <option value="FULL">Cash / Paid in Full</option>
@@ -158,7 +141,6 @@
                   <th>Total Cost (₱)</th>
                   <th>Amount Paid (₱)</th>
                   <th>Balance (₱)</th>
-                  <th>c/o Boss (₱)</th>
                   <th>Due Date</th>
                   <th>Status</th>
                   <th>Action</th>
@@ -172,29 +154,19 @@
         </div>
       </div>
 
-      <!-- ================= 3. SALES & NET PROFIT TAB ================= -->
+      <!-- ================= 3. INVENTORY TAB ================= -->
+      <div class="tab-pane fade" id="inventory-content">
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
+          <p class="text-muted">Talahanayan ng stocks at mga paninda.</p>
+        </div>
+      </div>
+
+      <!-- ================= 4. SALES MANAGEMENT TAB ================= -->
       <div class="tab-pane fade" id="sales-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-receipt me-2"></i>Sales History & Net Profit Summary</h4>
-          <div class="table-responsive">
-            <table class="table table-striped align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th>Date</th>
-                  <th>Customer</th>
-                  <th>Product</th>
-                  <th>Total Sales</th>
-                  <th>D/E (+)</th>
-                  <th>c/o Boss (-)</th>
-                  <th>Net Profit</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="salesTableBody">
-                <!-- Dynamic Content via JS -->
-              </tbody>
-            </table>
-          </div>
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Sales History</h4>
+          <p class="text-muted">Talaan ng lahat ng nakaraang bentahan.</p>
         </div>
       </div>
 
@@ -244,28 +216,18 @@
   <script>
     // Sample In-Memory Database
     let transactions = [
-      { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (1 Bag)", qty: 1, cost: 200, price: 250, total: 250.00, paid: 100.00, balance: 150.00, de: 50.00, coBoss: 20.00, netProfit: 80.00, dueDate: "2026-09-30", status: "PARTIAL" }
+      { id: 1, date: "2026-09-20", customer: "Juan Dela Cruz", product: "Semento (1 Bag)", total: 250.00, paid: 100.00, balance: 150.00, dueDate: "2026-09-30", status: "PARTIAL" },
+      { id: 2, date: "2026-09-19", customer: "Maria Clara", product: "Pintura Red", total: 450.00, paid: 0.00, balance: 450.00, dueDate: "2026-09-28", status: "UNPAID" }
     ];
 
+    // Set Default Date to Today
     document.getElementById('saleDate').valueAsDate = new Date();
 
-    function calculateCalculations() {
+    function calculateTotal() {
       const qty = parseFloat(document.getElementById('quantity').value) || 0;
-      const buyingPrice = parseFloat(document.getElementById('buyingPrice').value) || 0;
-      const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
-      const de = parseFloat(document.getElementById('deliveryExpense').value) || 0;
-      const coBoss = parseFloat(document.getElementById('coBoss').value) || 0;
-
-      const total = qty * sellingPrice;
-      const totalCost = qty * buyingPrice;
-      const grossProfit = total - totalCost;
-      
-      // Formula: Net Profit = (Gross Profit) + D/E - c/o Boss
-      const netProfit = grossProfit + de - coBoss;
-
+      const price = parseFloat(document.getElementById('sellingPrice').value) || 0;
+      const total = qty * price;
       document.getElementById('totalAmount').value = total.toFixed(2);
-      document.getElementById('netProfitPreview').textContent = netProfit.toFixed(2);
-      
       calculateBalance();
     }
 
@@ -303,15 +265,10 @@
     // Save New Transaction
     document.getElementById('posForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const qty = parseFloat(document.getElementById('quantity').value) || 0;
-      const buyingPrice = parseFloat(document.getElementById('buyingPrice').value) || 0;
-      const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
       const total = parseFloat(document.getElementById('totalAmount').value) || 0;
-      const de = parseFloat(document.getElementById('deliveryExpense').value) || 0;
-      const coBoss = parseFloat(document.getElementById('coBoss').value) || 0;
       const paymentType = document.getElementById('paymentType').value;
-      
       let paid = parseFloat(document.getElementById('amountPaidNow').value) || 0;
+      
       if (paymentType === 'FULL') paid = total;
       if (paymentType === 'CREDIT') paid = 0;
 
@@ -320,22 +277,14 @@
       if (balance > 0 && paid > 0) status = "PARTIAL";
       if (balance > 0 && paid === 0) status = "UNPAID";
 
-      const netProfit = ((sellingPrice - buyingPrice) * qty) + de - coBoss;
-
       const newTx = {
         id: transactions.length + 1,
         date: document.getElementById('saleDate').value,
         customer: document.getElementById('customerName').value,
         product: document.getElementById('productName').value,
-        qty: qty,
-        cost: buyingPrice,
-        price: sellingPrice,
         total: total,
         paid: paid,
         balance: balance,
-        de: de,
-        coBoss: coBoss,
-        netProfit: netProfit,
         dueDate: document.getElementById('dueDate').value || 'N/A',
         status: status
       };
@@ -346,7 +295,6 @@
       document.getElementById('saleDate').valueAsDate = new Date();
       toggleCreditFields();
       renderCreditTable();
-      renderSalesTable();
     });
 
     // Render Utang Table
@@ -357,7 +305,7 @@
       const utangList = transactions.filter(t => t.balance > 0);
 
       if (utangList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang nakatalang may utang sa kasalukuyan.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang nakatalang may utang sa kasalukuyan.</td></tr>`;
         return;
       }
 
@@ -373,7 +321,6 @@
             <td>₱${t.total.toFixed(2)}</td>
             <td class="text-success">₱${t.paid.toFixed(2)}</td>
             <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
-            <td>₱${t.coBoss.toFixed(2)}</td>
             <td>${t.dueDate}</td>
             <td>${statusBadge}</td>
             <td>
@@ -381,27 +328,6 @@
                 <i class="fa-solid fa-receipt me-1"></i> Pay
               </button>
             </td>
-          </tr>
-        `;
-      });
-    }
-
-    // Render Sales & Profit Table
-    function renderSalesTable() {
-      const tbody = document.getElementById('salesTableBody');
-      tbody.innerHTML = '';
-
-      transactions.forEach(t => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${t.date}</td>
-            <td>${t.customer}</td>
-            <td>${t.product}</td>
-            <td class="fw-bold">₱${t.total.toFixed(2)}</td>
-            <td class="text-primary">+₱${t.de.toFixed(2)}</td>
-            <td class="text-danger">-₱${t.coBoss.toFixed(2)}</td>
-            <td class="text-success fw-bold">₱${t.netProfit.toFixed(2)}</td>
-            <td><span class="badge bg-secondary">${t.status}</span></td>
           </tr>
         `;
       });
@@ -450,12 +376,10 @@
       alert('Na-record nang matagumpay ang bayad!');
       selectedModal.hide();
       renderCreditTable();
-      renderSalesTable();
     }
 
-    // Initial Renders
+    // Initial Render
     renderCreditTable();
-    renderSalesTable();
   </script>
 </body>
 </html>

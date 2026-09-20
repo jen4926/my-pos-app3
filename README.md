@@ -16,7 +16,7 @@
     .credit-fields, .container-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
     
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
-    .inventory-input { width: 75px; text-align: center; }
+    .inventory-input { width: 85px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
     
     /* Login Backdrop overlay */
@@ -82,7 +82,7 @@
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable()">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderCustomerSalesLog();">
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
@@ -478,13 +478,13 @@
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management & End of Day Summary</h4>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
               <i class="fa-solid fa-plus me-1"></i> Add Product
             </button>
           </div>
 
-          <div class="table-responsive">
+          <div class="table-responsive mb-4">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark text-center">
                 <tr>
@@ -500,8 +500,30 @@
               <tbody id="inventoryTableBody">
                 <!-- Dynamic Content -->
               </tbody>
+              <tfoot class="table-secondary fw-bold text-center" id="inventoryTableFooter">
+                <!-- Total Row rendered dynamically -->
+              </tfoot>
             </table>
           </div>
+
+          <!-- MGA BUMILI NG PRODUKTO (CUSTOMER SALES LOG) -->
+          <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-users me-2"></i>Listahan ng mga Bumili ng Item (Customer Purchases)</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle bg-white">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Customer Name</th>
+                  <th>Product Name</th>
+                  <th class="text-center">Quantity (Ilan)</th>
+                </tr>
+              </thead>
+              <tbody id="customerSalesLogBody">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
 
@@ -811,6 +833,10 @@
     document.getElementById('bossDate').value = todayFormatted;
     document.getElementById('auditMonth').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
+    window.onload = function() {
+      addPosRow();
+    };
+
     // ================= AUTHENTICATION LOGIC =================
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -905,7 +931,7 @@
     // ================= POS LOGIC =================
     function addPosRow() {
       const tbody = document.getElementById('posItemsBody');
-      const rowId = Date.now();
+      const rowId = Date.now() + Math.random().toString(36).substring(2, 5);
       const rowHTML = `
         <tr id="row-${rowId}">
           <td><input type="text" class="form-control form-control-sm pos-name" placeholder="Product Name" required></td>
@@ -1009,6 +1035,7 @@
       const paymentType = document.getElementById('paymentType').value;
       const method = document.getElementById('paymentMethod').value;
       const saleDate = document.getElementById('saleDate').value;
+      const custName = document.getElementById('customerName').value;
       let paid = parseFloat(document.getElementById('amountPaidNow').value) || 0;
       
       if (paymentType === 'FULL') paid = total;
@@ -1021,15 +1048,34 @@
 
       const itemRows = document.querySelectorAll('#posItemsBody tr');
       let productSummary = [];
+      let itemsPurchasedList = [];
       let totalCostOfGoods = 0;
 
       itemRows.forEach(row => {
-        const name = row.querySelector('.pos-name').value;
+        const name = row.querySelector('.pos-name').value.trim();
         const qty = parseFloat(row.querySelector('.pos-qty').value) || 0;
         const cost = parseFloat(row.querySelector('.pos-cost').value) || 0;
 
         totalCostOfGoods += (qty * cost);
-        if(name) productSummary.push(`${name} (x${qty})`);
+        if(name) {
+          productSummary.push(`${name} (x${qty})`);
+          itemsPurchasedList.push({ name: name, qty: qty });
+
+          // AUTOMATIC DEDUCTION TO INVENTORY ENDING STOCK
+          const invItem = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
+          if(invItem) {
+            invItem.ending = Math.max(0, invItem.ending - qty);
+          } else {
+            // Auto-add product to inventory if missing
+            inventory.push({
+              name: name,
+              qty: 1,
+              beginning: qty,
+              stockIn: 0,
+              ending: 0
+            });
+          }
+        }
       });
 
       const cStatus = document.getElementById('containerStatus').value;
@@ -1051,8 +1097,9 @@
       transactions.push({
         id: transactions.length + 1,
         date: saleDate,
-        customer: document.getElementById('customerName').value,
+        customer: custName,
         product: productSummary.join(', '),
+        itemsList: itemsPurchasedList,
         containerInfo: cInfo,
         total: total,
         totalCost: totalCostOfGoods,
@@ -1063,7 +1110,7 @@
         payments: paymentHistory
       });
 
-      alert('Transaction saved successfully!');
+      alert('Transaction saved successfully! Naka-deduct na rin sa Inventory.');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
       addPosRow();
@@ -1318,7 +1365,6 @@
         return;
       }
 
-      // Filter transactions matching customer name
       const customerTxs = transactions.filter(t => t.customer.toLowerCase().includes(query));
 
       if (customerTxs.length === 0) {
@@ -1330,12 +1376,10 @@
       noResultAlert.classList.add('d-none');
       resultContainer.style.display = 'block';
 
-      // Sort by latest transaction first
       customerTxs.sort((a, b) => b.id - a.id);
 
       const lastOrder = customerTxs[0];
 
-      // Populate Last Order Card
       document.getElementById('lastOrderCustomer').innerText = lastOrder.customer;
       document.getElementById('lastOrderDate').innerText = lastOrder.date;
       document.getElementById('lastOrderContainer').innerText = lastOrder.containerInfo || 'Wala';
@@ -1354,7 +1398,6 @@
         badgeElem.className = 'badge bg-danger fs-6';
       }
 
-      // Populate History Table
       historyBody.innerHTML = '';
       customerTxs.forEach(t => {
         let badge = t.status === 'PAID' 
@@ -1439,7 +1482,6 @@
         return;
       }
 
-      // Update customer name if modified
       tx.customer = newCustomerName;
 
       tx.paid += payAmount;
@@ -1457,24 +1499,38 @@
       renderCreditTable();
     }
 
-    // ================= INVENTORY =================
+    // ================= INVENTORY & END OF DAY TOTALS =================
     function renderInventoryTable() {
       const tbody = document.getElementById('inventoryTableBody');
+      const tfoot = document.getElementById('inventoryTableFooter');
       tbody.innerHTML = '';
+      
       if (inventory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang laman ang inventory.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang laman ang inventory. Mag-add ng produkto sa ibabaw.</td></tr>`;
+        tfoot.innerHTML = '';
         return;
       }
 
+      let totBeginning = 0;
+      let totStockIn = 0;
+      let totSold = 0;
+      let totEnding = 0;
+
       inventory.forEach((item, index) => {
         const sold = Math.max(0, (item.beginning + item.stockIn) - item.ending);
+        
+        totBeginning += item.beginning;
+        totStockIn += item.stockIn;
+        totSold += sold;
+        totEnding += item.ending;
+
         tbody.innerHTML += `
           <tr>
             <td><input type="text" class="form-control form-control-sm fw-bold" value="${item.name}" onchange="updateInventory(${index}, 'name', this.value)"></td>
             <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.qty}" min="0" onchange="updateInventory(${index}, 'qty', this.value)"></td>
             <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.beginning}" min="0" onchange="updateInventory(${index}, 'beginning', this.value)"></td>
             <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.stockIn}" min="0" onchange="updateInventory(${index}, 'stockIn', this.value)"></td>
-            <td class="text-center align-middle fw-semibold text-primary">${sold}</td>
+            <td class="text-center align-middle fw-semibold text-primary fs-6">${sold}</td>
             <td><input type="number" class="form-control form-control-sm text-center mx-auto inventory-input" value="${item.ending}" min="0" onchange="updateInventory(${index}, 'ending', this.value)"></td>
             <td class="col-action align-middle">
               <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})">
@@ -1484,6 +1540,19 @@
           </tr>
         `;
       });
+
+      // End of Day Totals Row
+      tfoot.innerHTML = `
+        <tr>
+          <td class="text-start text-uppercase">End of Day Total:</td>
+          <td>-</td>
+          <td>${totBeginning}</td>
+          <td>${totStockIn}</td>
+          <td class="text-primary">${totSold}</td>
+          <td class="text-success">${totEnding}</td>
+          <td></td>
+        </tr>
+      `;
     }
 
     function updateInventory(index, key, value) {
@@ -1492,30 +1561,67 @@
     }
 
     function deleteInventoryItem(index) {
-      if (confirm('Sigurado ka bang gusto mong burahin ang item na ito?')) {
+      if(confirm('Sigurado ka bang gusto mong burahin ang produktong ito?')) {
         inventory.splice(index, 1);
         renderInventoryTable();
       }
     }
 
+    // Modal Add Product Logic
     document.getElementById('addProductForm').addEventListener('submit', function(e) {
       e.preventDefault();
+      const pName = document.getElementById('newProdName').value.trim();
+      const pQty = parseInt(document.getElementById('newProdQty').value) || 1;
+      const pStock = parseInt(document.getElementById('newProdStock').value) || 0;
+
       inventory.push({
-        id: inventory.length + 1,
-        name: document.getElementById('newProdName').value,
-        qty: parseInt(document.getElementById('newProdQty').value) || 1,
-        beginning: parseInt(document.getElementById('newProdStock').value) || 0,
+        name: pName,
+        qty: pQty,
+        beginning: pStock,
         stockIn: 0,
-        ending: parseInt(document.getElementById('newProdStock').value) || 0
+        ending: pStock
       });
-      this.reset();
+
+      alert('Matagumpay na naidagdag ang bagong produkto!');
       bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+      this.reset();
       renderInventoryTable();
     });
 
-    // Initializations
-    addPosRow();
-    generateDailyReport();
+    // CUSTOMER PURCHASES LOG IN INVENTORY
+    function renderCustomerSalesLog() {
+      const tbody = document.getElementById('customerSalesLogBody');
+      tbody.innerHTML = '';
+
+      if (transactions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakatalang transaksyon o benta.</td></tr>`;
+        return;
+      }
+
+      transactions.forEach(t => {
+        if(t.itemsList && t.itemsList.length > 0) {
+          t.itemsList.forEach(item => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${t.date}</td>
+                <td class="fw-bold">${t.customer}</td>
+                <td>${item.name}</td>
+                <td class="text-center fw-semibold text-primary">${item.qty}</td>
+              </tr>
+            `;
+          });
+        } else {
+          tbody.innerHTML += `
+            <tr>
+              <td>${t.date}</td>
+              <td class="fw-bold">${t.customer}</td>
+              <td>${t.product}</td>
+              <td class="text-center fw-semibold text-primary">-</td>
+            </tr>
+          `;
+        }
+      });
+    }
   </script>
 </body>
 </html>

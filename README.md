@@ -298,21 +298,27 @@
           </div>
 
           <div class="row g-3 mb-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
               <div class="card p-3 stat-card bg-light">
                 <span class="text-muted small fw-bold">DAILY TOTAL SALES</span>
                 <h4 class="text-primary mt-1 mb-0" id="dailyTotalSales">₱0.00</h4>
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">TOTAL COLLECTION (All Payments)</span>
+                <span class="text-muted small fw-bold">TOTAL COLLECTION</span>
                 <h4 class="text-success mt-1 mb-0" id="dailyTotalCollected">₱0.00</h4>
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #00897b;">
+                <span class="text-muted small fw-bold">DAILY NET PROFIT</span>
+                <h4 class="text-success fw-bold mt-1 mb-0" id="dailyTotalNetProfit">₱0.00</h4>
+              </div>
+            </div>
+            <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;">
-                <span class="text-muted small fw-bold">TRANSACTIONS ENCODED</span>
+                <span class="text-muted small fw-bold">TRANSACTIONS</span>
                 <h4 class="text-warning mt-1 mb-0" id="dailyTxCount">0</h4>
               </div>
             </div>
@@ -729,6 +735,28 @@
                 <span class="text-muted small fw-bold">NET PROFIT (Final Kita)</span>
                 <h4 class="text-success fw-bold mt-1 mb-0" id="auditNetProfit">₱0.00</h4>
               </div>
+            </div>
+          </div>
+
+          <!-- DAILY NET PROFIT BREAKDOWN TABLE IN AUDIT -->
+          <div class="card p-3 bg-light mb-4 border">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-calendar-days me-2"></i>Daily Net Profit Breakdown (Araw-arawang Kita)</h6>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm align-middle bg-white">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th class="text-end">Total Sales (₱)</th>
+                    <th class="text-end">Total Cost / Puhunan (₱)</th>
+                    <th class="text-end">Net Profit (₱)</th>
+                  </tr>
+                </thead>
+                <tbody id="auditDailyBreakdownBody">
+                  <!-- Dynamic Daily Breakdown Rows -->
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -1206,7 +1234,6 @@
         locationSelect.value = 'Hiway';
       }
 
-      // Refresh rows display for price columns
       const rows = document.querySelectorAll('#posItemsBody tr');
       rows.forEach(row => {
         const costInput = row.querySelector('.pos-cost').closest('td');
@@ -1387,7 +1414,6 @@
             customer: custName 
           });
 
-          // Update Inventory Stock (Add or Deduct based on transaction type)
           const invItem = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
           if(invItem) {
             if (isInventoryOnly) {
@@ -1407,7 +1433,6 @@
             });
           }
 
-          // Kung Inventory Only, itala rin sa Stock-In History
           if (isInventoryOnly) {
             stockInHistory.push({
               date: saleDate,
@@ -1543,6 +1568,7 @@
 
       let daySales = 0;
       let dayCollected = 0;
+      let dayNetProfit = 0;
       let count = 0;
 
       let totalGCash = 0;
@@ -1552,7 +1578,10 @@
       const filtered = transactions.filter(t => t.date === selectedDate || t.payments.some(p => p.date === selectedDate));
 
       filtered.forEach((t, index) => {
-        if(t.date === selectedDate) daySales += t.total;
+        if(t.date === selectedDate) {
+          daySales += t.total;
+          dayNetProfit += (t.netProfit || (t.total - (t.totalCost || 0)));
+        }
         
         t.payments.forEach(p => {
           if (p.date === selectedDate) {
@@ -1606,6 +1635,7 @@
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
+      document.getElementById('dailyTotalNetProfit').innerText = `₱${dayNetProfit.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;
 
       document.getElementById('totalCollectionAll').innerText = `₱${dayCollected.toFixed(2)}`;
@@ -1641,7 +1671,6 @@
       totalCounted += coinsValue;
       breakdownState.coins = coinsValue;
 
-      // I-save ang state para sa kasalukuyang petsa
       cashBreakdownData[selectedDate] = breakdownState;
       saveData();
 
@@ -1691,6 +1720,123 @@
         saveData();
         loadMoneyBreakdown();
       }
+    }
+
+    // ================= MONTHLY AUDIT SCRIPT INTEGRATION =================
+    function generateMonthlyAudit() {
+      const selectedMonth = document.getElementById('auditMonth').value; // e.g. "2026-09"
+      if (!selectedMonth) return;
+
+      let totalSales = 0;
+      let totalCost = 0;
+
+      // Group by date for daily net profit breakdown
+      let dailyMap = {};
+
+      transactions.forEach(t => {
+        if (t.date && t.date.startsWith(selectedMonth)) {
+          totalSales += t.total || 0;
+          const cost = t.totalCost || 0;
+          totalCost += cost;
+
+          if (!dailyMap[t.date]) {
+            dailyMap[t.date] = { sales: 0, cost: 0, netProfit: 0 };
+          }
+          dailyMap[t.date].sales += t.total || 0;
+          dailyMap[t.date].cost += cost;
+          dailyMap[t.date].netProfit += (t.total || 0) - cost;
+        }
+      });
+
+      const grossProfit = totalSales - totalCost;
+
+      // Expenses breakdown table rendering
+      const expBody = document.getElementById('expenseTableBody');
+      if (expBody && expBody.children.length === 0) {
+        addExpenseRow('Store Rent', 0);
+        addExpenseRow('Electricity / Water', 0);
+        addExpenseRow('Staff Salaries', 0);
+      }
+
+      let totalExpenses = 0;
+      const expenseRows = document.querySelectorAll('.expense-row');
+      expenseRows.forEach(row => {
+        const amt = parseFloat(row.querySelector('.expense-amount').value) || 0;
+        totalExpenses += amt;
+      });
+
+      // Save expenses data
+      monthlyExpensesData[selectedMonth] = totalExpenses;
+      saveData();
+
+      // Boss adjustments calculation
+      let bossNetAdjustment = 0;
+      const bossBody = document.getElementById('bossLogsBody');
+      bossBody.innerHTML = '';
+
+      const filteredBoss = bossAdjustments.filter(b => b.date && b.date.startsWith(selectedMonth));
+      filteredBoss.forEach(b => {
+        const val = b.type === 'ADD' ? b.amount : -b.amount;
+        bossNetAdjustment += val;
+        bossBody.innerHTML += `
+          <tr>
+            <td>${b.date}</td>
+            <td>${b.type === 'ADD' ? '<span class="badge bg-success">Boss Addition (+)</span>' : '<span class="badge bg-danger">Boss Withdrawal (-)</span>'} - ${b.notes || ''}</td>
+            <td class="${b.type === 'ADD' ? 'text-success' : 'text-danger'} fw-bold">₱${b.amount.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      if (filteredBoss.length === 0) {
+        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang Boss adjustment para sa buwang ito.</td></tr>`;
+      }
+
+      const netProfit = grossProfit - totalExpenses + bossNetAdjustment;
+
+      // Render summary cards
+      document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
+      document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
+      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
+      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+
+      // Render Daily Net Profit Breakdown table inside audit
+      const dailyBreakdownBody = document.getElementById('auditDailyBreakdownBody');
+      dailyBreakdownBody.innerHTML = '';
+
+      const sortedDates = Object.keys(dailyMap).sort();
+      sortedDates.forEach(dateStr => {
+        const dData = dailyMap[dateStr];
+        dailyBreakdownBody.innerHTML += `
+          <tr>
+            <td class="fw-semibold">${dateStr}</td>
+            <td class="text-end">₱${dData.sales.toFixed(2)}</td>
+            <td class="text-end text-secondary">₱${dData.cost.toFixed(2)}</td>
+            <td class="text-end text-success fw-bold">₱${dData.netProfit.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      if (sortedDates.length === 0) {
+        dailyBreakdownBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-2">Walang transaksyon sa buwang ito.</td></tr>`;
+      }
+    }
+
+    function addExpenseRow(name = '', amount = 0) {
+      const tbody = document.getElementById('expenseTableBody');
+      const rowId = Date.now() + Math.random().toString(36).substring(2, 5);
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr id="exp-${rowId}" class="expense-row">
+          <td><input type="text" class="form-control form-control-sm expense-name" value="${name}" placeholder="Pangalan ng Gastusin" oninput="generateMonthlyAudit()"></td>
+          <td><input type="number" step="0.01" class="form-control form-control-sm expense-amount" value="${amount}" placeholder="0.00" oninput="generateMonthlyAudit()"></td>
+          <td class="text-center no-print">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="document.getElementById('exp-${rowId}').remove(); generateMonthlyAudit();">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `);
+      generateMonthlyAudit();
     }
   </script>
 </body>

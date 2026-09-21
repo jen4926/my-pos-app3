@@ -14,11 +14,11 @@
     .nav-pills .nav-link { color: #fff; margin-right: 5px; }
     .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
     .credit-fields, .container-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
-    
+   
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
     .inventory-input { width: 95px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
-    
+   
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(13, 71, 161, 0.85); z-index: 9999;
@@ -89,7 +89,7 @@
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory();">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory(); renderCustomerSalesLog();">
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
@@ -115,7 +115,7 @@
             <li><a class="dropdown-item" href="#" onclick="openChangeProfileModal()"><i class="fa-solid fa-key me-2"></i>Change Name / Password</a></li>
             <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i>Tag Out</a></li>
+            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2">Tag Out</i></a></li>
           </ul>
         </div>
       </div>
@@ -134,7 +134,7 @@
               <i class="fa-solid fa-print me-1"></i> I-print ang Page
             </button>
           </div>
-          
+         
           <div class="alert alert-info py-2 mb-3 d-flex justify-content-between align-items-center">
             <div>
               <i class="fa-solid fa-info-circle me-1"></i> <strong>Paalala:</strong> Maaari kang pumili ng lumang petsa sa ibaba kung nag-e-encode ka ng nakaligtaang araw.
@@ -408,6 +408,7 @@
                   <th>Customer Name</th>
                   <th>Location</th>
                   <th>Products Bought</th>
+                  <th>Container Status</th>
                   <th>Total Cost (₱)</th>
                   <th>Total Amount</th>
                   <th>Paid Amount</th>
@@ -705,85 +706,12 @@
     </div>
   </div>
 
-  <!-- MODAL: CHANGE PROFILE -->
-  <div class="modal fade" id="changeProfileModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-key me-2"></i>Change Name / Password</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <form id="changeProfileForm" onsubmit="updateProfile(event)">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Name:</label>
-              <input type="text" id="profileName" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">New Password (iwanang blangko kung hindi papalitan):</label>
-              <input type="password" id="profilePassword" class="form-control" placeholder="••••••••">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success">Save Changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: MANAGE USERS -->
-  <div class="modal fade" id="manageUsersModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-users-gear me-2"></i>Manage Users</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <div class="table-responsive mb-4">
-            <table class="table table-bordered align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Name</th>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th class="text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="userListTableBody"></tbody>
-            </table>
-          </div>
-          <hr>
-          <h6 class="fw-bold text-secondary mb-3">Add New User</h6>
-          <form id="addUserForm" onsubmit="addNewUser(event)">
-            <div class="row g-2">
-              <div class="col-md-3">
-                <input type="text" id="newUserNameInput" class="form-control" placeholder="Full Name" required>
-              </div>
-              <div class="col-md-3">
-                <input type="text" id="newUserUsernameInput" class="form-control" placeholder="Username" required>
-              </div>
-              <div class="col-md-3">
-                <input type="password" id="newUserPasswordInput" class="form-control" placeholder="Password" required>
-              </div>
-              <div class="col-md-3">
-                <button type="submit" class="btn btn-success w-100">Add User</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let users = JSON.parse(localStorage.getItem('rmv_users')) || [
       { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" }
     ];
-    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
+    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || { name: "Admin", role: "Admin" };
 
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
@@ -802,135 +730,12 @@
 
     window.onload = function() {
       addPosRow();
-      checkAuthStatus();
+      document.getElementById('loginOverlay').style.display = 'none';
       generateDailyReport();
       renderCreditTable();
       renderInventoryTable();
       renderStockInHistory();
     };
-
-    function checkAuthStatus() {
-      const overlay = document.getElementById('loginOverlay');
-      if (!currentUser) {
-        overlay.style.display = 'flex';
-      } else {
-        overlay.style.display = 'none';
-        document.getElementById('currentUserName').innerText = currentUser.name;
-        applyRolePermissions();
-      }
-    }
-
-    function applyRolePermissions() {
-      const adminElements = document.querySelectorAll('.admin-only');
-      adminElements.forEach(el => {
-        if (currentUser && currentUser.role === 'Admin') {
-          el.style.display = '';
-        } else {
-          el.style.display = 'none';
-        }
-      });
-    }
-
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const u = document.getElementById('loginUsername').value.trim();
-      const p = document.getElementById('loginPassword').value.trim();
-      const errDiv = document.getElementById('loginError');
-
-      const found = users.find(x => x.username === u && x.password === p);
-      if (found) {
-        currentUser = found;
-        localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
-        errDiv.classList.add('d-none');
-        this.reset();
-        checkAuthStatus();
-      } else {
-        errDiv.classList.remove('d-none');
-      }
-    });
-
-    function logout() {
-      currentUser = null;
-      localStorage.removeItem('rmv_current_user');
-      document.getElementById('loginOverlay').style.display = 'flex';
-    }
-
-    function openChangeProfileModal() {
-      if(!currentUser) return;
-      document.getElementById('profileName').value = currentUser.name;
-      document.getElementById('profilePassword').value = '';
-      new bootstrap.Modal(document.getElementById('changeProfileModal')).show();
-    }
-
-    function updateProfile(e) {
-      e.preventDefault();
-      const newName = document.getElementById('profileName').value.trim();
-      const newPass = document.getElementById('profilePassword').value.trim();
-
-      currentUser.name = newName;
-      if(newPass) currentUser.password = newPass;
-
-      // Update in users array
-      const idx = users.findIndex(x => x.username === currentUser.username);
-      if(idx !== -1) {
-        users[idx] = currentUser;
-      }
-
-      localStorage.setItem('rmv_users', JSON.stringify(users));
-      localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
-      document.getElementById('currentUserName').innerText = currentUser.name;
-
-      bootstrap.Modal.getInstance(document.getElementById('changeProfileModal')).hide();
-      alert('Tagumpay na na-update ang profile!');
-    }
-
-    function openUserManagementModal() {
-      renderUserList();
-      new bootstrap.Modal(document.getElementById('manageUsersModal')).show();
-    }
-
-    function renderUserList() {
-      const tbody = document.getElementById('userListTableBody');
-      tbody.innerHTML = '';
-      users.forEach(u => {
-        tbody.innerHTML += `
-          <tr>
-            <td class="fw-bold">${u.name}</td>
-            <td>${u.username}</td>
-            <td><span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-secondary'}">${u.role}</span></td>
-            <td class="text-center">
-              ${u.username !== 'admin' ? `<button class="btn btn-sm btn-outline-danger border-0" onclick="deleteUser('${u.username}')"><i class="fa-solid fa-trash"></i></button>` : '<span class="text-muted small">Protected</span>'}
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    function addNewUser(e) {
-      e.preventDefault();
-      const name = document.getElementById('newUserNameInput').value.trim();
-      const username = document.getElementById('newUserUsernameInput').value.trim();
-      const password = document.getElementById('newUserPasswordInput').value.trim();
-
-      if(users.some(x => x.username === username)) {
-        alert('Mayroon nang gumagamit ng username na ito!');
-        return;
-      }
-
-      users.push({ id: Date.now(), name, username, password, role: "Staff" });
-      localStorage.setItem('rmv_users', JSON.stringify(users));
-      document.getElementById('addUserForm').reset();
-      renderUserList();
-      alert('Tagumpay na naidagdag ang bagong user!');
-    }
-
-    function deleteUser(username) {
-      if(confirm(`Sigurado ka bang gusto mong tanggalin si ${username}?`)) {
-        users = users.filter(x => x.username !== username);
-        localStorage.setItem('rmv_users', JSON.stringify(users));
-        renderUserList();
-      }
-    }
 
     function saveData() {
       localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
@@ -990,7 +795,7 @@
 
     document.getElementById('posForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const saleDate = document.getElementById('saleDate').value;
+      const saleDate = document.getElementById('saleDate').value; // Dito napapasok ang petsa ng nakaligtaang araw
       const custName = document.getElementById('customerName').value;
       const location = document.getElementById('transactionLocation').value;
       const total = parseFloat(document.getElementById('totalAmount').value) || 0;
@@ -998,7 +803,7 @@
       const method = document.getElementById('paymentMethod').value;
       let paid = paymentType === 'FULL' ? total : (paymentType === 'CREDIT' ? 0 : (parseFloat(document.getElementById('amountPaidNow').value) || 0));
       const balance = total - paid;
-      
+     
       let productSummary = [];
       let totalCostOfGoods = 0;
       document.querySelectorAll('#posItemsBody tr').forEach(row => {
@@ -1011,7 +816,7 @@
 
       transactions.push({
         id: Date.now(),
-        date: saleDate,
+        date: saleDate, // Nakatala sa napiling petsa (kahit nakaligtaang araw)
         customer: custName,
         location: location,
         product: productSummary.join(', '),
@@ -1098,7 +903,8 @@
             </tr>
           `;
         }
-        
+       
+        // Pagpapakita ng petsa kung kailan nagbayad / naghulog
         t.payments.forEach(p => {
           paidTbody.innerHTML += `
             <tr>
@@ -1120,7 +926,7 @@
       if(!t) return;
       const amt = prompt(`Magkano ang ibinayad ni ${t.customer}? (Balance: ₱${t.balance})`, t.balance);
       const payDate = prompt(`Ilagay ang petsa ng pagbabayad (YYYY-MM-DD):`, getTodayDateString());
-      
+     
       if(amt && payDate) {
         const payAmt = parseFloat(amt);
         if(payAmt > 0) {
@@ -1156,7 +962,7 @@
 
     document.getElementById('addProductForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const pDate = document.getElementById('newProdDate').value;
+      const pDate = document.getElementById('newProdDate').value; // May kasamang petsa ng pagdadagdag
       const name = document.getElementById('newProdName').value;
       const cost = parseFloat(document.getElementById('newProdCost').value) || 0;
       const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
@@ -1195,7 +1001,7 @@
       const id = parseInt(document.getElementById('editTxId').value);
       const t = transactions.find(x => x.id === id);
       if(t) {
-        t.date = document.getElementById('editDate').value;
+        t.date = document.getElementById('editDate').value; // Pwede ring baguhin ang petsa dito sakaling mali ang na-encode
         t.customer = document.getElementById('editCustomerName').value;
         t.product = document.getElementById('editProduct').value;
         t.total = parseFloat(document.getElementById('editTotal').value) || 0;

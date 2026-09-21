@@ -19,18 +19,37 @@
     .inventory-input { width: 95px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
    
+    /* Login Backdrop overlay */
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(13, 71, 161, 0.85); z-index: 9999;
       display: flex; justify-content: center; align-items: center;
     }
 
+    /* PRINT STYLES */
     @media print {
-      body { background-color: #fff !important; color: #000 !important; font-size: 12pt; }
-      .navbar, #loginOverlay, .btn, .nav, .modal, .no-print { display: none !important; }
-      .card { border: none !important; box-shadow: none !important; padding: 0 !important; }
-      .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
-      .tab-pane { display: block !important; opacity: 1 !important; }
+      body {
+        background-color: #fff !important;
+        color: #000 !important;
+        font-size: 12pt;
+      }
+      .navbar, #loginOverlay, .btn, .nav, .modal, .no-print {
+        display: none !important;
+      }
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .tab-pane {
+        display: block !important;
+        opacity: 1 !important;
+      }
     }
   </style>
 </head>
@@ -89,7 +108,7 @@
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory();">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory(); renderCustomerSalesLog();">
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
@@ -100,8 +119,9 @@
         </li>
       </ul>
 
+      <!-- User Profile, Save, Refresh Button & Account Controls -->
       <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()" title="Save Data">
+        <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()" title="Save Data to Local Storage">
           <i class="fa-solid fa-floppy-disk me-1"></i> Save Data
         </button>
         <button class="btn btn-outline-light btn-sm fw-semibold" onclick="location.reload()" title="Refresh Page">
@@ -113,9 +133,9 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-end text-small shadow">
             <li><a class="dropdown-item" href="#" onclick="openChangeProfileModal()"><i class="fa-solid fa-key me-2"></i>Change Name / Password</a></li>
-            <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users</a></li>
+            <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users & Admins</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i>Tag Out</a></li>
+            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2">Tag Out</i></a></li>
           </ul>
         </div>
       </div>
@@ -129,32 +149,32 @@
       <div class="tab-pane fade show active" id="pos-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-cash-register me-2"></i>Record New Transaction / Back-date Entry</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-cash-register me-2"></i>Record New Transaction</h4>
             <button class="btn btn-outline-secondary" onclick="window.print()">
-              <i class="fa-solid fa-print me-1"></i> I-print ang Page
+              <i class="fa-solid fa-print me-1"></i> I-print ang Page / Resibo
             </button>
           </div>
          
+          <!-- Inventory Only Mode Toggle -->
           <div class="alert alert-info py-2 mb-3 d-flex justify-content-between align-items-center">
             <div>
-              <i class="fa-solid fa-info-circle me-1"></i> <strong>Paalala:</strong> Maaari kang pumili ng lumang petsa sa ibaba kung nag-e-encode ka ng nakaligtaang araw.
+              <i class="fa-solid fa-info-circle me-1"></i> <strong>Mode:</strong> Pwede kang magpasok ng item para sa Inventory Lang (Walang halaga/presyo).
             </div>
             <div class="form-check form-switch mb-0">
               <input class="form-check-input" type="checkbox" id="inventoryOnlyMode" onchange="toggleInventoryOnlyMode()">
-              <label class="form-check-label fw-semibold" for="inventoryOnlyMode">Inventory Only Mode</label>
+              <label class="form-check-label fw-semibold" for="inventoryOnlyMode">Inventory Only Mode (No Price/Cost)</label>
             </div>
           </div>
 
           <form id="posForm">
             <div class="row g-3 mb-3">
               <div class="col-md-4">
-                <label class="form-label fw-semibold text-danger">* Petsa ng Transaksyon (Date of Sale / Log):</label>
-                <input type="date" id="saleDate" class="form-control border-danger" required>
-                <small class="text-muted">Palitan ito kung nakaligtaang araw ang i-encode mo.</small>
+                <label class="form-label fw-semibold">Date of Sale / Log:</label>
+                <input type="date" id="saleDate" class="form-control" required>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Customer / Reference Name:</label>
-                <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz" required>
+                <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz o Stock In" required>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Transaction Location / Uri:</label>
@@ -180,13 +200,16 @@
                     <th class="col-action"><i class="fa-solid fa-trash"></i></th>
                   </tr>
                 </thead>
-                <tbody id="posItemsBody"></tbody>
+                <tbody id="posItemsBody">
+                  <!-- Dynamic Rows -->
+                </tbody>
               </table>
               <button type="button" class="btn btn-sm btn-outline-primary" onclick="addPosRow()">
                 <i class="fa-solid fa-plus me-1"></i> Add Another Item
               </button>
             </div>
 
+            <!-- CONTAINER / DEPOSIT DETAILS -->
             <div class="card p-3 bg-light border mb-3" id="containerSectionBox">
               <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-box-open me-2"></i>Container / Lalagyan Details</h6>
               <div class="row g-3">
@@ -194,16 +217,16 @@
                   <label class="form-label fw-semibold">Container Status:</label>
                   <select id="containerStatus" class="form-select" onchange="toggleContainerFields()">
                     <option value="NONE">Walang Container / Soli Agad</option>
-                    <option value="HIRAM">Hiram / Bagon</option>
-                    <option value="DEPOSIT">May Deposito</option>
+                    <option value="HIRAM">Hiram / Bagon (Walang Deposit)</option>
+                    <option value="DEPOSIT">May Deposito (With Deposit Fee)</option>
                   </select>
                 </div>
                 <div class="col-md-4 container-qty-group" style="display: none;">
-                  <label class="form-label fw-semibold">Ilang Container:</label>
-                  <input type="number" min="1" id="containerQty" class="form-control" value="1">
+                  <label class="form-label fw-semibold">Ilang Container / Lalagyan:</label>
+                  <input type="number" min="1" id="containerQty" class="form-control" value="1" placeholder="Hal. 2">
                 </div>
                 <div class="col-md-4 container-deposit-group" style="display: none;">
-                  <label class="form-label fw-semibold">Deposito bawat Isa (₱):</label>
+                  <label class="form-label fw-semibold">Halaga ng Deposito bawat Isa (₱):</label>
                   <input type="number" step="0.01" min="0" id="containerDepositRate" class="form-control" placeholder="0.00" oninput="calculateTotal()">
                 </div>
               </div>
@@ -211,17 +234,19 @@
 
             <div class="row g-3 mt-2" id="financialSectionBox">
               <div class="col-md-4">
-                <label class="form-label fw-semibold">Total Amount (₱):</label>
+                <label class="form-label fw-semibold">Total Amount (₱) <small class="text-muted">(Inc. Deposit)</small>:</label>
                 <input type="number" step="0.01" id="totalAmount" class="form-control bg-light fs-5 fw-bold text-primary" readonly placeholder="0.00">
               </div>
+
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Transaction Type:</label>
                 <select id="paymentType" class="form-select" onchange="toggleCreditFields()">
                   <option value="FULL">Paid in Full (Buong Bayad)</option>
-                  <option value="PARTIAL">Partial Payment (May Utang)</option>
+                  <option value="PARTIAL">Partial Payment (May Natirang Utang)</option>
                   <option value="CREDIT">Full Credit / Purong Utang</option>
                 </select>
               </div>
+
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Payment Method:</label>
                 <select id="paymentMethod" class="form-select">
@@ -264,8 +289,8 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales & Encoded Logs</h4>
             <div class="d-flex gap-2 align-items-center">
-              <label class="fw-bold me-1">Piliin ang Araw:</label>
-              <input type="date" id="dailyReportDate" class="form-control border-primary" onchange="generateDailyReport()">
+              <label class="fw-bold me-1">Select Date:</label>
+              <input type="date" id="dailyReportDate" class="form-control" onchange="generateDailyReport()">
               <button class="btn btn-outline-primary ms-2" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Report
               </button>
@@ -299,12 +324,12 @@
             </div>
           </div>
 
-          <!-- MONEY BREAKDOWN -->
+          <!-- MONEY BREAKDOWN & AUDIT SECTION -->
           <div class="card p-3 bg-light border mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-money-bill-wave me-2"></i>Daily Cash Money Breakdown</h6>
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-money-bill-wave me-2"></i>Daily Cash Money Breakdown (Denominations)</h6>
               <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearMoneyBreakdown()">
-                <i class="fa-solid fa-rotate-right me-1"></i> Clear Breakdown
+                <i class="fa-solid fa-rotate-right me-1"></i> I-refresh / Clear Breakdown
               </button>
             </div>
             <div class="row g-3">
@@ -321,47 +346,49 @@
                     <tbody>
                       <tr>
                         <td class="fw-semibold text-primary">₱1,000</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="1000" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="1000" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱500</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="500" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="500" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱200</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="200" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="200" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱100</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="100" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="100" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱50</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="50" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="50" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱20</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="20" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="20" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                         <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">Coins / Barya</td>
                         <td><span class="text-muted small">Kabuuang Barya</span></td>
-                        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()"></td>
+                        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
+              <!-- CASH VERIFICATION / DISCREPANCY COMPARISON -->
               <div class="col-md-5 d-flex flex-column justify-content-between">
                 <div class="card p-3 bg-white h-100 border">
                   <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fa-solid fa-scale-balanced me-2"></i>Cash Audit & Deductions</h6>
+                 
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="text-muted small fw-semibold">Total Collections:</span>
                     <span class="fw-bold text-secondary" id="totalCollectionAll">₱0.00</span>
@@ -378,19 +405,24 @@
                     <span class="text-muted small">Less: Cheque</span>
                     <span class="text-danger small" id="lessCheque">-₱0.00</span>
                   </div>
+
                   <hr class="my-1">
+
                   <div class="d-flex justify-content-between align-items-center my-2 bg-light p-2 rounded">
                     <span class="fw-bold text-dark">Target Cash in Drawer:</span>
                     <span class="fs-5 fw-bold text-success" id="breakdownTargetSales">₱0.00</span>
                   </div>
+
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-muted fw-semibold">Total Cash Counted:</span>
                     <span class="fs-5 fw-bold text-dark" id="totalCountedCash">₱0.00</span>
                   </div>
+
                   <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="fw-bold text-dark">Discrepancy:</span>
+                    <span class="fw-bold text-dark">Discrepancy / Over-Short:</span>
                     <span class="fs-5 fw-bold" id="cashDiscrepancy">₱0.00</span>
                   </div>
+
                   <div id="cashStatusAlert" class="alert alert-secondary text-center p-2 fw-bold mb-0">
                     <i class="fa-solid fa-calculator me-1"></i> Magpasok ng breakdown para ma-audit.
                   </div>
@@ -399,7 +431,7 @@
             </div>
           </div>
 
-          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>Listahan ng mga Transaksyon sa Napiling Petsa</h6>
+          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>List of Encoded Transactions Today</h6>
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
@@ -408,6 +440,7 @@
                   <th>Customer Name</th>
                   <th>Location</th>
                   <th>Products Bought</th>
+                  <th>Container Status</th>
                   <th>Total Cost (₱)</th>
                   <th>Total Amount</th>
                   <th>Paid Amount</th>
@@ -417,7 +450,9 @@
                   <th class="text-center no-print" style="width: 100px;">Actions</th>
                 </tr>
               </thead>
-              <tbody id="dailyTableBody"></tbody>
+              <tbody id="dailyTableBody">
+                <!-- Dynamic Content -->
+              </tbody>
             </table>
           </div>
         </div>
@@ -447,7 +482,9 @@
                   <th class="no-print">Action</th>
                 </tr>
               </thead>
-              <tbody id="creditTableBody"></tbody>
+              <tbody id="creditTableBody">
+                <!-- Dynamic Content -->
+              </tbody>
             </table>
           </div>
 
@@ -457,7 +494,6 @@
               <table class="table table-bordered table-hover align-middle bg-white">
                 <thead class="table-light">
                   <tr>
-                    <th>Petsa ng Hulog / Bayad (Payment Date)</th>
                     <th>Customer Name</th>
                     <th>Product(s)</th>
                     <th>Total Amount (₱)</th>
@@ -466,7 +502,9 @@
                     <th class="text-center no-print" style="width: 120px;">Actions</th>
                   </tr>
                 </thead>
-                <tbody id="paidHistoryTableBody"></tbody>
+                <tbody id="paidHistoryTableBody">
+                  <!-- Dynamic Content -->
+                </tbody>
               </table>
             </div>
           </div>
@@ -482,6 +520,7 @@
               <i class="fa-solid fa-print me-1"></i> Print Customer Record
             </button>
           </div>
+         
           <div class="row g-2 mb-4">
             <div class="col-md-9">
               <input type="text" id="searchCustomerInput" class="form-control form-control-lg" placeholder="I-type ang pangalan ng Customer (e.g. Juan Dela Cruz)">
@@ -514,13 +553,49 @@
                     <h5 class="fw-bold text-dark" id="lastOrderContainer">-</h5>
                   </div>
                   <div class="col-md-12">
-                    <p class="mb-1 text-muted small fw-bold">ITEMS BOUGHT:</p>
+                    <p class="mb-1 text-muted small fw-bold">ITEMS / PRODUCTS BOUGHT:</p>
                     <p class="fs-5 text-dark fw-semibold mb-0" id="lastOrderProducts">-</p>
+                  </div>
+                  <hr class="my-2">
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">TOTAL AMOUNT:</p>
+                    <h4 class="fw-bold text-primary" id="lastOrderTotal">₱0.00</h4>
+                  </div>
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">PAID AMOUNT:</p>
+                    <h4 class="fw-bold text-success" id="lastOrderPaid">₱0.00</h4>
+                  </div>
+                  <div class="col-md-4">
+                    <p class="mb-1 text-muted small fw-bold">REMAINING BALANCE:</p>
+                    <h4 class="fw-bold text-danger" id="lastOrderBalance">₱0.00</h4>
                   </div>
                 </div>
               </div>
             </div>
+
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lahat ng Naging Transaksyon ni Customer (Complete History)</h6>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle bg-white">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Products</th>
+                    <th>Container</th>
+                    <th>Total (₱)</th>
+                    <th>Paid (₱)</th>
+                    <th>Balance (₱)</th>
+                    <th>Net Profit (₱)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="customerHistoryBody">
+                  <!-- Dynamic History Rows -->
+                </tbody>
+              </table>
+            </div>
           </div>
+
           <div id="noCustomerFound" class="alert alert-warning text-center p-3 d-none">
             <i class="fa-solid fa-triangle-exclamation me-2"></i> Walang nahanap na record para sa customer na ito.
           </div>
@@ -531,10 +606,14 @@
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management & Product Cost</h4>
             <div class="d-flex gap-2">
-              <button class="btn btn-outline-secondary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Print</button>
-              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="fa-solid fa-plus me-1"></i> Add Product</button>
+              <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i> Print Inventory
+              </button>
+              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="fa-solid fa-plus me-1"></i> Add Product
+              </button>
             </div>
           </div>
 
@@ -552,27 +631,61 @@
                   <th class="col-action no-print"><i class="fa-solid fa-trash"></i></th>
                 </tr>
               </thead>
-              <tbody id="inventoryTableBody"></tbody>
-              <tfoot class="table-secondary fw-bold text-center" id="inventoryTableFooter"></tfoot>
+              <tbody id="inventoryTableBody">
+                <!-- Dynamic Content -->
+              </tbody>
+              <tfoot class="table-secondary fw-bold text-center" id="inventoryTableFooter">
+                <!-- Total Row rendered dynamically -->
+              </tfoot>
             </table>
           </div>
 
           <div class="card p-3 bg-light border mb-4">
-            <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Talaan kung kelan nagdagdag ng Produkto (Stock-In History)</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Talaan kung kelan nagdadagdag ng Produkto (Stock-In History)</h5>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" id="searchStockInInput" class="form-control" placeholder="I-search ang pangalan ng produkto o petsa..." oninput="renderStockInHistory()">
+            </div>
             <div class="table-responsive">
               <table class="table table-bordered table-hover align-middle bg-white">
                 <thead class="table-light">
                   <tr>
                     <th>Petsa (Date Added)</th>
                     <th>Product Name</th>
-                    <th class="text-center">Ibinagdag (Qty)</th>
+                    <th class="text-center">Ibinagdag (Stock In Qty)</th>
                     <th>Uri / Note</th>
                   </tr>
                 </thead>
-                <tbody id="stockInHistoryBody"></tbody>
+                <tbody id="stockInHistoryBody">
+                  <!-- Dynamic Content -->
+                </tbody>
               </table>
             </div>
           </div>
+
+          <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-users me-2"></i>Listahan ng mga Bumili ng Item (Customer Purchases)</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle bg-white">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Customer Name</th>
+                  <th>Location</th>
+                  <th>Product Name</th>
+                  <th class="text-center">Quantity (Ilan)</th>
+                  <th class="text-end">Cost (₱)</th>
+                  <th class="text-end">Price (₱)</th>
+                  <th class="text-end">Total Amount (₱)</th>
+                </tr>
+              </thead>
+              <tbody id="customerSalesLogBody">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
 
@@ -580,40 +693,148 @@
       <div class="tab-pane fade" id="audit-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit Computation</h4>
             <div class="d-flex gap-2 align-items-center">
-              <button class="btn btn-outline-secondary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Print</button>
+              <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i> Print Audit Report
+              </button>
+              <button class="btn btn-warning fw-bold text-dark me-2" data-bs-toggle="modal" data-bs-target="#bossModal">
+                <i class="fa-solid fa-user-tie me-1"></i> Add D/Eco Boss Adjustment
+              </button>
               <label class="fw-bold me-1">Filter Month:</label>
               <input type="month" id="auditMonth" class="form-control" onchange="generateMonthlyAudit()">
             </div>
           </div>
 
+          <!-- BAGONG FEATURE: SEARCH LAHAT NG TRANSAKSIYON BUONG ARAW O BUWAN -->
+          <div class="card p-3 bg-white border mb-4 shadow-sm">
+            <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-magnifying-glass me-2"></i>Search All Transactions & Logs (POS, Daily, Utang, Inventory)</h6>
+            <div class="row g-2">
+              <div class="col-md-9">
+                <input type="text" id="globalSearchInput" class="form-control" placeholder="I-type ang pangalan ng customer, produkto, o petsa (e.g. 2026-06-06 o Juan)..." oninput="renderGlobalSearchResults()">
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-outline-primary w-100 fw-semibold" onclick="clearGlobalSearch()"><i class="fa-solid fa-rotate-right me-1"></i> Reset Search</button>
+              </div>
+            </div>
+            <div id="globalSearchResultsWrapper" class="mt-3" style="display: none;">
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Date</th>
+                      <th>Customer / Ref</th>
+                      <th>Location</th>
+                      <th>Products / Details</th>
+                      <th>Total (₱)</th>
+                      <th>Paid (₱)</th>
+                      <th>Balance</th>
+                      <th>Status / Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="globalSearchResultsBody">
+                    <!-- Dynamic Search Results -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
           <div class="row g-3 mb-4">
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="card p-3 stat-card bg-light">
                 <span class="text-muted small fw-bold">GROSS SALES</span>
                 <h5 class="text-primary mt-1 mb-0" id="auditTotalSales">₱0.00</h5>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #6c757d;">
                 <span class="text-muted small fw-bold">TOTAL COGS (Puhunan)</span>
                 <h5 class="text-secondary mt-1 mb-0" id="auditTotalCost">₱0.00</h5>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #00897b;">
                 <span class="text-muted small fw-bold">GROSS PROFIT</span>
                 <h5 class="text-teal mt-1 mb-0" id="auditGrossProfit" style="color: #00897b;">₱0.00</h5>
               </div>
             </div>
             <div class="col-md-3">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #c62828;">
+                <span class="text-muted small fw-bold">EXPENSES / SALARIES</span>
+                <h5 class="text-danger mt-1 mb-0" id="auditExpenses">₱0.00</h5>
+              </div>
+            </div>
+            <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">NET PROFIT</span>
+                <span class="text-muted small fw-bold">NET PROFIT (Final Kita)</span>
                 <h4 class="text-success fw-bold mt-1 mb-0" id="auditNetProfit">₱0.00</h4>
               </div>
             </div>
           </div>
+
+          <!-- DAILY NET PROFIT BREAKDOWN TABLE IN AUDIT -->
+          <div class="card p-3 bg-light mb-4 border">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-calendar-days me-2"></i>Daily Net Profit Breakdown (Araw-arawang Kita) - Pindutin ang "View" para balikan ang Daily Report</h6>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-sm align-middle bg-white">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th class="text-end">Total Sales (₱)</th>
+                    <th class="text-end">Total Cost / Puhunan (₱)</th>
+                    <th class="text-end">Net Profit (₱)</th>
+                    <th class="text-center no-print" style="width: 140px;">Action / Balikan</th>
+                  </tr>
+                </thead>
+                <tbody id="auditDailyBreakdownBody">
+                  <!-- Dynamic Daily Breakdown Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card p-3 bg-light mb-4 border">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-receipt me-2"></i>Itemized Salary & Expenses Breakdown</h6>
+              <button class="btn btn-sm btn-outline-danger" onclick="addExpenseRow()">
+                <i class="fa-solid fa-plus me-1"></i> Add Expense Line
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle bg-white" id="expenseTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>Expense Name / Description</th>
+                    <th style="width: 200px;">Amount (₱)</th>
+                    <th class="col-action no-print"><i class="fa-solid fa-trash"></i></th>
+                  </tr>
+                </thead>
+                <tbody id="expenseTableBody">
+                  <!-- Dynamic Expense Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Transactions Log</h6>
+          <div class="table-responsive mb-4">
+            <table class="table table-sm table-bordered bg-white">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Description / Type</th>
+                  <th>Amount (₱)</th>
+                </tr>
+              </thead>
+              <tbody id="bossLogsBody">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
 
@@ -625,80 +846,56 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Transaction & Date</h5>
+          <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Transaction & Cost</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <form id="editTransactionForm">
           <div class="modal-body">
             <input type="hidden" id="editTxId">
             <div class="mb-3">
-              <label class="form-label fw-semibold">Petsa ng Transaksyon (Date):</label>
-              <input type="date" id="editDate" class="form-control" required>
-            </div>
-            <div class="mb-3">
               <label class="form-label fw-semibold">Customer Name:</label>
               <input type="text" id="editCustomerName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Location / Uri:</label>
+              <select id="editLocation" class="form-select" required>
+                <option value="Hiway">Hiway</option>
+                <option value="Byahe">Byahe</option>
+                <option value="Inventory Only">Inventory Only</option>
+              </select>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Products Bought:</label>
               <input type="text" id="editProduct" class="form-control" required>
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Container Status:</label>
+              <input type="text" id="editContainerInfo" class="form-control">
+            </div>
             <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Total Cost / Puhunan (₱):</label>
+                <input type="number" step="0.01" id="editTotalCost" class="form-control" required>
+              </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Total Amount (₱):</label>
                 <input type="number" step="0.01" id="editTotal" class="form-control" required oninput="calculateEditBalance()">
               </div>
+            </div>
+            <div class="row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Paid Amount (₱):</label>
                 <input type="number" step="0.01" id="editPaid" class="form-control" required oninput="calculateEditBalance()">
               </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Remaining Balance (₱):</label>
+                <input type="number" step="0.01" id="editBalance" class="form-control bg-light" readonly>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success">Update</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: ADD PRODUCT -->
-  <div class="modal fade" id="addProductModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-box-open me-2"></i>Add New Product</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <form id="addProductForm">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Petsa ng Pagdaragdag (Date Added):</label>
-              <input type="date" id="newProdDate" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Product Name:</label>
-              <input type="text" id="newProdName" class="form-control" required>
-            </div>
-            <div class="row g-2 mb-3">
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Cost / Unit (₱):</label>
-                <input type="number" step="0.01" id="newProdCost" class="form-control" value="0.00" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Price / Unit (₱):</label>
-                <input type="number" step="0.01" id="newProdPrice" class="form-control" value="0.00" required>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Stock Qty:</label>
-              <input type="number" id="newProdStock" class="form-control" value="1" min="1" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success">Save Product</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Update Transaction</button>
           </div>
         </form>
       </div>
@@ -710,40 +907,63 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-key me-2"></i>Change Name / Password</h5>
+          <h5 class="modal-title"><i class="fa-solid fa-id-card me-2"></i>Edit My Profile</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <form id="changeProfileForm" onsubmit="updateProfile(event)">
+        <form id="changeProfileForm">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label fw-semibold">Name:</label>
-              <input type="text" id="profileName" class="form-control" required>
+              <label class="form-label fw-semibold">Display Name:</label>
+              <input type="text" id="profDisplayName" class="form-control" required>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">New Password (iwanang blangko kung hindi papalitan):</label>
-              <input type="password" id="profilePassword" class="form-control" placeholder="••••••••">
+              <label class="form-label fw-semibold">New Password:</label>
+              <input type="password" id="profPassword" class="form-control" placeholder="Iwanang blangko kung ayaw palitan">
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success">Save Changes</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Changes</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: MANAGE USERS -->
-  <div class="modal fade" id="manageUsersModal" tabindex="-1">
+  <!-- MODAL: USER MANAGEMENT -->
+  <div class="modal fade" id="userManagementModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-users-gear me-2"></i>Manage Users</h5>
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-users-gear me-2"></i>User & Admin Accounts Management</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="table-responsive mb-4">
-            <table class="table table-bordered align-middle">
+          <h6 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-plus me-1"></i>Add New System User / Admin</h6>
+          <form id="newUserForm" class="row g-2 mb-4 bg-light p-3 border rounded">
+            <div class="col-md-3">
+              <input type="text" id="newAccName" class="form-control form-control-sm" placeholder="Full Name" required>
+            </div>
+            <div class="col-md-3">
+              <input type="text" id="newAccUser" class="form-control form-control-sm" placeholder="Username" required>
+            </div>
+            <div class="col-md-3">
+              <input type="password" id="newAccPass" class="form-control form-control-sm" placeholder="Password" required>
+            </div>
+            <div class="col-md-2">
+              <select id="newAccRole" class="form-select form-select-sm">
+                <option value="Staff">Staff</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button type="submit" class="btn btn-sm btn-success w-100"><i class="fa-solid fa-plus"></i></button>
+            </div>
+          </form>
+
+          <h6 class="fw-bold mb-2"><i class="fa-solid fa-users me-1"></i>Existing System Users</h6>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle table-sm">
               <thead class="table-light">
                 <tr>
                   <th>Name</th>
@@ -752,100 +972,210 @@
                   <th class="text-center">Action</th>
                 </tr>
               </thead>
-              <tbody id="userListTableBody"></tbody>
+              <tbody id="userListBody">
+                <!-- User rows rendered dynamically -->
+              </tbody>
             </table>
           </div>
-          <hr>
-          <h6 class="fw-bold text-secondary mb-3">Add New User</h6>
-          <form id="addUserForm" onsubmit="addNewUser(event)">
-            <div class="row g-2">
-              <div class="col-md-3">
-                <input type="text" id="newUserNameInput" class="form-control" placeholder="Full Name" required>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para sa D/Eco Boss Adjustment -->
+  <div class="modal fade" id="bossModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Adjustment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="bossForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Date:</label>
+              <input type="date" id="bossDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Adjustment Type:</label>
+              <select id="bossType" class="form-select">
+                <option value="ADD"> Boss Addition / Capital Cash In (+ Net Profit)</option>
+                <option value="SUB"> Boss Withdrawal / Cash Out (- Net Profit)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount (₱):</label>
+              <input type="number" step="0.01" id="bossAmount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Notes / Description:</label>
+              <input type="text" id="bossNotes" class="form-control" placeholder="e.g., Personal Withdrawal, Additional Capital">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-dark"><i class="fa-solid fa-floppy-disk me-1"></i>Save Adjustment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para sa Pagdaragdag ng Bagong Produkto -->
+  <div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-box-open me-2"></i>Add New Product</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="addProductForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Product Name:</label>
+              <input type="text" id="newProdName" class="form-control" placeholder="e.g., Semento" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Cost / Unit (₱):</label>
+                <input type="number" step="0.01" id="newProdCost" class="form-control" placeholder="0.00" value="0.00" required>
               </div>
-              <div class="col-md-3">
-                <input type="text" id="newUserUsernameInput" class="form-control" placeholder="Username" required>
-              </div>
-              <div class="col-md-3">
-                <input type="password" id="newUserPasswordInput" class="form-control" placeholder="Password" required>
-              </div>
-              <div class="col-md-3">
-                <button type="submit" class="btn btn-success w-100">Add User</button>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Price / Unit (₱):</label>
+                <input type="number" step="0.01" id="newProdPrice" class="form-control" placeholder="0.00" value="0.00" required>
               </div>
             </div>
-          </form>
-        </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Beginning Stock / Stock In Qty:</label>
+              <input type="number" id="newProdStock" class="form-control" value="0" min="0" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Product</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // System Users Database
     let users = JSON.parse(localStorage.getItem('rmv_users')) || [
-      { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" }
+      { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
+      { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
     ];
     let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
 
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
     let stockInHistory = JSON.parse(localStorage.getItem('rmv_stockInHistory')) || [];
+    let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
+    let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
 
     function getTodayDateString() {
       const now = new Date();
-      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
     let todayFormatted = getTodayDateString();
     document.getElementById('saleDate').value = todayFormatted;
     document.getElementById('dailyReportDate').value = todayFormatted;
-    document.getElementById('newProdDate').value = todayFormatted;
+    document.getElementById('bossDate').value = todayFormatted;
+    const nowObj = new Date();
+    document.getElementById('auditMonth').value = `${nowObj.getFullYear()}-${String(nowObj.getMonth() + 1).padStart(2, '0')}`;
+
+    function checkAndUpdateDate() {
+      const currentDate = getTodayDateString();
+      const saleDateInput = document.getElementById('saleDate');
+     
+      if (saleDateInput && saleDateInput.value === todayFormatted) {
+        saleDateInput.value = currentDate;
+      }
+      todayFormatted = currentDate;
+    }
+
+    setInterval(checkAndUpdateDate, 60000);
 
     window.onload = function() {
       addPosRow();
-      checkAuthStatus();
+     
+      if (currentUser) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
+        const adminElements = document.querySelectorAll('.admin-only');
+        adminElements.forEach(el => {
+          el.style.display = currentUser.role === 'Admin' ? 'block' : 'none';
+        });
+      }
+
+      loadMoneyBreakdown();
       generateDailyReport();
       renderCreditTable();
       renderInventoryTable();
-      renderStockInHistory();
+      renderExpensesTable();
     };
 
-    function checkAuthStatus() {
-      const overlay = document.getElementById('loginOverlay');
-      if (!currentUser) {
-        overlay.style.display = 'flex';
+    function saveData() {
+      localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
+      localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
+      localStorage.setItem('rmv_stockInHistory', JSON.stringify(stockInHistory));
+      localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
+      localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
+      localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
+      localStorage.setItem('rmv_users', JSON.stringify(users));
+      if (currentUser) {
+        localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
       } else {
-        overlay.style.display = 'none';
-        document.getElementById('currentUserName').innerText = currentUser.name;
-        applyRolePermissions();
+        localStorage.removeItem('rmv_current_user');
       }
     }
 
-    function applyRolePermissions() {
-      const adminElements = document.querySelectorAll('.admin-only');
-      adminElements.forEach(el => {
-        if (currentUser && currentUser.role === 'Admin') {
-          el.style.display = '';
-        } else {
-          el.style.display = 'none';
-        }
-      });
+    function manualSaveData() {
+      saveData();
+      alert('Tagumpay na nai-save ang lahat ng data sa Local Storage!');
     }
 
+    function handleEnterNext(event, currentInput) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const inputs = Array.from(document.querySelectorAll('.denom-count, .denom-coins'));
+        const currentIndex = inputs.indexOf(currentInput);
+        if (currentIndex > -1 && currentIndex < inputs.length - 1) {
+          inputs[currentIndex + 1].focus();
+          inputs[currentIndex + 1].select();
+        }
+      }
+    }
+
+    // ================= AUTHENTICATION LOGIC =================
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const u = document.getElementById('loginUsername').value.trim();
       const p = document.getElementById('loginPassword').value.trim();
-      const errDiv = document.getElementById('loginError');
 
-      const found = users.find(x => x.username === u && x.password === p);
+      const found = users.find(user => user.username === u && user.password === p);
+
       if (found) {
         currentUser = found;
-        localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
-        errDiv.classList.add('d-none');
+        saveData();
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('loginError').classList.add('d-none');
+        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
+       
+        const adminElements = document.querySelectorAll('.admin-only');
+        adminElements.forEach(el => {
+          el.style.display = currentUser.role === 'Admin' ? 'block' : 'none';
+        });
+
         this.reset();
-        checkAuthStatus();
       } else {
-        errDiv.classList.remove('d-none');
+        document.getElementById('loginError').classList.remove('d-none');
       }
     });
 
@@ -857,157 +1187,318 @@
 
     function openChangeProfileModal() {
       if(!currentUser) return;
-      document.getElementById('profileName').value = currentUser.name;
-      document.getElementById('profilePassword').value = '';
+      document.getElementById('profDisplayName').value = currentUser.name;
+      document.getElementById('profPassword').value = '';
       new bootstrap.Modal(document.getElementById('changeProfileModal')).show();
     }
 
-    function updateProfile(e) {
+    document.getElementById('changeProfileForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const newName = document.getElementById('profileName').value.trim();
-      const newPass = document.getElementById('profilePassword').value.trim();
-
-      currentUser.name = newName;
+      currentUser.name = document.getElementById('profDisplayName').value;
+      const newPass = document.getElementById('profPassword').value;
       if(newPass) currentUser.password = newPass;
 
-      // Update in users array
-      const idx = users.findIndex(x => x.username === currentUser.username);
-      if(idx !== -1) {
-        users[idx] = currentUser;
-      }
+      const uIndex = users.findIndex(u => u.id === currentUser.id);
+      if(uIndex > -1) users[uIndex] = currentUser;
 
-      localStorage.setItem('rmv_users', JSON.stringify(users));
-      localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
-      document.getElementById('currentUserName').innerText = currentUser.name;
-
+      saveData();
+      document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
+      alert('Profile successfully updated!');
       bootstrap.Modal.getInstance(document.getElementById('changeProfileModal')).hide();
-      alert('Tagumpay na na-update ang profile!');
-    }
+    });
 
     function openUserManagementModal() {
       renderUserList();
-      new bootstrap.Modal(document.getElementById('manageUsersModal')).show();
+      new bootstrap.Modal(document.getElementById('userManagementModal')).show();
     }
 
     function renderUserList() {
-      const tbody = document.getElementById('userListTableBody');
+      const tbody = document.getElementById('userListBody');
       tbody.innerHTML = '';
-      users.forEach(u => {
+      users.forEach((u, index) => {
         tbody.innerHTML += `
           <tr>
-            <td class="fw-bold">${u.name}</td>
-            <td>${u.username}</td>
+            <td>${u.name}</td>
+            <td><code>${u.username}</code></td>
             <td><span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-secondary'}">${u.role}</span></td>
             <td class="text-center">
-              ${u.username !== 'admin' ? `<button class="btn btn-sm btn-outline-danger border-0" onclick="deleteUser('${u.username}')"><i class="fa-solid fa-trash"></i></button>` : '<span class="text-muted small">Protected</span>'}
+              ${u.id !== 1 ? `<button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteUser(${index})"><i class="fa-solid fa-trash"></i></button>` : `<small class="text-muted">Master</small>`}
             </td>
           </tr>
         `;
       });
     }
 
-    function addNewUser(e) {
+    document.getElementById('newUserForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const name = document.getElementById('newUserNameInput').value.trim();
-      const username = document.getElementById('newUserUsernameInput').value.trim();
-      const password = document.getElementById('newUserPasswordInput').value.trim();
-
-      if(users.some(x => x.username === username)) {
-        alert('Mayroon nang gumagamit ng username na ito!');
-        return;
-      }
-
-      users.push({ id: Date.now(), name, username, password, role: "Staff" });
-      localStorage.setItem('rmv_users', JSON.stringify(users));
-      document.getElementById('addUserForm').reset();
+      users.push({
+        id: Date.now(),
+        name: document.getElementById('newAccName').value,
+        username: document.getElementById('newAccUser').value,
+        password: document.getElementById('newAccPass').value,
+        role: document.getElementById('newAccRole').value
+      });
+      saveData();
+      this.reset();
       renderUserList();
-      alert('Tagumpay na naidagdag ang bagong user!');
-    }
+    });
 
-    function deleteUser(username) {
-      if(confirm(`Sigurado ka bang gusto mong tanggalin si ${username}?`)) {
-        users = users.filter(x => x.username !== username);
-        localStorage.setItem('rmv_users', JSON.stringify(users));
+    function deleteUser(index) {
+      if(confirm('Sigurado ka bang gusto mong alisin ang user na ito?')) {
+        users.splice(index, 1);
+        saveData();
         renderUserList();
       }
     }
 
-    function saveData() {
-      localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
-      localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
-      localStorage.setItem('rmv_stockInHistory', JSON.stringify(stockInHistory));
-      localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
-    }
+    // ================= POS & INVENTORY ONLY LOGIC =================
+    function toggleInventoryOnlyMode() {
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
+      const priceCols = document.querySelectorAll('.price-col');
+      const containerBox = document.getElementById('containerSectionBox');
+      const financialBox = document.getElementById('financialSectionBox');
+      const creditSection = document.getElementById('creditFieldsSection');
+      const locationSelect = document.getElementById('transactionLocation');
 
-    function manualSaveData() {
-      saveData();
-      alert('Tagumpay na nai-save ang data!');
+      priceCols.forEach(col => col.style.display = isInventoryOnly ? 'none' : '');
+      containerBox.style.display = isInventoryOnly ? 'none' : 'block';
+      financialBox.style.display = isInventoryOnly ? 'none' : 'flex';
+      creditSection.style.display = 'none';
+
+      if(isInventoryOnly) {
+        locationSelect.value = 'Inventory Only';
+        document.getElementById('totalAmount').value = '0.00';
+      } else {
+        locationSelect.value = 'Hiway';
+      }
+
+      const rows = document.querySelectorAll('#posItemsBody tr');
+      rows.forEach(row => {
+        const costInput = row.querySelector('.pos-cost').closest('td');
+        const priceInput = row.querySelector('.pos-price').closest('td');
+        const subtotalInput = row.querySelector('.pos-subtotal').closest('td');
+
+        costInput.style.display = isInventoryOnly ? 'none' : '';
+        priceInput.style.display = isInventoryOnly ? 'none' : '';
+        subtotalInput.style.display = isInventoryOnly ? 'none' : '';
+      });
     }
 
     function addPosRow() {
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
       const tbody = document.getElementById('posItemsBody');
       const rowId = Date.now() + Math.random().toString(36).substring(2, 5);
-      tbody.insertAdjacentHTML('beforeend', `
+     
+      const displayStyle = isInventoryOnly ? 'style="display: none;"' : '';
+
+      const rowHTML = `
         <tr id="row-${rowId}">
-          <td><input type="text" class="form-control form-control-sm pos-name" placeholder="Pangalan ng Produkto" required></td>
-          <td><input type="text" class="form-control form-control-sm pos-desc" placeholder="Description"></td>
+          <td>
+            <input type="text" class="form-control form-control-sm pos-name" placeholder="Pangalan ng Produkto" required>
+          </td>
+          <td>
+            <input type="text" class="form-control form-control-sm pos-desc" placeholder="Description / Specification">
+          </td>
           <td><input type="number" class="form-control form-control-sm pos-qty" value="1" min="1" oninput="calculateTotal()" required></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" required></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" required></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm bg-light pos-subtotal" readonly></td>
-          <td class="col-action"><button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="document.getElementById('row-${rowId}').remove(); calculateTotal();"><i class="fa-solid fa-trash-can"></i></button></td>
+          <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" ${isInventoryOnly ? '' : 'required'}></td>
+          <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" ${isInventoryOnly ? '' : 'required'}></td>
+          <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm bg-light pos-subtotal" placeholder="0.00" readonly></td>
+          <td class="col-action no-print">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removePosRow('row-${rowId}')">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
         </tr>
-      `);
+      `;
+      tbody.insertAdjacentHTML('beforeend', rowHTML);
+      calculateTotal();
+    }
+
+    function removePosRow(rowId) {
+      const rows = document.querySelectorAll('#posItemsBody tr');
+      if (rows.length > 1) {
+        document.getElementById(rowId).remove();
+        calculateTotal();
+      } else {
+        alert('Kailangang mayroong kahit isang produkto.');
+      }
+    }
+
+    function toggleContainerFields() {
+      const status = document.getElementById('containerStatus').value;
+      const qtyGroup = document.querySelector('.container-qty-group');
+      const depositGroup = document.querySelector('.container-deposit-group');
+
+      if (status === 'HIRAM') {
+        qtyGroup.style.display = 'block';
+        depositGroup.style.display = 'none';
+        document.getElementById('containerDepositRate').value = '0';
+      } else if (status === 'DEPOSIT') {
+        qtyGroup.style.display = 'block';
+        depositGroup.style.display = 'block';
+      } else {
+        qtyGroup.style.display = 'none';
+        depositGroup.style.display = 'none';
+        document.getElementById('containerDepositRate').value = '0';
+      }
       calculateTotal();
     }
 
     function calculateTotal() {
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
+      if (isInventoryOnly) return;
+
+      const rows = document.querySelectorAll('#posItemsBody tr');
       let grandTotal = 0;
-      document.querySelectorAll('#posItemsBody tr').forEach(row => {
+      rows.forEach(row => {
         const qty = parseFloat(row.querySelector('.pos-qty').value) || 0;
         const price = parseFloat(row.querySelector('.pos-price').value) || 0;
-        const sub = qty * price;
-        row.querySelector('.pos-subtotal').value = sub.toFixed(2);
-        grandTotal += sub;
+        const subtotal = qty * price;
+        row.querySelector('.pos-subtotal').value = subtotal.toFixed(2);
+        grandTotal += subtotal;
       });
+
+      const status = document.getElementById('containerStatus').value;
+      if (status === 'DEPOSIT') {
+        const cQty = parseFloat(document.getElementById('containerQty').value) || 0;
+        const cRate = parseFloat(document.getElementById('containerDepositRate').value) || 0;
+        grandTotal += (cQty * cRate);
+      }
+
       document.getElementById('totalAmount').value = grandTotal.toFixed(2);
       calculateBalance();
     }
 
     function toggleCreditFields() {
-      const type = document.getElementById('paymentType').value;
-      document.getElementById('creditFieldsSection').style.display = type === 'FULL' ? 'none' : 'block';
-      if(type === 'FULL') document.getElementById('amountPaidNow').value = document.getElementById('totalAmount').value;
+      const paymentType = document.getElementById('paymentType').value;
+      const creditSection = document.getElementById('creditFieldsSection');
+      if (paymentType === 'FULL') {
+        creditSection.style.display = 'none';
+        document.getElementById('amountPaidNow').value = document.getElementById('totalAmount').value;
+      } else {
+        creditSection.style.display = 'block';
+        if (paymentType === 'CREDIT') {
+          document.getElementById('amountPaidNow').value = '0.00';
+        }
+      }
       calculateBalance();
     }
 
     function calculateBalance() {
       const total = parseFloat(document.getElementById('totalAmount').value) || 0;
-      const type = document.getElementById('paymentType').value;
-      let paid = type === 'FULL' ? total : (type === 'CREDIT' ? 0 : (parseFloat(document.getElementById('amountPaidNow').value) || 0));
-      document.getElementById('remainingBalance').value = Math.max(0, total - paid).toFixed(2);
+      const paymentType = document.getElementById('paymentType').value;
+      let paidNow = parseFloat(document.getElementById('amountPaidNow').value) || 0;
+
+      if (paymentType === 'FULL') paidNow = total;
+      if (paymentType === 'CREDIT') paidNow = 0;
+
+      const balance = Math.max(0, total - paidNow);
+      document.getElementById('remainingBalance').value = balance.toFixed(2);
     }
 
     document.getElementById('posForm').addEventListener('submit', function(e) {
       e.preventDefault();
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
+
       const saleDate = document.getElementById('saleDate').value;
       const custName = document.getElementById('customerName').value;
       const location = document.getElementById('transactionLocation').value;
-      const total = parseFloat(document.getElementById('totalAmount').value) || 0;
-      const paymentType = document.getElementById('paymentType').value;
-      const method = document.getElementById('paymentMethod').value;
-      let paid = paymentType === 'FULL' ? total : (paymentType === 'CREDIT' ? 0 : (parseFloat(document.getElementById('amountPaidNow').value) || 0));
-      const balance = total - paid;
-     
+
+      let total = 0;
+      let paid = 0;
+      let balance = 0;
+      let status = "PAID";
+      let method = "Inventory Update";
+
+      if (!isInventoryOnly) {
+        total = parseFloat(document.getElementById('totalAmount').value) || 0;
+        const paymentType = document.getElementById('paymentType').value;
+        method = document.getElementById('paymentMethod').value;
+        paid = parseFloat(document.getElementById('amountPaidNow').value) || 0;
+       
+        if (paymentType === 'FULL') paid = total;
+        if (paymentType === 'CREDIT') paid = 0;
+
+        balance = total - paid;
+        if (balance > 0 && paid > 0) status = "PARTIAL";
+        if (balance > 0 && paid === 0) status = "UNPAID";
+      }
+
+      const itemRows = document.querySelectorAll('#posItemsBody tr');
       let productSummary = [];
+      let itemsPurchasedList = [];
       let totalCostOfGoods = 0;
-      document.querySelectorAll('#posItemsBody tr').forEach(row => {
+
+      itemRows.forEach(row => {
         const name = row.querySelector('.pos-name').value.trim();
+        const desc = row.querySelector('.pos-desc').value.trim();
         const qty = parseFloat(row.querySelector('.pos-qty').value) || 0;
-        const cost = parseFloat(row.querySelector('.pos-cost').value) || 0;
+        const cost = isInventoryOnly ? 0 : (parseFloat(row.querySelector('.pos-cost').value) || 0);
+        const price = isInventoryOnly ? 0 : (parseFloat(row.querySelector('.pos-price').value) || 0);
+
         totalCostOfGoods += (qty * cost);
-        productSummary.push(`${name} (x${qty})`);
+        if(name) {
+          let itemString = desc ? `${name} (${desc}) (x${qty})` : `${name} (x${qty})`;
+          productSummary.push(itemString);
+          itemsPurchasedList.push({
+            name: name,
+            desc: desc,
+            qty: qty,
+            cost: cost,
+            price: price,
+            subtotal: qty * price,
+            location: location,
+            date: saleDate,
+            customer: custName
+          });
+
+          const invItem = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
+          if(invItem) {
+            if (isInventoryOnly) {
+              invItem.ending += qty;
+              invItem.stockIn += qty;
+            } else {
+              invItem.ending = Math.max(0, invItem.ending - qty);
+            }
+          } else {
+            inventory.push({
+              name: name,
+              cost: cost,
+              price: price,
+              beginning: isInventoryOnly ? qty : 0,
+              stockIn: isInventoryOnly ? qty : 0,
+              ending: qty
+            });
+          }
+
+          if (isInventoryOnly) {
+            stockInHistory.push({
+              date: saleDate,
+              product: name,
+              qty: qty,
+              note: `Manual Entry / ${custName}`
+            });
+          }
+        }
       });
+
+      let cInfo = "Wala";
+      if (!isInventoryOnly) {
+        const cStatus = document.getElementById('containerStatus').value;
+        const cQty = document.getElementById('containerQty').value || 0;
+        const cRate = parseFloat(document.getElementById('containerDepositRate').value) || 0;
+
+        if (cStatus === 'HIRAM') {
+          cInfo = `Hiram (${cQty} pcs)`;
+        } else if (cStatus === 'DEPOSIT') {
+          cInfo = `May Deposito (${cQty} pcs - ₱${(cQty * cRate).toFixed(2)})`;
+        }
+      }
+
+      const paymentHistory = [];
+      if (paid > 0) {
+        paymentHistory.push({ amount: paid, method: method, date: saleDate });
+      }
 
       transactions.push({
         id: Date.now(),
@@ -1015,75 +1506,502 @@
         customer: custName,
         location: location,
         product: productSummary.join(', '),
+        itemsList: itemsPurchasedList,
+        containerInfo: cInfo,
         total: total,
         totalCost: totalCostOfGoods,
+        netProfit: total - totalCostOfGoods,
         paid: paid,
         balance: balance,
-        status: balance === 0 ? "PAID" : (paid > 0 ? "PARTIAL" : "UNPAID"),
-        payments: paid > 0 ? [{ amount: paid, method: method, date: saleDate }] : []
+        dueDate: isInventoryOnly ? 'N/A' : (document.getElementById('dueDate').value || 'N/A'),
+        status: status,
+        payments: paymentHistory
       });
 
       saveData();
-      alert('Tagumpay na na-encode para sa petsang: ' + saleDate);
+      alert(isInventoryOnly ? 'Tagumpay na naidagdag sa Inventory!' : 'Transaction saved successfully!');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
+      document.getElementById('inventoryOnlyMode').checked = false;
+      toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
     });
+
+    // ================= ADD PRODUCT, EDIT & STOCK-IN INVENTORY LOGIC =================
+    document.getElementById('addProductForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newProdName').value.trim();
+      const cost = parseFloat(document.getElementById('newProdCost').value) || 0;
+      const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
+      const qty = parseInt(document.getElementById('newProdStock').value) || 0;
+      const currentDate = getTodayDateString();
+
+      let existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+      if(existing) {
+        existing.cost = cost;
+        existing.price = price;
+        existing.stockIn += qty;
+        existing.ending += qty;
+      } else {
+        inventory.push({
+          name: name,
+          cost: cost,
+          price: price,
+          beginning: qty,
+          stockIn: 0,
+          ending: qty
+        });
+      }
+
+      if(qty > 0) {
+        stockInHistory.push({
+          date: currentDate,
+          product: name,
+          qty: qty,
+          note: existing ? 'Nagdagdag ng Stock' : 'Bagong Produkto / Beginning Stock'
+        });
+      }
+
+      saveData();
+      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+      this.reset();
+      renderInventoryTable();
+      renderStockInHistory();
+      alert('Tagumpay na naidagdag ang produkto at nailagay sa talaan!');
+    });
+
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      const tfoot = document.getElementById('inventoryTableFooter');
+      tbody.innerHTML = '';
+
+      let totalCostVal = 0;
+      let totalInventoryValue = 0;
+
+      inventory.forEach((item, index) => {
+        let sold = (item.beginning + item.stockIn) - item.ending;
+        if (sold < 0) sold = 0;
+
+        totalCostVal += (item.ending * item.cost);
+        totalInventoryValue += (item.ending * item.price);
+
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="text" class="form-control form-control-sm fw-bold" value="${item.name}" onchange="updateInventoryItem(${index}, 'name', this.value)"></td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm text-center" value="${item.cost}" onchange="updateInventoryItem(${index}, 'cost', this.value)"></td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm text-center" value="${item.price}" onchange="updateInventoryItem(${index}, 'price', this.value)"></td>
+            <td class="text-center">${item.beginning}</td>
+            <td class="text-center text-success fw-bold">+${item.stockIn}</td>
+            <td class="text-center text-danger">${sold}</td>
+            <td><input type="number" class="form-control form-control-sm text-center fw-bold text-primary inventory-input mx-auto" value="${item.ending}" onchange="updateInventoryItem(${index}, 'ending', this.value)"></td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})" title="Tanggalin ang Produkto">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (inventory.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang nakatalang produkto sa inventory.</td></tr>`;
+      }
+
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-end">Total Inventory Valuation (Puhunan / Presyo):</td>
+          <td colspan="2" class="text-start text-primary">₱${totalCostVal.toFixed(2)} (Cost) / ₱${totalInventoryValue.toFixed(2)} (SRP)</td>
+        </tr>
+      `;
+      renderCustomerSalesLog();
+    }
+
+    function updateInventoryItem(index, field, value) {
+      if (field === 'name') {
+        inventory[index].name = value.trim();
+      } else {
+        inventory[index][field] = parseFloat(value) || 0;
+      }
+      saveData();
+      renderInventoryTable();
+    }
+
+    function deleteInventoryItem(index) {
+      if (confirm('Sigurado ka bang gusto mong tanggalin ang produktong ito sa inventory?')) {
+        inventory.splice(index, 1);
+        saveData();
+        renderInventoryTable();
+        alert('Naalis na sa inventory ang produkto.');
+      }
+    }
+
+    function renderStockInHistory() {
+      const tbody = document.getElementById('stockInHistoryBody');
+      const searchQuery = document.getElementById('searchStockInInput') ? document.getElementById('searchStockInInput').value.toLowerCase() : '';
+      tbody.innerHTML = '';
+
+      const filtered = stockInHistory.filter(item =>
+        item.product.toLowerCase().includes(searchQuery) || item.date.includes(searchQuery)
+      );
+
+      filtered.slice().reverse().forEach(item => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.date}</td>
+            <td class="fw-bold">${item.product}</td>
+            <td class="text-center text-success fw-bold">+${item.qty}</td>
+            <td><span class="badge bg-info text-dark">${item.note}</span></td>
+          </tr>
+        `;
+      });
+
+      if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Walang nakitang tala ng pagdadagdag ng produkto.</td></tr>`;
+      }
+    }
+
+    function renderCustomerSalesLog() {
+      const tbody = document.getElementById('customerSalesLogBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let logs = [];
+      transactions.forEach(t => {
+        if (t.itemsList && t.itemsList.length > 0) {
+          t.itemsList.forEach(item => {
+            logs.push({
+              date: t.date,
+              customer: t.customer,
+              location: t.location,
+              product: item.name + (item.desc ? ` (${item.desc})` : ''),
+              qty: item.qty,
+              cost: item.cost,
+              price: item.price,
+              total: item.subtotal
+            });
+          });
+        }
+      });
+
+      logs.slice().reverse().forEach(log => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${log.date}</td>
+            <td class="fw-bold">${log.customer}</td>
+            <td><span class="badge bg-secondary">${log.location}</span></td>
+            <td>${log.product}</td>
+            <td class="text-center">${log.qty}</td>
+            <td class="text-end">₱${log.cost.toFixed(2)}</td>
+            <td class="text-end">₱${log.price.toFixed(2)}</td>
+            <td class="text-end fw-bold text-success">₱${log.total.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitalang benta sa mga customer.</td></tr>`;
+      }
+    }
+
+    // ================= DAILY REPORT & MONEY BREAKDOWN LOGIC =================
+    let currentTargetCashInDrawer = 0;
 
     function generateDailyReport() {
       const selectedDate = document.getElementById('dailyReportDate').value;
       const tbody = document.getElementById('dailyTableBody');
       tbody.innerHTML = '';
-      let daySales = 0, dayCollected = 0, dayNet = 0, count = 0;
 
-      transactions.forEach((t, index) => {
+      let daySales = 0;
+      let dayCollected = 0;
+      let dayNetProfit = 0;
+      let count = 0;
+
+      let totalGCash = 0;
+      let totalBT = 0;
+      let totalCheque = 0;
+
+      const filtered = transactions.filter(t => t.date === selectedDate || t.payments.some(p => p.date === selectedDate));
+
+      filtered.forEach((t, index) => {
         if(t.date === selectedDate) {
           daySales += t.total;
-          dayNet += (t.total - (t.totalCost || 0));
-          count++;
+          dayNetProfit += (t.netProfit || (t.total - (t.totalCost || 0)));
         }
+       
         t.payments.forEach(p => {
-          if(p.date === selectedDate) dayCollected += p.amount;
+          if (p.date === selectedDate) {
+            dayCollected += p.amount;
+            if (p.method === 'GCash') totalGCash += p.amount;
+            else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
+            else if (p.method === 'Cheque') totalCheque += p.amount;
+          }
         });
+       
+        count++;
 
-        if(t.date === selectedDate) {
-          tbody.innerHTML += `
-            <tr>
-              <td>${index + 1}</td>
-              <td class="fw-bold">${t.customer}</td>
-              <td>${t.location}</td>
-              <td>${t.product}</td>
-              <td>₱${(t.totalCost || 0).toFixed(2)}</td>
-              <td>₱${t.total.toFixed(2)}</td>
-              <td class="text-success">₱${t.paid.toFixed(2)}</td>
-              <td class="text-danger">₱${t.balance.toFixed(2)}</td>
-              <td class="text-success fw-bold">₱${(t.total - (t.totalCost || 0)).toFixed(2)}</td>
-              <td>${t.payments.length ? t.payments[t.payments.length-1].method : 'N/A'}</td>
-              <td class="text-center no-print">
-                <button class="btn btn-sm btn-outline-primary border-0" onclick="openEditModal(${t.id})"><i class="fa-solid fa-pen"></i></button>
-              </td>
-            </tr>
-          `;
-        }
+        const lastMethod = t.payments.length > 0 ? t.payments[t.payments.length - 1].method : 'N/A';
+        let locBadge = '<span class="badge bg-primary">Hiway</span>';
+        if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
+        if (t.location === 'Inventory Only') locBadge = '<span class="badge bg-secondary">Inventory Only</span>';
+
+        const txCost = t.totalCost || 0;
+        const netProf = t.total - txCost;
+
+        tbody.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td class="fw-bold">${t.customer}</td>
+            <td>${locBadge}</td>
+            <td>${t.product}</td>
+            <td><span class="badge bg-secondary">${t.containerInfo || 'Wala'}</span></td>
+            <td class="text-secondary fw-semibold">₱${txCost.toFixed(2)}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
+            <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
+            <td>${lastMethod}</td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-primary border-0 p-1" onclick="openEditTransactionModal(${t.id})" title="Edit Transaction & Cost">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteTransaction(${t.id})" title="Delete Transaction">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
       });
 
-      if(!count) tbody.innerHTML = `<tr><td colspan="11" class="text-center text-muted py-3">Walang transaksyon sa petsang ito (${selectedDate}).</td></tr>`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
+      }
+
+      currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque));
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
-      document.getElementById('dailyTotalNetProfit').innerText = `₱${dayNet.toFixed(2)}`;
+      document.getElementById('dailyTotalNetProfit').innerText = `₱${dayNetProfit.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;
+
+      document.getElementById('totalCollectionAll').innerText = `₱${dayCollected.toFixed(2)}`;
+      document.getElementById('lessGCash').innerText = `-₱${totalGCash.toFixed(2)}`;
+      document.getElementById('lessBT').innerText = `-₱${totalBT.toFixed(2)}`;
+      document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
+      document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
+
+      loadMoneyBreakdown();
     }
 
+    // Helper functions for Edit & Delete Transactions
+    function openEditTransactionModal(id) {
+      const tx = transactions.find(t => t.id === id);
+      if(!tx) return;
+
+      document.getElementById('editTxId').value = tx.id;
+      document.getElementById('editCustomerName').value = tx.customer;
+      document.getElementById('editLocation').value = tx.location;
+      document.getElementById('editProduct').value = tx.product;
+      document.getElementById('editContainerInfo').value = tx.containerInfo;
+      document.getElementById('editTotalCost').value = tx.totalCost || 0;
+      document.getElementById('editTotal').value = tx.total;
+      document.getElementById('editPaid').value = tx.paid;
+      document.getElementById('editBalance').value = tx.balance;
+
+      new bootstrap.Modal(document.getElementById('editTransactionModal')).show();
+    }
+
+    function calculateEditBalance() {
+      const total = parseFloat(document.getElementById('editTotal').value) || 0;
+      const paid = parseFloat(document.getElementById('editPaid').value) || 0;
+      document.getElementById('editBalance').value = Math.max(0, total - paid).toFixed(2);
+    }
+
+    document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const id = parseInt(document.getElementById('editTxId').value);
+      const tx = transactions.find(t => t.id === id);
+      if(!tx) return;
+
+      tx.customer = document.getElementById('editCustomerName').value;
+      tx.location = document.getElementById('editLocation').value;
+      tx.product = document.getElementById('editProduct').value;
+      tx.containerInfo = document.getElementById('editContainerInfo').value;
+      tx.totalCost = parseFloat(document.getElementById('editTotalCost').value) || 0;
+      tx.total = parseFloat(document.getElementById('editTotal').value) || 0;
+      tx.paid = parseFloat(document.getElementById('editPaid').value) || 0;
+      tx.balance = parseFloat(document.getElementById('editBalance').value) || 0;
+      tx.netProfit = tx.total - tx.totalCost;
+
+      if(tx.balance === 0) tx.status = 'PAID';
+      else if(tx.paid > 0) tx.status = 'PARTIAL';
+      else tx.status = 'UNPAID';
+
+      saveData();
+      bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
+      generateDailyReport();
+      renderCreditTable();
+      alert('Tagumpay na na-update ang transaksyon!');
+    });
+
+    function deleteTransaction(id) {
+      if(confirm('Sigurado ka bang gusto mong tanggalin ang transaksyong ito?')) {
+        transactions = transactions.filter(t => t.id !== id);
+        saveData();
+        generateDailyReport();
+        renderCreditTable();
+        alert('Na-delete na ang transaksyon.');
+      }
+    }
+
+    function viewDailyReportForDate(dateStr) {
+      document.getElementById('dailyReportDate').value = dateStr;
+      generateDailyReport();
+      const dailyTabButton = document.getElementById('daily-tab');
+      const tab = new bootstrap.Tab(dailyTabButton);
+      tab.show();
+    }
+
+    // GLOBAL SEARCH ALL TRANSACTIONS
+    function renderGlobalSearchResults() {
+      const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
+      const container = document.getElementById('globalSearchResultsWrapper');
+      const tbody = document.getElementById('globalSearchResultsBody');
+      tbody.innerHTML = '';
+
+      if (!query) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.style.display = 'block';
+      const matched = transactions.filter(t =>
+        t.date.includes(query) ||
+        t.customer.toLowerCase().includes(query) ||
+        t.product.toLowerCase().includes(query) ||
+        t.location.toLowerCase().includes(query) ||
+        (t.containerInfo && t.containerInfo.toLowerCase().includes(query))
+      );
+
+      matched.forEach(t => {
+        tbody.innerHTML += `
+          <tr>
+            <td><a href="#" onclick="viewDailyReportForDate('${t.date}')">${t.date}</a></td>
+            <td class="fw-bold">${t.customer}</td>
+            <td><span class="badge bg-secondary">${t.location}</span></td>
+            <td>${t.product}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="openEditTransactionModal(${t.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+              <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteTransaction(${t.id}); renderGlobalSearchResults();"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (matched.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang nakitang transaksyon na tugma sa hinahanap mo.</td></tr>`;
+      }
+    }
+
+    function clearGlobalSearch() {
+      document.getElementById('globalSearchInput').value = '';
+      document.getElementById('globalSearchResultsWrapper').style.display = 'none';
+    }
+
+    function calculateMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      const countInputs = document.querySelectorAll('.denom-count');
+      const subtotalInputs = document.querySelectorAll('.denom-subtotal');
+      const coinsInput = document.querySelector('.denom-coins');
+
+      let totalCounted = 0;
+      let breakdownState = { counts: {}, coins: 0 };
+
+      countInputs.forEach((input, index) => {
+        const denom = parseFloat(input.getAttribute('data-denom')) || 0;
+        const count = parseFloat(input.value) || 0;
+        const subtotal = denom * count;
+       
+        subtotalInputs[index].value = subtotal.toFixed(2);
+        totalCounted += subtotal;
+
+        breakdownState.counts[denom] = count;
+      });
+
+      const coinsValue = parseFloat(coinsInput.value) || 0;
+      totalCounted += coinsValue;
+      breakdownState.coins = coinsValue;
+
+      cashBreakdownData[selectedDate] = breakdownState;
+      saveData();
+
+      document.getElementById('totalCountedCash').innerText = `₱${totalCounted.toFixed(2)}`;
+
+      const discrepancy = totalCounted - currentTargetCashInDrawer;
+      const discEl = document.getElementById('cashDiscrepancy');
+      const statusAlert = document.getElementById('cashStatusAlert');
+
+      discEl.innerText = `₱${discrepancy.toFixed(2)}`;
+
+      if (Math.abs(discrepancy) < 0.01) {
+        discEl.className = "fs-5 fw-bold text-success";
+        statusAlert.className = "alert alert-success text-center p-2 fw-bold mb-0";
+        statusAlert.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Balanse ang Cash sa Drawer! (Exact Match)`;
+      } else if (discrepancy > 0) {
+        discEl.className = "fs-5 fw-bold text-primary";
+        statusAlert.className = "alert alert-warning text-center p-2 fw-bold mb-0";
+        statusAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> May Sobra (Over) na ₱${discrepancy.toFixed(2)}`;
+      } else {
+        discEl.className = "fs-5 fw-bold text-danger";
+        statusAlert.className = "alert alert-danger text-center p-2 fw-bold mb-0";
+        statusAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> May Kulang (Short) na ₱${Math.abs(discrepancy).toFixed(2)}`;
+      }
+    }
+
+    function loadMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      const countInputs = document.querySelectorAll('.denom-count');
+      const coinsInput = document.querySelector('.denom-coins');
+
+      const dayData = cashBreakdownData[selectedDate] || { counts: {}, coins: 0 };
+
+      countInputs.forEach(input => {
+        const denom = input.getAttribute('data-denom');
+        input.value = dayData.counts[denom] !== undefined ? dayData.counts[denom] : '';
+      });
+
+      coinsInput.value = dayData.coins ? dayData.coins : '';
+      calculateMoneyBreakdown();
+    }
+
+    function clearMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      if (confirm('Sigurado ka bang gusto mong i-clear ang cash breakdown para sa petsang ito?')) {
+        delete cashBreakdownData[selectedDate];
+        saveData();
+        loadMoneyBreakdown();
+      }
+    }
+
+    // ================= UTANG & PAYMENTS LOGIC =================
     function renderCreditTable() {
       const creditTbody = document.getElementById('creditTableBody');
       const paidTbody = document.getElementById('paidHistoryTableBody');
       creditTbody.innerHTML = '';
       paidTbody.innerHTML = '';
 
+      let hasCredit = false;
+      let hasPaid = false;
+
       transactions.forEach(t => {
-        if(t.balance > 0) {
+        if (t.balance > 0) {
+          hasCredit = true;
+          let badge = '<span class="badge bg-warning text-dark">May Utang</span>';
+          if(t.status === 'UNPAID') badge = '<span class="badge bg-danger">Purong Utang</span>';
+
           creditTbody.innerHTML += `
             <tr>
               <td class="fw-bold">${t.customer}</td>
@@ -1092,136 +2010,303 @@
               <td>₱${(t.totalCost || 0).toFixed(2)}</td>
               <td class="text-success">₱${t.paid.toFixed(2)}</td>
               <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
-              <td>${t.dueDate || 'N/A'}</td>
-              <td><span class="badge bg-warning text-dark">May Utang</span></td>
-              <td><button class="btn btn-sm btn-success" onclick="makePayment(${t.id})">Magbayad</button></td>
+              <td>${t.dueDate}</td>
+              <td>${badge}</td>
+              <td class="no-print">
+                <button class="btn btn-sm btn-success" onclick="openPaymentModal(${t.id})">
+                  <i class="fa-solid fa-hand-holding-dollar me-1"></i> Magbayad
+                </button>
+              </td>
             </tr>
           `;
-        }
-       
-        t.payments.forEach(p => {
+        } else if (t.total > 0 && t.balance <= 0) {
+          hasPaid = true;
           paidTbody.innerHTML += `
             <tr>
-              <td><span class="badge bg-primary">${p.date}</span></td>
               <td class="fw-bold">${t.customer}</td>
               <td>${t.product}</td>
               <td>₱${t.total.toFixed(2)}</td>
-              <td class="text-success fw-bold">₱${p.amount.toFixed(2)} (${p.method})</td>
-              <td><span class="badge bg-success">Paid / Hulog</span></td>
-              <td class="text-center">-</td>
+              <td class="text-success">₱${t.paid.toFixed(2)}</td>
+              <td><span class="badge bg-success">Fully Paid</span></td>
+              <td class="text-center no-print">
+                <button class="btn btn-sm btn-outline-primary border-0 p-1" onclick="openEditTransactionModal(${t.id})" title="Edit Transaction">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteTransaction(${t.id})" title="Delete Transaction">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </td>
             </tr>
           `;
-        });
-      });
-    }
-
-    function makePayment(id) {
-      const t = transactions.find(item => item.id === id);
-      if(!t) return;
-      const amt = prompt(`Magkano ang ibinayad ni ${t.customer}? (Balance: ₱${t.balance})`, t.balance);
-      const payDate = prompt(`Ilagay ang petsa ng pagbabayad (YYYY-MM-DD):`, getTodayDateString());
-     
-      if(amt && payDate) {
-        const payAmt = parseFloat(amt);
-        if(payAmt > 0) {
-          t.paid += payAmt;
-          t.balance = Math.max(0, t.balance - payAmt);
-          t.status = t.balance === 0 ? 'PAID' : 'PARTIAL';
-          t.payments.push({ amount: payAmt, method: 'Cash', date: payDate });
-          saveData();
-          renderCreditTable();
-          alert('Na-update na ang bayad para sa petsang ' + payDate);
         }
+      });
+
+      if (!hasCredit) {
+        creditTbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang aktibong utang sa kasalukuyan.</td></tr>`;
+      }
+      if (!hasPaid) {
+        paidTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang naitalang fully paid history.</td></tr>`;
       }
     }
 
-    function renderInventoryTable() {
-      const tbody = document.getElementById('inventoryTableBody');
-      tbody.innerHTML = '';
-      inventory.forEach((item, index) => {
-        tbody.innerHTML += `
+    function openPaymentModal(txId) {
+      const tx = transactions.find(t => t.id === txId);
+      if (!tx) return;
+
+      const payAmt = prompt(`Magkano ang ibinayad ni ${tx.customer}?\nKasalukuyang Balanse: ₱${tx.balance.toFixed(2)}`, tx.balance);
+      if (payAmt !== null && payAmt.trim() !== '') {
+        const amount = parseFloat(payAmt);
+        if (isNaN(amount) || amount <= 0) {
+          alert('Mangyaring maglagay ng wastong halaga.');
+          return;
+        }
+
+        if (amount > tx.balance) {
+          alert('Ang ibinayad ay mas malaki kaysa sa natitirang balanse!');
+          return;
+        }
+
+        tx.paid += amount;
+        tx.balance -= amount;
+        if (tx.balance <= 0) {
+          tx.balance = 0;
+          tx.status = 'PAID';
+        } else {
+          tx.status = 'PARTIAL';
+        }
+
+        tx.payments.push({
+          amount: amount,
+          method: 'Cash',
+          date: getTodayDateString()
+        });
+
+        saveData();
+        renderCreditTable();
+        generateDailyReport();
+        alert('Tagumpay na naitala ang bayad!');
+      }
+    }
+
+    // ================= CUSTOMER SEARCH LOOKUP =================
+    function searchCustomerOrder() {
+      const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
+      const resultContainer = document.getElementById('searchResultContainer');
+      const noFound = document.getElementById('noCustomerFound');
+
+      if (!query) {
+        alert('Mangyaring maglagay ng pangalan ng customer.');
+        return;
+      }
+
+      const customerTxs = transactions.filter(t => t.customer.toLowerCase().includes(query));
+
+      if (customerTxs.length === 0) {
+        resultContainer.style.display = 'none';
+        noFound.classList.remove('d-none');
+        return;
+      }
+
+      noFound.classList.add('d-none');
+      resultContainer.style.display = 'block';
+
+      customerTxs.sort((a, b) => b.id - a.id);
+      const lastTx = customerTxs[0];
+
+      document.getElementById('lastOrderCustomer').innerText = lastTx.customer;
+      document.getElementById('lastOrderDate').innerText = lastTx.date;
+      document.getElementById('lastOrderContainer').innerText = lastTx.containerInfo;
+      document.getElementById('lastOrderProducts').innerText = lastTx.product;
+      document.getElementById('lastOrderTotal').innerText = `₱${lastTx.total.toFixed(2)}`;
+      document.getElementById('lastOrderPaid').innerText = `₱${lastTx.paid.toFixed(2)}`;
+      document.getElementById('lastOrderBalance').innerText = `₱${lastTx.balance.toFixed(2)}`;
+
+      const badge = document.getElementById('lastOrderBadge');
+      if (lastTx.balance === 0) {
+        badge.className = 'badge bg-success fs-6';
+        badge.innerText = 'Fully Paid';
+      } else {
+        badge.className = 'badge bg-warning text-dark fs-6';
+        badge.innerText = 'May Balanse';
+      }
+
+      const historyBody = document.getElementById('customerHistoryBody');
+      historyBody.innerHTML = '';
+      customerTxs.forEach(t => {
+        const netProf = t.netProfit || (t.total - (t.totalCost || 0));
+        historyBody.innerHTML += `
           <tr>
-            <td>${item.name}</td>
-            <td>₱${item.cost.toFixed(2)}</td>
-            <td>₱${item.price.toFixed(2)}</td>
-            <td class="text-center">${item.beginning}</td>
-            <td class="text-center text-success">+${item.stockIn}</td>
-            <td class="text-center">0</td>
-            <td class="text-center fw-bold">${item.ending}</td>
-            <td></td>
+            <td>${t.date}</td>
+            <td><span class="badge bg-secondary">${t.location}</span></td>
+            <td>${t.product}</td>
+            <td>${t.containerInfo}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
+            <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
+            <td><span class="badge ${t.balance === 0 ? 'bg-success' : 'bg-warning text-dark'}">${t.status}</span></td>
           </tr>
         `;
       });
     }
 
-    document.getElementById('addProductForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const pDate = document.getElementById('newProdDate').value;
-      const name = document.getElementById('newProdName').value;
-      const cost = parseFloat(document.getElementById('newProdCost').value) || 0;
-      const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
-      const qty = parseInt(document.getElementById('newProdStock').value) || 0;
+    // ================= MONTHLY AUDIT & EXPENSES LOGIC =================
+    function addExpenseRow(desc = '', amount = 0) {
+      const tbody = document.getElementById('expenseTableBody');
+      const rowId = Date.now() + Math.random().toString(36).substring(2, 5);
 
-      inventory.push({ name, cost, price, beginning: qty, stockIn: 0, ending: qty });
-      stockInHistory.push({ date: pDate, product: name, qty: qty, note: 'Bagong Produkto' });
-      saveData();
-      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-      this.reset();
-      renderInventoryTable();
-    });
+      tbody.innerHTML += `
+        <tr id="exp-${rowId}">
+          <td><input type="text" class="form-control form-control-sm exp-desc" value="${desc}" placeholder="Pangalan ng Gastusin o Sahod" onchange="saveExpensesData()"></td>
+          <td><input type="number" step="0.01" class="form-control form-control-sm exp-amount" value="${amount}" placeholder="0.00" oninput="saveExpensesData(); generateMonthlyAudit();"></td>
+          <td class="text-center no-print">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="document.getElementById('exp-${rowId}').remove(); saveExpensesData(); generateMonthlyAudit();">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }
 
-    function renderStockInHistory() {
-      const tbody = document.getElementById('stockInHistoryBody');
+    function renderExpensesTable() {
+      const selectedMonth = document.getElementById('auditMonth').value;
+      const tbody = document.getElementById('expenseTableBody');
       tbody.innerHTML = '';
-      stockInHistory.forEach(s => {
-        tbody.innerHTML += `<tr><td>${s.date}</td><td class="fw-bold">${s.product}</td><td class="text-center text-success">+${s.qty}</td><td>${s.note}</td></tr>`;
+
+      if (!monthlyExpensesData[selectedMonth]) {
+        monthlyExpensesData[selectedMonth] = [
+          { desc: 'Sahod sa Tauhan (Payroll)', amount: 0 },
+          { desc: 'Kuryente at Tubig', amount: 0 },
+          { desc: 'Gasolina / Delivery', amount: 0 },
+          { desc: 'Iba pang Gastusin', amount: 0 }
+        ];
+      }
+
+      monthlyExpensesData[selectedMonth].forEach(item => {
+        addExpenseRow(item.desc, item.amount);
       });
     }
 
-    function openEditModal(id) {
-      const t = transactions.find(x => x.id === id);
-      if(!t) return;
-      document.getElementById('editTxId').value = t.id;
-      document.getElementById('editDate').value = t.date;
-      document.getElementById('editCustomerName').value = t.customer;
-      document.getElementById('editProduct').value = t.product;
-      document.getElementById('editTotal').value = t.total;
-      document.getElementById('editPaid').value = t.paid;
-      new bootstrap.Modal(document.getElementById('editTransactionModal')).show();
-    }
+    function saveExpensesData() {
+      const selectedMonth = document.getElementById('auditMonth').value;
+      const rows = document.querySelectorAll('#expenseTableBody tr');
+      let expList = [];
 
-    document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const id = parseInt(document.getElementById('editTxId').value);
-      const t = transactions.find(x => x.id === id);
-      if(t) {
-        t.date = document.getElementById('editDate').value;
-        t.customer = document.getElementById('editCustomerName').value;
-        t.product = document.getElementById('editProduct').value;
-        t.total = parseFloat(document.getElementById('editTotal').value) || 0;
-        t.paid = parseFloat(document.getElementById('editPaid').value) || 0;
-        t.balance = Math.max(0, t.total - t.paid);
-        saveData();
-        bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
-        generateDailyReport();
-        alert('Na-update na ang transaksyon.');
-      }
-    });
+      rows.forEach(row => {
+        const desc = row.querySelector('.exp-desc').value;
+        const amount = parseFloat(row.querySelector('.exp-amount').value) || 0;
+        expList.push({ desc, amount });
+      });
+
+      monthlyExpensesData[selectedMonth] = expList;
+      saveData();
+    }
 
     function generateMonthlyAudit() {
-      const mVal = document.getElementById('auditMonth').value;
-      let totalSales = 0, totalCost = 0;
+      const selectedMonth = document.getElementById('auditMonth').value; // e.g., '2026-06'
+      renderExpensesTable();
+
+      let totalSales = 0;
+      let totalCost = 0;
+      let totalExpenses = 0;
+
+      const dailyBreakdownMap = {};
+
       transactions.forEach(t => {
-        if(t.date.startsWith(mVal)) {
+        if (t.date && t.date.startsWith(selectedMonth)) {
           totalSales += t.total;
-          totalCost += (t.totalCost || 0);
+          const cost = t.totalCost || 0;
+          totalCost += cost;
+
+          if (!dailyBreakdownMap[t.date]) {
+            dailyBreakdownMap[t.date] = { sales: 0, cost: 0, netProfit: 0 };
+          }
+          dailyBreakdownMap[t.date].sales += t.total;
+          dailyBreakdownMap[t.date].cost += cost;
+          dailyBreakdownMap[t.date].netProfit += (t.total - cost);
         }
       });
+
+      const rows = document.querySelectorAll('#expenseTableBody tr');
+      rows.forEach(row => {
+        totalExpenses += parseFloat(row.querySelector('.exp-amount').value) || 0;
+      });
+
+      const grossProfit = totalSales - totalCost;
+      let netProfit = grossProfit - totalExpenses;
+
+      // Boss adjustments for the month
+      let bossBody = document.getElementById('bossLogsBody');
+      bossBody.innerHTML = '';
+      let bossTotalAdj = 0;
+
+      const filteredBoss = bossAdjustments.filter(b => b.date && b.date.startsWith(selectedMonth));
+      filteredBoss.forEach(b => {
+        const signedAmt = b.type === 'ADD' ? b.amount : -b.amount;
+        bossTotalAdj += signedAmt;
+        bossBody.innerHTML += `
+          <tr>
+            <td>${b.date}</td>
+            <td><span class="badge ${b.type === 'ADD' ? 'bg-success' : 'bg-danger'}">${b.type === 'ADD' ? 'Boss Addition (+)' : 'Boss Withdrawal (-)'}</span> ${b.notes}</td>
+            <td class="${b.type === 'ADD' ? 'text-success' : 'text-danger'} fw-bold">₱${b.amount.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      if (filteredBoss.length === 0) {
+        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang Boss adjustment ngayong buwan.</td></tr>`;
+      }
+
+      netProfit += bossTotalAdj;
+
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
-      document.getElementById('auditGrossProfit').innerText = `₱${(totalSales - totalCost).toFixed(2)}`;
-      document.getElementById('auditNetProfit').innerText = `₱${(totalSales - totalCost).toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
+      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
+      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+
+      // Daily Breakdown Table in Audit Tab
+      const dailyBreakdownBody = document.getElementById('auditDailyBreakdownBody');
+      dailyBreakdownBody.innerHTML = '';
+
+      const sortedDates = Object.keys(dailyBreakdownMap).sort().reverse();
+      sortedDates.forEach(dateStr => {
+        const d = dailyBreakdownMap[dateStr];
+        dailyBreakdownBody.innerHTML += `
+          <tr>
+            <td class="fw-bold">${dateStr}</td>
+            <td class="text-end">₱${d.sales.toFixed(2)}</td>
+            <td class="text-end text-secondary">₱${d.cost.toFixed(2)}</td>
+            <td class="text-end text-success fw-bold">₱${d.netProfit.toFixed(2)}</td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="viewDailyReportForDate('${dateStr}')">
+                <i class="fa-solid fa-eye me-1"></i> View
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (sortedDates.length === 0) {
+        dailyBreakdownBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-2">Walang transaksyon sa buwang ito.</td></tr>`;
+      }
     }
+
+    document.getElementById('bossForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      bossAdjustments.push({
+        date: document.getElementById('bossDate').value,
+        type: document.getElementById('bossType').value,
+        amount: parseFloat(document.getElementById('bossAmount').value) || 0,
+        notes: document.getElementById('bossNotes').value || 'Boss Adjustment'
+      });
+      saveData();
+      bootstrap.Modal.getInstance(document.getElementById('bossModal')).hide();
+      this.reset();
+      document.getElementById('bossDate').value = getTodayDateString();
+      generateMonthlyAudit();
+      alert('Tagumpay na naidagdag ang Boss Adjustment!');
+    });
   </script>
 </body>
 </html>

@@ -1009,6 +1009,7 @@
     let stockInHistory = JSON.parse(localStorage.getItem('rmv_stockInHistory')) || [];
     let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
+    let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
 
     function getTodayDateString() {
       const now = new Date();
@@ -1060,6 +1061,7 @@
       localStorage.setItem('rmv_stockInHistory', JSON.stringify(stockInHistory));
       localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
+      localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
       localStorage.setItem('rmv_users', JSON.stringify(users));
       if (currentUser) {
         localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
@@ -1613,6 +1615,82 @@
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
 
       loadMoneyBreakdown();
+    }
+
+    function calculateMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      const countInputs = document.querySelectorAll('.denom-count');
+      const subtotalInputs = document.querySelectorAll('.denom-subtotal');
+      const coinsInput = document.querySelector('.denom-coins');
+
+      let totalCounted = 0;
+      let breakdownState = { counts: {}, coins: 0 };
+
+      countInputs.forEach((input, index) => {
+        const denom = parseFloat(input.getAttribute('data-denom')) || 0;
+        const count = parseFloat(input.value) || 0;
+        const subtotal = denom * count;
+        
+        subtotalInputs[index].value = subtotal.toFixed(2);
+        totalCounted += subtotal;
+
+        breakdownState.counts[denom] = count;
+      });
+
+      const coinsValue = parseFloat(coinsInput.value) || 0;
+      totalCounted += coinsValue;
+      breakdownState.coins = coinsValue;
+
+      // I-save ang state para sa kasalukuyang petsa
+      cashBreakdownData[selectedDate] = breakdownState;
+      saveData();
+
+      document.getElementById('totalCountedCash').innerText = `₱${totalCounted.toFixed(2)}`;
+
+      const discrepancy = totalCounted - currentTargetCashInDrawer;
+      const discEl = document.getElementById('cashDiscrepancy');
+      const statusAlert = document.getElementById('cashStatusAlert');
+
+      discEl.innerText = `₱${discrepancy.toFixed(2)}`;
+
+      if (Math.abs(discrepancy) < 0.01) {
+        discEl.className = "fs-5 fw-bold text-success";
+        statusAlert.className = "alert alert-success text-center p-2 fw-bold mb-0";
+        statusAlert.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Balanse ang Cash sa Drawer! (Exact Match)`;
+      } else if (discrepancy > 0) {
+        discEl.className = "fs-5 fw-bold text-primary";
+        statusAlert.className = "alert alert-warning text-center p-2 fw-bold mb-0";
+        statusAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> May Sobra (Over) na ₱${discrepancy.toFixed(2)}`;
+      } else {
+        discEl.className = "fs-5 fw-bold text-danger";
+        statusAlert.className = "alert alert-danger text-center p-2 fw-bold mb-0";
+        statusAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> May Kulang (Short) na ₱${Math.abs(discrepancy).toFixed(2)}`;
+      }
+    }
+
+    function loadMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      const countInputs = document.querySelectorAll('.denom-count');
+      const coinsInput = document.querySelector('.denom-coins');
+
+      const dayData = cashBreakdownData[selectedDate] || { counts: {}, coins: 0 };
+
+      countInputs.forEach(input => {
+        const denom = input.getAttribute('data-denom');
+        input.value = dayData.counts[denom] !== undefined ? dayData.counts[denom] : '';
+      });
+
+      coinsInput.value = dayData.coins ? dayData.coins : '';
+      calculateMoneyBreakdown();
+    }
+
+    function clearMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      if (confirm('Sigurado ka bang gusto mong i-clear ang cash breakdown para sa petsang ito?')) {
+        delete cashBreakdownData[selectedDate];
+        saveData();
+        loadMoneyBreakdown();
+      }
     }
   </script>
 </body>

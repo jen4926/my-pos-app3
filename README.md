@@ -60,7 +60,7 @@
     <div class="card p-4 shadow-lg" style="width: 380px; border-top: 5px solid #1976d2;">
       <div class="text-center mb-3">
         <i class="fa-solid fa-store fa-3x text-primary mb-2"></i>
-        <h4 class="fw-bold">RMVillasis POS</h4>
+        <h4 class="fw-bold">RMVillasis Enterprises</h4>
         <p class="text-muted small">Mangyaring mag-log in upang magpatuloy</p>
       </div>
       <form id="loginForm">
@@ -84,7 +84,7 @@
   <nav class="navbar navbar-dark expand-lg mb-4">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold fs-4" href="#">
-        <i class="fa-solid fa-store me-2"></i>RMVillasis POS
+        <i class="fa-solid fa-store me-2"></i>RMVillasis Enterprises
       </a>
       <ul class="nav nav-pills me-auto" id="mainTabs" role="tablist">
         <li class="nav-item">
@@ -108,7 +108,7 @@
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderCustomerSalesLog();">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory(); renderCustomerSalesLog();">
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
@@ -119,8 +119,11 @@
         </li>
       </ul>
 
-      <!-- User Profile, Refresh Button & Account Controls -->
-      <div class="d-flex align-items-center gap-3">
+      <!-- User Profile, Save, Refresh Button & Account Controls -->
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()" title="Save Data to Local Storage">
+          <i class="fa-solid fa-floppy-disk me-1"></i> Save Data
+        </button>
         <button class="btn btn-outline-light btn-sm fw-semibold" onclick="location.reload()" title="Refresh Page">
           <i class="fa-solid fa-rotate me-1"></i> Refresh
         </button>
@@ -132,7 +135,7 @@
             <li><a class="dropdown-item" href="#" onclick="openChangeProfileModal()"><i class="fa-solid fa-key me-2"></i>Change Name / Password</a></li>
             <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users & Admins</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i>Log Out</a></li>
+            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2">Tag Out</i></a></li>
           </ul>
         </div>
       </div>
@@ -151,21 +154,34 @@
               <i class="fa-solid fa-print me-1"></i> I-print ang Page / Resibo
             </button>
           </div>
+          
+          <!-- Inventory Only Mode Toggle -->
+          <div class="alert alert-info py-2 mb-3 d-flex justify-content-between align-items-center">
+            <div>
+              <i class="fa-solid fa-info-circle me-1"></i> <strong>Mode:</strong> Pwede kang magpasok ng item para sa Inventory Lang (Walang halaga/presyo).
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="inventoryOnlyMode" onchange="toggleInventoryOnlyMode()">
+              <label class="form-check-label fw-semibold" for="inventoryOnlyMode">Inventory Only Mode (No Price/Cost)</label>
+            </div>
+          </div>
+
           <form id="posForm">
             <div class="row g-3 mb-3">
               <div class="col-md-4">
-                <label class="form-label fw-semibold">Date of Sale:</label>
+                <label class="form-label fw-semibold">Date of Sale / Log:</label>
                 <input type="date" id="saleDate" class="form-control" required>
               </div>
               <div class="col-md-4">
-                <label class="form-label fw-semibold">Customer Name:</label>
-                <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz" required>
+                <label class="form-label fw-semibold">Customer / Reference Name:</label>
+                <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz o Stock In" required>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Transaction Location / Uri:</label>
                 <select id="transactionLocation" class="form-select" required>
                   <option value="Hiway">Hiway</option>
                   <option value="Byahe">Byahe</option>
+                  <option value="Inventory Only">Inventory Only / Stock Update</option>
                 </select>
               </div>
             </div>
@@ -178,9 +194,9 @@
                     <th>Product Name</th>
                     <th>Description</th>
                     <th style="width: 100px;">Qty</th>
-                    <th style="width: 130px;">Cost / Unit (₱)</th>
-                    <th style="width: 130px;">Price / Unit (₱)</th>
-                    <th style="width: 130px;">Subtotal (₱)</th>
+                    <th style="width: 130px;" class="price-col">Cost / Unit (₱)</th>
+                    <th style="width: 130px;" class="price-col">Price / Unit (₱)</th>
+                    <th style="width: 130px;" class="price-col">Subtotal (₱)</th>
                     <th class="col-action"><i class="fa-solid fa-trash"></i></th>
                   </tr>
                 </thead>
@@ -194,7 +210,7 @@
             </div>
 
             <!-- CONTAINER / DEPOSIT DETAILS -->
-            <div class="card p-3 bg-light border mb-3">
+            <div class="card p-3 bg-light border mb-3" id="containerSectionBox">
               <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-box-open me-2"></i>Container / Lalagyan Details</h6>
               <div class="row g-3">
                 <div class="col-md-4">
@@ -216,7 +232,7 @@
               </div>
             </div>
 
-            <div class="row g-3 mt-2">
+            <div class="row g-3 mt-2" id="financialSectionBox">
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Total Amount (₱) <small class="text-muted">(Inc. Deposit)</small>:</label>
                 <input type="number" step="0.01" id="totalAmount" class="form-control bg-light fs-5 fw-bold text-primary" readonly placeholder="0.00">
@@ -261,7 +277,7 @@
             </div>
 
             <div class="mt-4 text-end">
-              <button type="submit" class="btn btn-success btn-lg px-4"><i class="fa-solid fa-check me-2"></i>Save Transaction</button>
+              <button type="submit" class="btn btn-success btn-lg px-4"><i class="fa-solid fa-check me-2"></i>Save Transaction / Inventory</button>
             </div>
           </form>
         </div>
@@ -409,7 +425,7 @@
             </div>
           </div>
 
-          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>List of Encoded Transactions Today <small class="text-muted fs-6">(Maaaring i-edit o i-delete ang Detalye at Puhunan)</small></h6>
+          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>List of Encoded Transactions Today</h6>
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
@@ -466,7 +482,6 @@
             </table>
           </div>
 
-          <!-- LISTAHAN NG MGA NAGBAYAD -->
           <div class="border-top pt-4">
             <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-list-check me-2"></i>Listahan ng mga Nakapagbayad na (Paid Accounts History)</h5>
             <div class="table-responsive">
@@ -486,7 +501,6 @@
               </table>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -511,7 +525,6 @@
             </div>
           </div>
 
-          <!-- Result Display Area -->
           <div id="searchResultContainer" style="display: none;">
             <div class="card bg-light border-primary mb-4">
               <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
@@ -620,7 +633,31 @@
             </table>
           </div>
 
-          <!-- MGA BUMILI NG PRODUKTO -->
+          <div class="card p-3 bg-light border mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Talaan kung kelan nagdadagdag ng Produkto (Stock-In History)</h5>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" id="searchStockInInput" class="form-control" placeholder="I-search ang pangalan ng produkto o petsa..." oninput="renderStockInHistory()">
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle bg-white">
+                <thead class="table-light">
+                  <tr>
+                    <th>Petsa (Date Added)</th>
+                    <th>Product Name</th>
+                    <th class="text-center">Ibinagdag (Stock In Qty)</th>
+                    <th>Uri / Note</th>
+                  </tr>
+                </thead>
+                <tbody id="stockInHistoryBody">
+                  <!-- Dynamic Content -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-users me-2"></i>Listahan ng mga Bumili ng Item (Customer Purchases)</h5>
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle bg-white">
@@ -760,6 +797,7 @@
               <select id="editLocation" class="form-select" required>
                 <option value="Hiway">Hiway</option>
                 <option value="Byahe">Byahe</option>
+                <option value="Inventory Only">Inventory Only</option>
               </select>
             </div>
             <div class="mb-3">
@@ -919,46 +957,6 @@
     </div>
   </div>
 
-  <!-- Modal para sa Pagbabayad ng Utang -->
-  <div class="modal fade" id="paymentModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Record Utang Payment</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="payTransactionId">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Customer Name:</label>
-            <input type="text" id="payCustomerName" class="form-control bg-light" readonly required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Current Balance (₱):</label>
-            <input type="number" id="payCurrentBalance" class="form-control bg-light" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-success">Amount Paying Now (₱):</label>
-            <input type="number" step="0.01" id="payAmountInput" class="form-control" placeholder="0.00" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Payment Method:</label>
-            <select id="payMethod" class="form-select">
-              <option value="Cash">Cash</option>
-              <option value="GCash">GCash</option>
-              <option value="Bank Transfer">Bank Transfer (BT)</option>
-              <option value="Cheque">Cheque</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success" onclick="submitUtangPayment()"><i class="fa-solid fa-floppy-disk me-1"></i>Save Payment</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal para sa Pagdaragdag ng Bagong Produkto -->
   <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog">
@@ -984,7 +982,7 @@
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Beginning Stock:</label>
+              <label class="form-label fw-semibold">Beginning Stock / Stock In Qty:</label>
               <input type="number" id="newProdStock" class="form-control" value="0" min="0" required>
             </div>
           </div>
@@ -1008,10 +1006,10 @@
 
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
+    let stockInHistory = JSON.parse(localStorage.getItem('rmv_stockInHistory')) || [];
     let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
 
-    // Helper para makuha ang current date sa format na YYYY-MM-DD
     function getTodayDateString() {
       const now = new Date();
       const year = now.getFullYear();
@@ -1020,7 +1018,6 @@
       return `${year}-${month}-${day}`;
     }
 
-    // Set Initial Dates
     let todayFormatted = getTodayDateString();
     document.getElementById('saleDate').value = todayFormatted;
     document.getElementById('dailyReportDate').value = todayFormatted;
@@ -1028,7 +1025,6 @@
     const nowObj = new Date();
     document.getElementById('auditMonth').value = `${nowObj.getFullYear()}-${String(nowObj.getMonth() + 1).padStart(2, '0')}`;
 
-    // AUTOMATIC DATE CHECKER
     function checkAndUpdateDate() {
       const currentDate = getTodayDateString();
       const saleDateInput = document.getElementById('saleDate');
@@ -1061,6 +1057,7 @@
     function saveData() {
       localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
       localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
+      localStorage.setItem('rmv_stockInHistory', JSON.stringify(stockInHistory));
       localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_users', JSON.stringify(users));
@@ -1069,6 +1066,11 @@
       } else {
         localStorage.removeItem('rmv_current_user');
       }
+    }
+
+    function manualSaveData() {
+      saveData();
+      alert('Tagumpay na nai-save ang lahat ng data sa Local Storage!');
     }
 
     function handleEnterNext(event, currentInput) {
@@ -1181,10 +1183,47 @@
       }
     }
 
-    // ================= POS LOGIC =================
+    // ================= POS & INVENTORY ONLY LOGIC =================
+    function toggleInventoryOnlyMode() {
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
+      const priceCols = document.querySelectorAll('.price-col');
+      const containerBox = document.getElementById('containerSectionBox');
+      const financialBox = document.getElementById('financialSectionBox');
+      const creditSection = document.getElementById('creditFieldsSection');
+      const locationSelect = document.getElementById('transactionLocation');
+
+      priceCols.forEach(col => col.style.display = isInventoryOnly ? 'none' : '');
+      containerBox.style.display = isInventoryOnly ? 'none' : 'block';
+      financialBox.style.display = isInventoryOnly ? 'none' : 'flex';
+      creditSection.style.display = 'none';
+
+      if(isInventoryOnly) {
+        locationSelect.value = 'Inventory Only';
+        document.getElementById('totalAmount').value = '0.00';
+      } else {
+        locationSelect.value = 'Hiway';
+      }
+
+      // Refresh rows display for price columns
+      const rows = document.querySelectorAll('#posItemsBody tr');
+      rows.forEach(row => {
+        const costInput = row.querySelector('.pos-cost').closest('td');
+        const priceInput = row.querySelector('.pos-price').closest('td');
+        const subtotalInput = row.querySelector('.pos-subtotal').closest('td');
+
+        costInput.style.display = isInventoryOnly ? 'none' : '';
+        priceInput.style.display = isInventoryOnly ? 'none' : '';
+        subtotalInput.style.display = isInventoryOnly ? 'none' : '';
+      });
+    }
+
     function addPosRow() {
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
       const tbody = document.getElementById('posItemsBody');
       const rowId = Date.now() + Math.random().toString(36).substring(2, 5);
+      
+      const displayStyle = isInventoryOnly ? 'style="display: none;"' : '';
+
       const rowHTML = `
         <tr id="row-${rowId}">
           <td>
@@ -1194,9 +1233,9 @@
             <input type="text" class="form-control form-control-sm pos-desc" placeholder="Description / Specification">
           </td>
           <td><input type="number" class="form-control form-control-sm pos-qty" value="1" min="1" oninput="calculateTotal()" required></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" required></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" required></td>
-          <td><input type="number" step="0.01" class="form-control form-control-sm bg-light pos-subtotal" placeholder="0.00" readonly></td>
+          <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" ${isInventoryOnly ? '' : 'required'}></td>
+          <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" ${isInventoryOnly ? '' : 'required'}></td>
+          <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm bg-light pos-subtotal" placeholder="0.00" readonly></td>
           <td class="col-action no-print">
             <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="removePosRow('row-${rowId}')">
               <i class="fa-solid fa-trash-can"></i>
@@ -1214,7 +1253,7 @@
         document.getElementById(rowId).remove();
         calculateTotal();
       } else {
-        alert('Kailangang mayroong kahit isang produkto sa resibo.');
+        alert('Kailangang mayroong kahit isang produkto.');
       }
     }
 
@@ -1239,6 +1278,9 @@
     }
 
     function calculateTotal() {
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
+      if (isInventoryOnly) return;
+
       const rows = document.querySelectorAll('#posItemsBody tr');
       let grandTotal = 0;
       rows.forEach(row => {
@@ -1289,21 +1331,31 @@
 
     document.getElementById('posForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const total = parseFloat(document.getElementById('totalAmount').value) || 0;
-      const paymentType = document.getElementById('paymentType').value;
-      const method = document.getElementById('paymentMethod').value;
+      const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
+
       const saleDate = document.getElementById('saleDate').value;
       const custName = document.getElementById('customerName').value;
       const location = document.getElementById('transactionLocation').value;
-      let paid = parseFloat(document.getElementById('amountPaidNow').value) || 0;
-      
-      if (paymentType === 'FULL') paid = total;
-      if (paymentType === 'CREDIT') paid = 0;
 
-      const balance = total - paid;
+      let total = 0;
+      let paid = 0;
+      let balance = 0;
       let status = "PAID";
-      if (balance > 0 && paid > 0) status = "PARTIAL";
-      if (balance > 0 && paid === 0) status = "UNPAID";
+      let method = "Inventory Update";
+
+      if (!isInventoryOnly) {
+        total = parseFloat(document.getElementById('totalAmount').value) || 0;
+        const paymentType = document.getElementById('paymentType').value;
+        method = document.getElementById('paymentMethod').value;
+        paid = parseFloat(document.getElementById('amountPaidNow').value) || 0;
+        
+        if (paymentType === 'FULL') paid = total;
+        if (paymentType === 'CREDIT') paid = 0;
+
+        balance = total - paid;
+        if (balance > 0 && paid > 0) status = "PARTIAL";
+        if (balance > 0 && paid === 0) status = "UNPAID";
+      }
 
       const itemRows = document.querySelectorAll('#posItemsBody tr');
       let productSummary = [];
@@ -1314,8 +1366,8 @@
         const name = row.querySelector('.pos-name').value.trim();
         const desc = row.querySelector('.pos-desc').value.trim();
         const qty = parseFloat(row.querySelector('.pos-qty').value) || 0;
-        const cost = parseFloat(row.querySelector('.pos-cost').value) || 0;
-        const price = parseFloat(row.querySelector('.pos-price').value) || 0;
+        const cost = isInventoryOnly ? 0 : (parseFloat(row.querySelector('.pos-cost').value) || 0);
+        const price = isInventoryOnly ? 0 : (parseFloat(row.querySelector('.pos-price').value) || 0);
 
         totalCostOfGoods += (qty * cost);
         if(name) {
@@ -1333,31 +1385,49 @@
             customer: custName 
           });
 
+          // Update Inventory Stock (Add or Deduct based on transaction type)
           const invItem = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
           if(invItem) {
-            invItem.ending = Math.max(0, invItem.ending - qty);
+            if (isInventoryOnly) {
+              invItem.ending += qty;
+              invItem.stockIn += qty;
+            } else {
+              invItem.ending = Math.max(0, invItem.ending - qty);
+            }
           } else {
             inventory.push({
               name: name,
               cost: cost,
               price: price,
-              beginning: qty,
-              stockIn: 0,
-              ending: 0
+              beginning: isInventoryOnly ? qty : 0,
+              stockIn: isInventoryOnly ? qty : 0,
+              ending: qty
+            });
+          }
+
+          // Kung Inventory Only, itala rin sa Stock-In History
+          if (isInventoryOnly) {
+            stockInHistory.push({
+              date: saleDate,
+              product: name,
+              qty: qty,
+              note: `Manual Entry / ${custName}`
             });
           }
         }
       });
 
-      const cStatus = document.getElementById('containerStatus').value;
-      const cQty = document.getElementById('containerQty').value || 0;
-      const cRate = parseFloat(document.getElementById('containerDepositRate').value) || 0;
       let cInfo = "Wala";
+      if (!isInventoryOnly) {
+        const cStatus = document.getElementById('containerStatus').value;
+        const cQty = document.getElementById('containerQty').value || 0;
+        const cRate = parseFloat(document.getElementById('containerDepositRate').value) || 0;
 
-      if (cStatus === 'HIRAM') {
-        cInfo = `Hiram (${cQty} pcs)`;
-      } else if (cStatus === 'DEPOSIT') {
-        cInfo = `May Deposito (${cQty} pcs - ₱${(cQty * cRate).toFixed(2)})`;
+        if (cStatus === 'HIRAM') {
+          cInfo = `Hiram (${cQty} pcs)`;
+        } else if (cStatus === 'DEPOSIT') {
+          cInfo = `May Deposito (${cQty} pcs - ₱${(cQty * cRate).toFixed(2)})`;
+        }
       }
 
       const paymentHistory = [];
@@ -1378,20 +1448,88 @@
         netProfit: total - totalCostOfGoods,
         paid: paid,
         balance: balance,
-        dueDate: document.getElementById('dueDate').value || 'N/A',
+        dueDate: isInventoryOnly ? 'N/A' : (document.getElementById('dueDate').value || 'N/A'),
         status: status,
         payments: paymentHistory
       });
 
       saveData();
-      alert('Transaction saved successfully! Naka-deduct na rin sa Inventory.');
+      alert(isInventoryOnly ? 'Tagumpay na naidagdag sa Inventory!' : 'Transaction saved successfully!');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
+      document.getElementById('inventoryOnlyMode').checked = false;
+      toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
-      toggleContainerFields();
-      toggleCreditFields();
     });
+
+    // ================= ADD PRODUCT & STOCK-IN HISTORY LOGIC =================
+    document.getElementById('addProductForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newProdName').value.trim();
+      const cost = parseFloat(document.getElementById('newProdCost').value) || 0;
+      const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
+      const qty = parseInt(document.getElementById('newProdStock').value) || 0;
+      const currentDate = getTodayDateString();
+
+      let existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+      if(existing) {
+        existing.cost = cost;
+        existing.price = price;
+        existing.stockIn += qty;
+        existing.ending += qty;
+      } else {
+        inventory.push({
+          name: name,
+          cost: cost,
+          price: price,
+          beginning: qty,
+          stockIn: 0,
+          ending: qty
+        });
+      }
+
+      if(qty > 0) {
+        stockInHistory.push({
+          date: currentDate,
+          product: name,
+          qty: qty,
+          note: existing ? 'Nagdagdag ng Stock' : 'Bagong Produkto / Beginning Stock'
+        });
+      }
+
+      saveData();
+      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+      this.reset();
+      renderInventoryTable();
+      renderStockInHistory();
+      alert('Tagumpay na naidagdag ang produkto at nailagay sa talaan!');
+    });
+
+    function renderStockInHistory() {
+      const tbody = document.getElementById('stockInHistoryBody');
+      const searchQuery = document.getElementById('searchStockInInput') ? document.getElementById('searchStockInInput').value.toLowerCase() : '';
+      tbody.innerHTML = '';
+
+      const filtered = stockInHistory.filter(item => 
+        item.product.toLowerCase().includes(searchQuery) || item.date.includes(searchQuery)
+      );
+
+      filtered.slice().reverse().forEach(item => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.date}</td>
+            <td class="fw-bold">${item.product}</td>
+            <td class="text-center text-success fw-bold">+${item.qty}</td>
+            <td><span class="badge bg-info text-dark">${item.note}</span></td>
+          </tr>
+        `;
+      });
+
+      if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Walang nakitang tala ng pagdadagdag ng produkto.</td></tr>`;
+      }
+    }
 
     // ================= DAILY REPORT & MONEY BREAKDOWN LOGIC =================
     let currentTargetCashInDrawer = 0;
@@ -1426,7 +1564,10 @@
         count++;
 
         const lastMethod = t.payments.length > 0 ? t.payments[t.payments.length - 1].method : 'N/A';
-        const locBadge = t.location === 'Hiway' ? '<span class="badge bg-primary">Hiway</span>' : '<span class="badge bg-info text-dark">Byahe</span>';
+        let locBadge = '<span class="badge bg-primary">Hiway</span>';
+        if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
+        if (t.location === 'Inventory Only') locBadge = '<span class="badge bg-secondary">Inventory Only</span>';
+
         const txCost = t.totalCost || 0;
         const netProf = t.total - txCost;
 

@@ -390,7 +390,6 @@
                 <div class="card p-3 bg-white h-100 border">
                   <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fa-solid fa-scale-balanced me-2"></i>Cash Audit & Deductions</h6>
                  
-                  <!-- NAKA-ILIPAT NA ANG PONDO / CHANGE FUND DITO SA BABA -->
                   <div class="mb-3 bg-warning-subtle p-2 rounded border border-warning">
                     <label class="form-label fw-bold text-dark small mb-1"><i class="fa-solid fa-wallet me-1"></i> Pondo / Change Fund (Idaragdag):</label>
                     <input type="number" step="0.01" min="0" class="form-control form-control-sm fw-bold denom-fund bg-white" id="cashFundInput" placeholder="0.00" oninput="calculateMoneyBreakdown()">
@@ -428,7 +427,6 @@
                     <span class="fs-6 fw-bold text-success" id="breakdownTargetSales">₱0.00</span>
                   </div>
 
-                  <!-- NAIDAGDAG: KASAMANG PONDO SA TARGET CASH IN DRAWER -->
                   <div class="d-flex justify-content-between align-items-center mb-2 bg-warning-subtle p-2 rounded border border-warning-subtle">
                     <span class="fw-bold text-dark small"><i class="fa-solid fa-wallet me-1"></i> Target Cash + Pondo:</span>
                     <span class="fs-5 fw-bold text-primary" id="breakdownTargetWithFund">₱0.00</span>
@@ -1871,70 +1869,66 @@
       cashBreakdownData[selectedDate] = breakdownObj;
       saveData();
 
-      document.getElementById('totalCountedCash').innerText = `₱${totalCounted.toFixed(2)}`;
-
       const targetWithFund = currentTargetCashInDrawer + fundInputVal;
       document.getElementById('breakdownTargetWithFund').innerText = `₱${targetWithFund.toFixed(2)}`;
+      document.getElementById('totalCountedCash').innerText = `₱${totalCounted.toFixed(2)}`;
 
       const discrepancy = totalCounted - targetWithFund;
       const discEl = document.getElementById('cashDiscrepancy');
       const alertEl = document.getElementById('cashStatusAlert');
 
-      discEl.innerText = `₱${Math.abs(discrepancy).toFixed(2)} ${discrepancy > 0 ? '(OVER)' : discrepancy < 0 ? '(SHORT)' : '(EXAKTO)'}`;
+      discEl.innerText = `₱${discrepancy.toFixed(2)}`;
 
       if (Math.abs(discrepancy) < 0.01) {
-        discEl.className = 'fs-5 fw-bold text-success';
-        alertEl.className = 'alert alert-success text-center p-2 fw-bold mb-0';
-        alertEl.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Balanse ang Pera! Walang Kulang o Sobra.`;
+        discEl.className = "fs-5 fw-bold text-success";
+        alertEl.className = "alert alert-success text-center p-2 fw-bold mb-0";
+        alertEl.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> BALANSE ANG CASH! Walang kulang o sobra.`;
       } else if (discrepancy > 0) {
-        discEl.className = 'fs-5 fw-bold text-primary';
-        alertEl.className = 'alert alert-warning text-center p-2 fw-bold mb-0';
-        alertEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> May Sobra (Over) na ₱${discrepancy.toFixed(2)} sa kaha.`;
+        discEl.className = "fs-5 fw-bold text-primary";
+        alertEl.className = "alert alert-primary text-center p-2 fw-bold mb-0";
+        alertEl.innerHTML = `<i class="fa-solid fa-arrow-up me-1"></i> OVER SA CASH (Sobra nang ₱${discrepancy.toFixed(2)})`;
       } else {
-        discEl.className = 'fs-5 fw-bold text-danger';
-        alertEl.className = 'alert alert-danger text-center p-2 fw-bold mb-0';
-        alertEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> May Kulang (Short) na ₱${Math.abs(discrepancy).toFixed(2)} sa kaha.`;
+        discEl.className = "fs-5 fw-bold text-danger";
+        alertEl.className = "alert alert-danger text-center p-2 fw-bold mb-0";
+        alertEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> SHORT SA CASH (Kulang nang ₱${Math.abs(discrepancy).toFixed(2)})`;
       }
-    }
-
-    function loadMoneyBreakdown() {
-      const selectedDate = document.getElementById('dailyReportDate').value;
-      const saved = cashBreakdownData[selectedDate];
-
-      const counts = document.querySelectorAll('.denom-count');
-      const subtotals = document.querySelectorAll('.denom-subtotal');
-      const coinsInput = document.querySelector('.denom-coins');
-      const fundInput = document.getElementById('cashFundInput');
-
-      if (saved) {
-        fundInput.value = saved.fund !== undefined ? saved.fund : '';
-        coinsInput.value = saved.coins !== undefined ? saved.coins : '';
-
-        counts.forEach(input => {
-          const denom = input.getAttribute('data-denom');
-          const qty = (saved.counts && saved.counts[denom]) ? saved.counts[denom] : '';
-          input.value = qty;
-        });
-      } else {
-        fundInput.value = '';
-        coinsInput.value = '';
-        counts.forEach(input => input.value = '');
-      }
-
-      counts.forEach((input, index) => {
-        const denom = parseFloat(input.getAttribute('data-denom'));
-        const qty = parseInt(input.value) || 0;
-        subtotals[index].value = (qty * denom).toFixed(2);
-      });
-
-      calculateMoneyBreakdown();
     }
 
     function clearMoneyBreakdown() {
       const selectedDate = document.getElementById('dailyReportDate').value;
       delete cashBreakdownData[selectedDate];
       saveData();
-      loadMoneyBreakdown();
+
+      document.getElementById('cashFundInput').value = '';
+      document.querySelectorAll('.denom-count').forEach(inp => inp.value = '');
+      document.querySelectorAll('.denom-subtotal').forEach(inp => inp.value = '0.00');
+      document.querySelector('.denom-coins').value = '';
+      calculateMoneyBreakdown();
+    }
+
+    function loadMoneyBreakdown() {
+      const selectedDate = document.getElementById('dailyReportDate').value;
+      const data = cashBreakdownData[selectedDate];
+
+      if (data) {
+        document.getElementById('cashFundInput').value = data.fund || '';
+        document.querySelector('.denom-coins').value = data.coins || '';
+
+        const counts = document.querySelectorAll('.denom-count');
+        counts.forEach(input => {
+          const denom = input.getAttribute('data-denom');
+          if (data.counts && data.counts[denom] !== undefined) {
+            input.value = data.counts[denom];
+          } else {
+            input.value = '';
+          }
+        });
+      } else {
+        document.getElementById('cashFundInput').value = '';
+        document.querySelectorAll('.denom-count').forEach(inp => inp.value = '');
+        document.querySelector('.denom-coins').value = '';
+      }
+      calculateMoneyBreakdown();
     }
 
     // ================= UTANG & PAYMENTS LOGIC =================
@@ -1944,54 +1938,56 @@
       tbody.innerHTML = '';
       paidTbody.innerHTML = '';
 
-      let hasCredit = false;
-      let hasPaid = false;
+      let creditCount = 0;
+      let paidCount = 0;
 
       transactions.forEach(t => {
         if (t.balance > 0) {
-          hasCredit = true;
-          let badge = '<span class="badge bg-danger">Unpaid / May Utang</span>';
-          if (t.status === 'PARTIAL') badge = '<span class="badge bg-warning text-dark">Partial Payment</span>';
+          creditCount++;
+          let locBadge = '<span class="badge bg-primary">Hiway</span>';
+          if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
 
           tbody.innerHTML += `
             <tr>
               <td class="fw-bold">${t.customer}</td>
-              <td><span class="badge bg-secondary">${t.location}</span></td>
+              <td>${locBadge}</td>
               <td>${t.product}</td>
-              <td class="text-secondary">₱${(t.totalCost || 0).toFixed(2)}</td>
-              <td class="text-success fw-bold">₱${t.paid.toFixed(2)}</td>
+              <td class="text-secondary fw-semibold">₱${(t.totalCost || 0).toFixed(2)}</td>
+              <td class="text-success">₱${t.paid.toFixed(2)}</td>
               <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
               <td>${t.dueDate}</td>
-              <td>${badge}</td>
+              <td><span class="badge bg-warning text-dark">${t.status}</span></td>
               <td class="no-print">
-                <button class="btn btn-sm btn-success fw-bold" onclick="openPaymentModal(${t.id})">
-                  <i class="fa-solid fa-hand-holding-dollar me-1"></i> Magbayad
+                <button class="btn btn-sm btn-success" onclick="openPaymentModal(${t.id})">
+                  <i class="fa-solid fa-peso-sign me-1"></i> Magbayad
                 </button>
               </td>
             </tr>
           `;
-        } else {
-          hasPaid = true;
+        } else if (t.total > 0) {
+          paidCount++;
           paidTbody.innerHTML += `
             <tr>
               <td class="fw-bold">${t.customer}</td>
               <td>${t.product}</td>
               <td>₱${t.total.toFixed(2)}</td>
-              <td class="text-success fw-bold">₱${t.paid.toFixed(2)}</td>
-              <td><span class="badge bg-success">Fully Paid</span></td>
+              <td class="text-success">₱${t.paid.toFixed(2)}</td>
+              <td><span class="badge bg-success">PAID / FULL</span></td>
               <td class="text-center no-print">
-                <button class="btn btn-sm btn-outline-primary border-0 p-1" onclick="openEditTransactionModal(${t.id})"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="btn btn-sm btn-outline-primary border-0 p-1" onclick="openPaymentModal(${t.id})" title="Tingnan ang Payment History">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
               </td>
             </tr>
           `;
         }
       });
 
-      if (!hasCredit) {
+      if (creditCount === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang aktibong utang sa kasalukuyan.</td></tr>`;
       }
-      if (!hasPaid) {
-        paidTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakatalang fully paid na kasaysayan.</td></tr>`;
+      if (paidCount === 0) {
+        paidTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakatalang bayad na transaksyon.</td></tr>`;
       }
     }
 
@@ -1999,266 +1995,116 @@
       const t = transactions.find(item => item.id === txId);
       if(!t) return;
 
-      const payAmountStr = prompt(`Magkano ang ibabayad ni ${t.customer}?\n(Natitirang Balance: ₱${t.balance.toFixed(2)})`);
-      if (payAmountStr === null) return;
-
-      const payAmount = parseFloat(payAmountStr);
-      if (isNaN(payAmount) || payAmount <= 0) {
-        alert('Mangyaring maglagay ng wastong halaga.');
-        return;
-      }
-
-      if (payAmount > t.balance) {
-        alert('Ang ibinayad ay mas mataas kaysa sa natitirang balance!');
-        return;
-      }
-
-      const method = prompt("Paraan ng pagbabayad? (Cash / GCash / Bank Transfer / Cheque)", "Cash");
-      if (!method) return;
-
-      const paymentDate = prompt("Ilagay ang petsa ng pagbabayad (YYYY-MM-DD):", getTodayDateString());
-      if (!paymentDate) return;
-
-      t.paid += payAmount;
-      t.balance -= payAmount;
-      if (t.balance <= 0.01) {
-        t.balance = 0;
-        t.status = "PAID";
+      let paymentHistoryHTML = '';
+      if(t.payments && t.payments.length > 0) {
+        t.payments.forEach(p => {
+          paymentHistoryHTML += `<li>${p.date} - ₱${p.amount.toFixed(2)} (${p.method})</li>`;
+        });
       } else {
-        t.status = "PARTIAL";
+        paymentHistoryHTML = `<li>Wala pang naitalang hulog.</li>`;
       }
 
-      if (!t.payments) t.payments = [];
-      t.payments.push({ amount: payAmount, method: method, date: paymentDate });
+      let promptMsg = `Customer: ${t.customer}\nTotal Amount: ₱${t.total.toFixed(2)}\nNaibayad Na: ₱${t.paid.toFixed(2)}\nNalalabing Utang (Balance): ₱${t.balance.toFixed(2)}\n\nMagkano ang idadagdag na bayad / hulog ngayon?`;
+      let payAmtStr = prompt(promptMsg, t.balance);
+      if(payAmtStr !== null) {
+        let payAmt = parseFloat(payAmtStr) || 0;
+        if(payAmt > 0) {
+          if(payAmt > t.balance) {
+            alert('Ang ibinigay na bayad ay mas malaki kaysa sa natitirang balanse!');
+            return;
+          }
+          let payMethod = prompt('Ilagay ang Payment Method (Cash, GCash, Bank Transfer, Cheque):', 'Cash') || 'Cash';
+          let payDate = prompt('Ilagay ang Petsa ng Pagbabayad (YYYY-MM-DD):', getTodayDateString()) || getTodayDateString();
 
-      saveData();
-      renderCreditTable();
-      alert('Matagumpay na naitala ang pagbabayad!');
+          t.paid += payAmt;
+          t.balance = Math.max(0, t.total - t.paid);
+          if(t.balance === 0) t.status = 'PAID';
+          else t.status = 'PARTIAL';
+
+          if(!t.payments) t.payments = [];
+          t.payments.push({ amount: payAmt, method: payMethod, date: payDate });
+
+          saveData();
+          renderCreditTable();
+          alert('Tagumpay na naitala ang pagbabayad!');
+        }
+      }
     }
 
     // ================= CUSTOMER ORDER LOOKUP =================
     function searchCustomerOrder() {
       const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
-      const resultContainer = document.getElementById('searchResultContainer');
-      const noFound = document.getElementById('noCustomerFound');
+      const container = document.getElementById('searchResultContainer');
+      const notFound = document.getElementById('noCustomerFound');
 
       if (!query) {
-        resultContainer.style.display = 'none';
-        noFound.classList.add('d-none');
+        container.style.display = 'none';
+        notFound.classList.add('d-none');
         return;
       }
 
-      const customerTxs = transactions.filter(t => t.customer.toLowerCase().includes(query));
+      const matched = transactions.filter(t => t.customer.toLowerCase().includes(query));
 
-      if (customerTxs.length === 0) {
-        resultContainer.style.display = 'none';
-        noFound.classList.remove('d-none');
-        return;
-      }
+      if (matched.length > 0) {
+        notFound.classList.add('d-none');
+        container.style.display = 'block';
 
-      noFound.classList.add('d-none');
-      resultContainer.style.display = 'block';
+        const last = matched[matched.length - 1];
+        document.getElementById('lastOrderCustomer').innerText = last.customer;
+        document.getElementById('lastOrderDate').innerText = last.date;
+        document.getElementById('lastOrderContainer').innerText = last.containerInfo || 'Wala';
+        document.getElementById('lastOrderProducts').innerText = last.product;
+        document.getElementById('lastOrderTotal').innerText = `₱${last.total.toFixed(2)}`;
+        document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
+        document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
 
-      const lastTx = customerTxs[customerTxs.length - 1];
-      document.getElementById('lastOrderCustomer').innerText = lastTx.customer;
-      document.getElementById('lastOrderDate').innerText = lastTx.date;
-      document.getElementById('lastOrderContainer').innerText = lastTx.containerInfo || 'Wala';
-      document.getElementById('lastOrderProducts').innerText = lastTx.product;
-      document.getElementById('lastOrderTotal').innerText = `₱${lastTx.total.toFixed(2)}`;
-      document.getElementById('lastOrderPaid').innerText = `₱${lastTx.paid.toFixed(2)}`;
-      document.getElementById('lastOrderBalance').innerText = `₱${lastTx.balance.toFixed(2)}`;
+        const badge = document.getElementById('lastOrderBadge');
+        if (last.balance === 0) {
+          badge.className = "badge bg-success fs-6";
+          badge.innerText = "PAID";
+        } else if (last.paid > 0) {
+          badge.className = "badge bg-warning text-dark fs-6";
+          badge.innerText = "PARTIAL";
+        } else {
+          badge.className = "badge bg-danger fs-6";
+          badge.innerText = "UNPAID / CREDIT";
+        }
 
-      const badge = document.getElementById('lastOrderBadge');
-      if (lastTx.balance <= 0) {
-        badge.className = 'badge bg-success fs-6';
-        badge.innerText = 'Fully Paid';
-      } else if (lastTx.paid > 0) {
-        badge.className = 'badge bg-warning text-dark fs-6';
-        badge.innerText = 'Partial Payment';
+        const historyBody = document.getElementById('customerHistoryBody');
+        historyBody.innerHTML = '';
+        matched.slice().reverse().forEach(item => {
+          let sBadge = '<span class="badge bg-success">PAID</span>';
+          if (item.balance > 0 && item.paid > 0) sBadge = '<span class="badge bg-warning text-dark">PARTIAL</span>';
+          else if (item.balance > 0) sBadge = '<span class="badge bg-danger">UNPAID</span>';
+
+          historyBody.innerHTML += `
+            <tr>
+              <td>${item.date}</td>
+              <td><span class="badge bg-secondary">${item.location}</span></td>
+              <td>${item.product}</td>
+              <td>${item.containerInfo || 'Wala'}</td>
+              <td>₱${item.total.toFixed(2)}</td>
+              <td class="text-success">₱${item.paid.toFixed(2)}</td>
+              <td class="text-danger">₱${item.balance.toFixed(2)}</td>
+              <td class="text-success fw-bold">₱${(item.netProfit || (item.total - (item.totalCost || 0))).toFixed(2)}</td>
+              <td>${sBadge}</td>
+            </tr>
+          `;
+        });
       } else {
-        badge.className = 'badge bg-danger fs-6';
-        badge.innerText = 'Unpaid / Utang';
+        container.style.display = 'none';
+        notFound.classList.remove('d-none');
       }
-
-      const historyBody = document.getElementById('customerHistoryBody');
-      historyBody.innerHTML = '';
-      customerTxs.slice().reverse().forEach(tx => {
-        let stBadge = '<span class="badge bg-success">Paid</span>';
-        if (tx.balance > 0 && tx.paid > 0) stBadge = '<span class="badge bg-warning text-dark">Partial</span>';
-        else if (tx.balance > 0) stBadge = '<span class="badge bg-danger">Unpaid</span>';
-
-        const txCost = tx.totalCost || 0;
-        const netProf = tx.total - txCost;
-
-        historyBody.innerHTML += `
-          <tr>
-            <td>${tx.date}</td>
-            <td><span class="badge bg-secondary">${tx.location}</span></td>
-            <td>${tx.product}</td>
-            <td>${tx.containerInfo || 'Wala'}</td>
-            <td>₱${tx.total.toFixed(2)}</td>
-            <td class="text-success">₱${tx.paid.toFixed(2)}</td>
-            <td class="text-danger">₱${tx.balance.toFixed(2)}</td>
-            <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
-            <td>${stBadge}</td>
-          </tr>
-        `;
-      });
     }
 
     // ================= MONTHLY AUDIT & EXPENSES LOGIC =================
-    function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value; // e.g. "2026-06"
-      if (!selectedMonth) return;
-
-      let totalSales = 0;
-      let totalCost = 0;
-      let totalGross = 0;
-      let totalExpenses = 0;
-
-      let dailyBreakdownMap = {};
-
-      transactions.forEach(t => {
-        if (t.date && t.date.startsWith(selectedMonth)) {
-          totalSales += t.total;
-          const tCost = t.totalCost || 0;
-          totalCost += tCost;
-
-          if (!dailyBreakdownMap[t.date]) {
-            dailyBreakdownMap[t.date] = { sales: 0, cost: 0, net: 0 };
-          }
-          dailyBreakdownMap[t.date].sales += t.total;
-          dailyBreakdownMap[t.date].cost += tCost;
-          dailyBreakdownMap[t.date].net += (t.total - tCost);
-        }
-      });
-
-      totalGross = totalSales - totalCost;
-
-      // Expenses breakdown compute
-      Object.keys(monthlyExpensesData).forEach(dateStr => {
-        if (dateStr.startsWith(selectedMonth)) {
-          monthlyExpensesData[dateStr].forEach(exp => {
-            totalExpenses += (parseFloat(exp.salaryAmount) || 0) + (parseFloat(exp.expenseAmount) || 0);
-          });
-        }
-      });
-
-      bossAdjustments.forEach(b => {
-        if (b.date && b.date.startsWith(selectedMonth)) {
-          if (b.type === 'SUB') {
-            totalExpenses += parseFloat(b.amount) || 0;
-          }
-        }
-      });
-
-      let netProfit = totalGross - totalExpenses;
-
-      bossAdjustments.forEach(b => {
-        if (b.date && b.date.startsWith(selectedMonth)) {
-          if (b.type === 'ADD') {
-            netProfit += parseFloat(b.amount) || 0;
-          }
-        }
-      });
-
-      document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
-      document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
-      document.getElementById('auditGrossProfit').innerText = `₱${totalGross.toFixed(2)}`;
-      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
-
-      // Daily breakdown table render
-      const dailyBody = document.getElementById('auditDailyBreakdownBody');
-      dailyBody.innerHTML = '';
-      const sortedDates = Object.keys(dailyBreakdownMap).sort().reverse();
-
-      sortedDates.forEach(dateStr => {
-        const item = dailyBreakdownMap[dateStr];
-        dailyBody.innerHTML += `
-          <tr>
-            <td class="fw-bold">${dateStr}</td>
-            <td class="text-end">₱${item.sales.toFixed(2)}</td>
-            <td class="text-end text-secondary">₱${item.cost.toFixed(2)}</td>
-            <td class="text-end text-success fw-bold">₱${item.net.toFixed(2)}</td>
-            <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-primary" onclick="jumpToDailyReport('${dateStr}')">
-                <i class="fa-solid fa-eye me-1"></i> View
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      if (sortedDates.length === 0) {
-        dailyBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-2">Walang transaksyon sa buwang ito.</td></tr>`;
-      }
-
-      renderExpensesTable();
-      renderBossLogs();
-    }
-
-    function jumpToDailyReport(dateStr) {
-      document.getElementById('dailyReportDate').value = dateStr;
-      generateDailyReport();
-      const dailyTabBtn = document.getElementById('daily-tab');
-      const tab = new bootstrap.Tab(dailyTabBtn);
-      tab.show();
-    }
-
-    function renderExpensesTable() {
-      const tbody = document.getElementById('expenseTableBody');
-      const searchQuery = document.getElementById('searchExpenseInput') ? document.getElementById('searchExpenseInput').value.toLowerCase() : '';
-      tbody.innerHTML = '';
-
-      let allExpensesList = [];
-      Object.keys(monthlyExpensesData).forEach(dateStr => {
-        monthlyExpensesData[dateStr].forEach((exp, idx) => {
-          allExpensesList.push({
-            date: dateStr,
-            salaryName: exp.salaryName || '',
-            salaryAmount: parseFloat(exp.salaryAmount) || 0,
-            expenseName: exp.expenseName || '',
-            expenseAmount: parseFloat(exp.expenseAmount) || 0,
-            originalIndex: idx
-          });
-        });
-      });
-
-      const filtered = allExpensesList.filter(item =>
-        item.date.includes(searchQuery) ||
-        item.salaryName.toLowerCase().includes(searchQuery) ||
-        item.expenseName.toLowerCase().includes(searchQuery)
-      );
-
-      filtered.slice().reverse().forEach(item => {
-        tbody.innerHTML += `
-          <tr>
-            <td><input type="date" class="form-control form-control-sm" value="${item.date}" onchange="updateExpenseField('${item.date}', ${item.originalIndex}, 'date', this.value)"></td>
-            <td><input type="text" class="form-control form-control-sm" value="${item.salaryName}" placeholder="Pangalan ng Sahod" onchange="updateExpenseField('${item.date}', ${item.originalIndex}, 'salaryName', this.value)"></td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm" value="${item.salaryAmount}" placeholder="0.00" onchange="updateExpenseField('${item.date}', ${item.originalIndex}, 'salaryAmount', this.value)"></td>
-            <td><input type="text" class="form-control form-control-sm" value="${item.expenseName}" placeholder="Pangalan ng Gastusin / Bill" onchange="updateExpenseField('${item.date}', ${item.originalIndex}, 'expenseName', this.value)"></td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm" value="${item.expenseAmount}" placeholder="0.00" onchange="updateExpenseField('${item.date}', ${item.originalIndex}, 'expenseAmount', this.value)"></td>
-            <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow('${item.date}', ${item.originalIndex})">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang nakitang Salary o Expenses. Pindutin ang "Add Expense Line" para magdagdag.</td></tr>`;
-      }
-    }
-
     function addExpenseRow() {
-      const selectedDate = document.getElementById('dailyReportDate').value || getTodayDateString();
-      if (!monthlyExpensesData[selectedDate]) {
-        monthlyExpensesData[selectedDate] = [];
+      const auditMonth = document.getElementById('auditMonth').value;
+      if (!monthlyExpensesData[auditMonth]) {
+        monthlyExpensesData[auditMonth] = [];
       }
-      monthlyExpensesData[selectedDate].push({
+      monthlyExpensesData[auditMonth].push({
+        date: auditMonth + '-01',
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -2269,39 +2115,179 @@
       generateMonthlyAudit();
     }
 
-    function updateExpenseField(dateStr, index, field, value) {
-      if (!monthlyExpensesData[dateStr] || !monthlyExpensesData[dateStr][index]) return;
+    function renderExpensesTable() {
+      const tbody = document.getElementById('expenseTableBody');
+      const auditMonth = document.getElementById('auditMonth').value;
+      const searchQuery = document.getElementById('searchExpenseInput') ? document.getElementById('searchExpenseInput').value.toLowerCase() : '';
+      
+      tbody.innerHTML = '';
 
-      if (field === 'date') {
-        const item = monthlyExpensesData[dateStr].splice(index, 1)[0];
-        if (monthlyExpensesData[dateStr].length === 0) delete monthlyExpensesData[dateStr];
-        
-        if (!monthlyExpensesData[value]) monthlyExpensesData[value] = [];
-        monthlyExpensesData[value].push(item);
-      } else if (field === 'salaryName' || field === 'expenseName') {
-        monthlyExpensesData[dateStr][index][field] = value.trim();
-      } else {
-        monthlyExpensesData[dateStr][index][field] = parseFloat(value) || 0;
+      if (!monthlyExpensesData[auditMonth]) {
+        monthlyExpensesData[auditMonth] = [];
       }
 
+      const expensesList = monthlyExpensesData[auditMonth];
+      let hasVisibleRow = false;
+
+      expensesList.forEach((item, index) => {
+        const rowText = `${item.date} ${item.salaryName} ${item.salaryAmount} ${item.expenseName} ${item.expenseAmount}`.toLowerCase();
+        if (searchQuery && !rowText.includes(searchQuery)) {
+          return;
+        }
+        hasVisibleRow = true;
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <input type="date" class="form-control form-control-sm" value="${item.date || auditMonth + '-01'}" onchange="updateExpenseField(${index}, 'date', this.value)">
+            </td>
+            <td>
+              <input type="text" class="form-control form-control-sm" placeholder="e.g. Sahod ni Juan" value="${item.salaryName || ''}" onchange="updateExpenseField(${index}, 'salaryName', this.value)">
+            </td>
+            <td>
+              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.salaryAmount || 0}" onchange="updateExpenseField(${index}, 'salaryAmount', this.value)">
+            </td>
+            <td>
+              <input type="text" class="form-control form-control-sm" placeholder="e.g. Kuryente / Tubig / Bigas" value="${item.expenseName || ''}" onchange="updateExpenseField(${index}, 'expenseName', this.value)">
+            </td>
+            <td>
+              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.expenseAmount || 0}" onchange="updateExpenseField(${index}, 'expenseAmount', this.value)">
+            </td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow(${index})">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (!hasVisibleRow) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang natagpuang salary o expense para sa paghahanap na ito. Pindutin ang "Add Expense Line" para magdagdag.</td></tr>`;
+      }
+    }
+
+    function updateExpenseField(index, field, value) {
+      const auditMonth = document.getElementById('auditMonth').value;
+      if (field === 'salaryAmount' || field === 'expenseAmount') {
+        monthlyExpensesData[auditMonth][index][field] = parseFloat(value) || 0;
+      } else {
+        monthlyExpensesData[auditMonth][index][field] = value;
+      }
       saveData();
       renderExpensesTable();
       generateMonthlyAudit();
     }
 
-    function deleteExpenseRow(dateStr, index) {
+    function deleteExpenseRow(index) {
+      const auditMonth = document.getElementById('auditMonth').value;
       if (confirm('Sigurado ka bang gusto mong tanggalin ang entry na ito?')) {
-        monthlyExpensesData[dateStr].splice(index, 1);
-        if (monthlyExpensesData[dateStr].length === 0) {
-          delete monthlyExpensesData[dateStr];
-        }
+        monthlyExpensesData[auditMonth].splice(index, 1);
         saveData();
         renderExpensesTable();
         generateMonthlyAudit();
       }
     }
 
-    // Boss Form Modal
+    function generateMonthlyAudit() {
+      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
+      if (!selectedMonth) return;
+
+      let totalSales = 0;
+      let totalCost = 0;
+      let totalExpenses = 0;
+
+      transactions.forEach(t => {
+        if (t.date.startsWith(selectedMonth)) {
+          totalSales += t.total;
+          totalCost += (t.totalCost || 0);
+        }
+      });
+
+      if (monthlyExpensesData[selectedMonth]) {
+        monthlyExpensesData[selectedMonth].forEach(exp => {
+          totalExpenses += (parseFloat(exp.salaryAmount) || 0) + (parseFloat(exp.expenseAmount) || 0);
+        });
+      }
+
+      let bossNetAdjustment = 0;
+      const bossBody = document.getElementById('bossLogsBody');
+      bossBody.innerHTML = '';
+      bossAdjustments.forEach(b => {
+        if (b.date.startsWith(selectedMonth)) {
+          let val = parseFloat(b.amount) || 0;
+          if (b.type === 'ADD') {
+            bossNetAdjustment += val;
+            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-success">Boss Addition</span> ${b.notes}</td><td class="text-success">+₱${val.toFixed(2)}</td></tr>`;
+          } else {
+            bossNetAdjustment -= val;
+            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-danger">Boss Withdrawal</span> ${b.notes}</td><td class="text-danger">-₱${val.toFixed(2)}</td></tr>`;
+          }
+        }
+      });
+
+      if (bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).length === 0) {
+        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Wala pang D/Eco Boss adjustments sa buwang ito.</td></tr>`;
+      }
+
+      const grossProfit = totalSales - totalCost;
+      const netProfit = grossProfit - totalExpenses + bossNetAdjustment;
+
+      document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
+      document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
+      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
+      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+
+      // Render Daily Breakdown inside Audit Tab
+      const dailyBreakdownBody = document.getElementById('auditDailyBreakdownBody');
+      dailyBreakdownBody.innerHTML = '';
+
+      let dailyMap = {};
+      transactions.forEach(t => {
+        if (t.date.startsWith(selectedMonth)) {
+          if (!dailyMap[t.date]) {
+            dailyMap[t.date] = { sales: 0, cost: 0, profit: 0 };
+          }
+          dailyMap[t.date].sales += t.total;
+          dailyMap[t.date].cost += (t.totalCost || 0);
+          dailyMap[t.date].profit += (t.netProfit || (t.total - (t.totalCost || 0)));
+        }
+      });
+
+      const sortedDates = Object.keys(dailyMap).sort().reverse();
+      sortedDates.forEach(d => {
+        const item = dailyMap[d];
+        dailyBreakdownBody.innerHTML += `
+          <tr>
+            <td class="fw-bold">${d}</td>
+            <td class="text-end">₱${item.sales.toFixed(2)}</td>
+            <td class="text-end text-secondary">₱${item.cost.toFixed(2)}</td>
+            <td class="text-end text-success fw-bold">₱${item.profit.toFixed(2)}</td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="jumpToDailyReport('${d}')">
+                <i class="fa-solid fa-eye me-1"></i> View
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (sortedDates.length === 0) {
+        dailyBreakdownBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Walang nahanap na transaksyon sa buwang ito.</td></tr>`;
+      }
+
+      renderExpensesTable();
+    }
+
+    function jumpToDailyReport(dateStr) {
+      document.getElementById('dailyReportDate').value = dateStr;
+      generateDailyReport();
+      const dailyTabButton = document.getElementById('daily-tab');
+      const tab = new bootstrap.Tab(dailyTabButton);
+      tab.show();
+    }
+
     document.getElementById('bossForm').addEventListener('submit', function(e) {
       e.preventDefault();
       bossAdjustments.push({
@@ -2315,70 +2301,59 @@
       this.reset();
       document.getElementById('bossDate').value = getTodayDateString();
       generateMonthlyAudit();
-      alert('Matagumpay na naidagdag ang Boss Adjustment!');
+      alert('Tagumpay na naidagdag ang D/Eco Boss adjustment!');
     });
 
-    function renderBossLogs() {
-      const tbody = document.getElementById('bossLogsBody');
-      tbody.innerHTML = '';
-      bossAdjustments.slice().reverse().forEach(b => {
-        let badge = b.type === 'ADD' ? '<span class="badge bg-success">Capital Addition (+)</span>' : '<span class="badge bg-danger">Withdrawal (-)</span>';
-        tbody.innerHTML += `
-          <tr>
-            <td>${b.date}</td>
-            <td>${badge} - ${b.notes || 'Wala'}</td>
-            <td class="fw-bold">₱${b.amount.toFixed(2)}</td>
-          </tr>
-        `;
-      });
-      if(bossAdjustments.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang D/Eco Boss adjustment.</td></tr>`;
-      }
-    }
-
-    // ================= GLOBAL SEARCH =================
+    // ================= GLOBAL SEARCH LOGIC =================
     function renderGlobalSearchResults() {
-      const q = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+      const query = document.getElementById('globalSearchInput').value.trim().toLowerCase();
       const wrapper = document.getElementById('globalSearchResultsWrapper');
       const tbody = document.getElementById('globalSearchResultsBody');
       tbody.innerHTML = '';
 
-      if (!q) {
+      if (!query) {
         wrapper.style.display = 'none';
         return;
       }
 
       wrapper.style.display = 'block';
-      const matches = transactions.filter(t =>
-        t.customer.toLowerCase().includes(q) ||
-        t.product.toLowerCase().includes(q) ||
-        t.date.includes(q) ||
-        t.location.toLowerCase().includes(q)
-      );
+      let results = [];
 
-      matches.slice().reverse().forEach(t => {
-        let st = '<span class="badge bg-success">Paid</span>';
-        if (t.balance > 0) st = '<span class="badge bg-danger">Unpaid</span>';
+      transactions.forEach(t => {
+        let matchStr = `${t.date} ${t.customer} ${t.location} ${t.product} ${t.status}`.toLowerCase();
+        if (matchStr.includes(query)) {
+          results.push({
+            date: t.date,
+            customer: t.customer,
+            location: t.location,
+            details: t.product,
+            total: t.total,
+            paid: t.paid,
+            balance: t.balance,
+            status: t.status,
+            id: t.id,
+            type: 'POS'
+          });
+        }
+      });
 
+      results.forEach(r => {
         tbody.innerHTML += `
           <tr>
-            <td>${t.date}</td>
-            <td class="fw-bold">${t.customer}</td>
-            <td>${t.location}</td>
-            <td>${t.product}</td>
-            <td>₱${t.total.toFixed(2)}</td>
-            <td>₱${t.paid.toFixed(2)}</td>
-            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
-            <td>
-              ${st}
-              <button class="btn btn-sm btn-outline-primary ms-1 py-0" onclick="jumpToDailyReport('${t.date}')"><i class="fa-solid fa-eye"></i></button>
-            </td>
+            <td>${r.date}</td>
+            <td class="fw-bold">${r.customer}</td>
+            <td><span class="badge bg-secondary">${r.location}</span></td>
+            <td>${r.details}</td>
+            <td>₱${r.total.toFixed(2)}</td>
+            <td class="text-success">₱${r.paid.toFixed(2)}</td>
+            <td class="text-danger">₱${r.balance.toFixed(2)}</td>
+            <td><span class="badge bg-info text-dark">${r.status}</span></td>
           </tr>
         `;
       });
 
-      if (matches.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang nahanap na tugma sa iyong paghahanap.</td></tr>`;
+      if (results.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang nakitang tugma sa iyong paghahanap.</td></tr>`;
       }
     }
 
@@ -2387,9 +2362,9 @@
       document.getElementById('globalSearchResultsWrapper').style.display = 'none';
     }
 
-    // ================= EDIT TRANSACTION MODAL =================
-    function openEditTransactionModal(id) {
-      const t = transactions.find(item => item.id === id);
+    // ================= EDIT TRANSACTION MODAL LOGIC =================
+    function openEditTransactionModal(txId) {
+      const t = transactions.find(item => item.id === txId);
       if(!t) return;
 
       document.getElementById('editTxId').value = t.id;
@@ -2407,42 +2382,53 @@
     }
 
     function calculateEditBalance() {
-      const tot = parseFloat(document.getElementById('editTotal').value) || 0;
-      const pd = parseFloat(document.getElementById('editPaid').value) || 0;
-      document.getElementById('editBalance').value = Math.max(0, tot - pd).toFixed(2);
+      const total = parseFloat(document.getElementById('editTotal').value) || 0;
+      const paid = parseFloat(document.getElementById('editPaid').value) || 0;
+      const balance = Math.max(0, total - paid);
+      document.getElementById('editBalance').value = balance.toFixed(2);
     }
 
     document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const id = parseInt(document.getElementById('editTxId').value);
-      const t = transactions.find(item => item.id === id);
-      if(!t) return;
+      const txId = parseInt(document.getElementById('editTxId').value);
+      const tIndex = transactions.findIndex(item => item.id === txId);
 
-      t.date = document.getElementById('editTxDate').value;
-      t.customer = document.getElementById('editCustomerName').value.trim();
-      t.location = document.getElementById('editLocation').value;
-      t.product = document.getElementById('editProduct').value.trim();
-      t.containerInfo = document.getElementById('editContainerInfo').value.trim();
-      t.totalCost = parseFloat(document.getElementById('editTotalCost').value) || 0;
-      t.total = parseFloat(document.getElementById('editTotal').value) || 0;
-      t.paid = parseFloat(document.getElementById('editPaid').value) || 0;
-      t.balance = Math.max(0, t.total - t.paid);
-      t.netProfit = t.total - t.totalCost;
+      if (tIndex > -1) {
+        const newTotal = parseFloat(document.getElementById('editTotal').value) || 0;
+        const newPaid = parseFloat(document.getElementById('editPaid').value) || 0;
+        const newCost = parseFloat(document.getElementById('editTotalCost').value) || 0;
+        const newBalance = Math.max(0, newTotal - newPaid);
 
-      if (t.balance <= 0) t.status = "PAID";
-      else if (t.paid > 0) t.status = "PARTIAL";
-      else t.status = "UNPAID";
+        transactions[tIndex].date = document.getElementById('editTxDate').value;
+        transactions[tIndex].customer = document.getElementById('editCustomerName').value;
+        transactions[tIndex].location = document.getElementById('editLocation').value;
+        transactions[tIndex].product = document.getElementById('editProduct').value;
+        transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;
+        transactions[tIndex].totalCost = newCost;
+        transactions[tIndex].netProfit = newTotal - newCost;
+        transactions[tIndex].total = newTotal;
+        transactions[tIndex].paid = newPaid;
+        transactions[tIndex].balance = newBalance;
+        transactions[tIndex].status = newBalance === 0 ? 'PAID' : (newPaid > 0 ? 'PARTIAL' : 'UNPAID');
 
-      saveData();
-      bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
-      generateDailyReport();
-      renderCreditTable();
-      alert('Matagumpay na na-update ang transaksyon!');
+        if (transactions[tIndex].payments && transactions[tIndex].payments.length > 0) {
+          transactions[tIndex].payments[0].amount = newPaid;
+          transactions[tIndex].payments[0].date = transactions[tIndex].date;
+        } else if (newPaid > 0) {
+          transactions[tIndex].payments = [{ amount: newPaid, method: 'Cash', date: transactions[tIndex].date }];
+        }
+
+        saveData();
+        bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
+        generateDailyReport();
+        renderCreditTable();
+        alert('Tagumpay na na-update ang transaksyon!');
+      }
     });
 
-    function deleteTransaction(id) {
-      if (confirm('Sigurado ka bang gusto mong burahin ang transaksyong ito?')) {
-        transactions = transactions.filter(item => item.id !== id);
+    function deleteTransaction(txId) {
+      if (confirm('Sigurado ka bang gusto mong tanggalin ang transaksyong ito?')) {
+        transactions = transactions.filter(t => t.id !== txId);
         saveData();
         generateDailyReport();
         renderCreditTable();

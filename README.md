@@ -1753,7 +1753,6 @@
         t.payments.forEach((p, pIdx) => {
           if (p.date === selectedDate) {
             dayCollected += p.amount;
-            // Kung ito ay pangalawang bayad o higit pa (o kaya ay partial/full payment sa utang), ituring na payment sa utang kung ang transaksyon ay lumang petsa o kung may balance na nabawasan
             if (t.date !== selectedDate || pIdx > 0) {
               dayDebtPayments += p.amount;
             }
@@ -1805,7 +1804,6 @@
 
       currentDayDebtPayments = dayDebtPayments;
 
-      // Kunin ang mga expenses para sa napiling petsa na ito
       let dayExpensesTotal = 0;
       if (monthlyExpensesData && monthlyExpensesData[selectedDate]) {
         monthlyExpensesData[selectedDate].forEach(exp => {
@@ -1814,7 +1812,6 @@
       }
       currentDayExpenses = dayExpensesTotal;
 
-      // Target Cash in Drawer = Collections + Payment sa Utang - (GCash + BT + Cheque + Expenses/Salary)
       currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque + dayExpensesTotal));
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
@@ -1946,96 +1943,156 @@
               <td><span class="badge ${badgeClass}">${t.status}</span></td>
               <td class="no-print">
                 <button class="btn btn-sm btn-success fw-bold" onclick="openPaymentModal(${t.id})">
-                  <i class="fa-solid fa-peso-sign me-1"></i> Magbayad
-                </button>
-              </td>
-            </tr>
-          `;
-        } else {
-          hasPaidHistory = true;
-          historyTbody.innerHTML += `
-            <tr>
-              <td class="fw-bold">${t.customer}</td>
-              <td>${t.product}</td>
-              <td>₱${t.total.toFixed(2)}</td>
-              <td class="text-success fw-bold">₱${t.paid.toFixed(2)}</td>
-              <td><span class="badge bg-success">PAID (Fully Settled)</span></td>
-              <td class="text-center no-print">
-                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteTransaction(${t.id})" title="Delete Record">
-                  <i class="fa-solid fa-trash-can"></i>
+                  <i class="fa-solid fa-wallet me-1"></i> Pay
                 </button>
               </td>
             </tr>
           `;
         }
+
+        if (t.paid > 0) {
+          t.payments.forEach((p, pIndex) => {
+            hasPaidHistory = true;
+            historyTbody.innerHTML += `
+              <tr>
+                <td class="fw-bold">${t.customer}</td>
+                <td>${t.product}</td>
+                <td>₱${t.total.toFixed(2)}</td>
+                <td class="text-success fw-bold">₱${p.amount.toFixed(2)} <small class="text-muted">(${p.method} - ${p.date})</small></td>
+                <td><span class="badge bg-success">Recorded Payment</span></td>
+                <td class="text-center no-print">
+                  <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deletePaymentRecord(${t.id}, ${pIndex})" title="Tanggalin ang bayad na ito">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        }
       });
 
       if (!hasActiveCredit) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang kasalukuyang utang (No active credits).</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang aktibong utang sa kasalukuyan.</td></tr>`;
       }
       if (!hasPaidHistory) {
-        historyTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakabayad nang buo.</td></tr>`;
+        historyTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakatalang kasaysayan ng pagbabayad.</td></tr>`;
       }
     }
 
+    // Modal para sa pagbabayad ng utang
+    let payingTxId = null;
     function openPaymentModal(txId) {
+      payingTxId = txId;
       const t = transactions.find(item => item.id === txId);
       if(!t) return;
 
-      const payAmountStr = prompt(`Magkano ang ibinayad ni ${t.customer}?\n(Natitirang Balance: ₱${t.balance.toFixed(2)})`);
-      if(payAmountStr === null) return;
+      const modalHTML = `
+        <div class="modal fade" id="payDebtModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Magbayad ng Utang: ${t.customer}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <form id="payDebtForm" onsubmit="submitDebtPayment(event)">
+                <div class="modal-body">
+                  <p class="mb-2"><strong>Total Balance:</strong> ₱${t.balance.toFixed(2)}</p>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold">Petsa ng Pagbabayad:</label>
+                    <input type="date" id="payDate" class="form-control" value="${getTodayDateString()}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold">Halaga na Babayaran ngayon (₱):</label>
+                    <input type="number" step="0.01" min="0.01" max="${t.balance}" id="payAmount" class="form-control" value="${t.balance.toFixed(2)}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold">Payment Method:</label>
+                    <select id="payMethod" class="form-select">
+                      <option value="Cash">Cash</option>
+                      <option value="GCash">GCash</option>
+                      <option value="Bank Transfer">Bank Transfer (BT)</option>
+                      <option value="Cheque">Cheque</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>I-save ang Bayad</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
 
-      const payAmount = parseFloat(payAmountStr);
-      if(isNaN(payAmount) || payAmount <= 0) {
-        alert('Mangyaring maglagay ng tamang halaga.');
-        return;
-      }
+      const existingModal = document.getElementById('payDebtModal');
+      if(existingModal) existingModal.remove();
 
-      if(payAmount > t.balance) {
-        alert('Ang ibinayad ay mas malaki kaysa sa natitirang balance!');
-        return;
-      }
-
-      const method = prompt(`Anong uri ng pagbabayad?\nIlagay ang: Cash, GCash, Bank Transfer, o Cheque`, 'Cash') || 'Cash';
-      const paymentDate = prompt(`Ilagay ang petsa ng pagbabayad (YYYY-MM-DD):`, getTodayDateString()) || getTodayDateString();
-
-      t.paid += payAmount;
-      t.balance -= payAmount;
-      if(t.balance <= 0) {
-        t.balance = 0;
-        t.status = 'PAID';
-      } else {
-        t.status = 'PARTIAL';
-      }
-
-      if(!t.payments) t.payments = [];
-      t.payments.push({ amount: payAmount, method: method, date: paymentDate });
-
-      saveData();
-      renderCreditTable();
-      generateDailyReport();
-      alert('Tagumpay na naitala ang pagbabayad sa utang!');
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      const modalObj = new bootstrap.Modal(document.getElementById('payDebtModal'));
+      modalObj.show();
     }
 
-    // ================= CUSTOMER ORDER LOOKUP =================
+    function submitDebtPayment(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('payAmount').value) || 0;
+      const method = document.getElementById('payMethod').value;
+      const pDate = document.getElementById('payDate').value;
+
+      const t = transactions.find(item => item.id === payingTxId);
+      if (t) {
+        t.paid += amount;
+        t.balance = Math.max(0, t.total - t.paid);
+        if (t.balance === 0) {
+          t.status = "PAID";
+        } else {
+          t.status = "PARTIAL";
+        }
+        t.payments.push({ amount: amount, method: method, date: pDate });
+
+        saveData();
+        renderCreditTable();
+        bootstrap.Modal.getInstance(document.getElementById('payDebtModal')).hide();
+        alert('Tagumpay na naitala ang bayad!');
+      }
+    }
+
+    function deletePaymentRecord(txId, paymentIndex) {
+      if (confirm('Sigurado ka bang gusto mong tanggalin ang payment record na ito?')) {
+        const t = transactions.find(item => item.id === txId);
+        if (t && t.payments[paymentIndex]) {
+          const removedAmount = t.payments[paymentIndex].amount;
+          t.paid = Math.max(0, t.paid - removedAmount);
+          t.balance = t.total - t.paid;
+          t.status = t.balance > 0 ? (t.paid > 0 ? 'PARTIAL' : 'UNPAID') : 'PAID';
+          t.payments.splice(paymentIndex, 1);
+
+          saveData();
+          renderCreditTable();
+          alert('Naalis na ang payment record.');
+        }
+      }
+    }
+
+    // ================= CUSTOMER ORDER LOOKUP LOGIC =================
     function searchCustomerOrder() {
       const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
-      const container = document.getElementById('searchResultContainer');
-      const notFound = document.getElementById('noCustomerFound');
+      const resultContainer = document.getElementById('searchResultContainer');
+      const noFound = document.getElementById('noCustomerFound');
 
       if (!query) {
-        container.style.display = 'none';
-        notFound.classList.add('d-none');
+        resultContainer.style.display = 'none';
+        noFound.classList.add('d-none');
         return;
       }
 
-      const matches = transactions.filter(t => t.customer.toLowerCase().includes(query));
+      const matched = transactions.filter(t => t.customer.toLowerCase().includes(query));
 
-      if (matches.length > 0) {
-        notFound.classList.add('d-none');
-        container.style.display = 'block';
+      if (matched.length > 0) {
+        noFound.classList.add('d-none');
+        resultContainer.style.display = 'block';
 
-        const last = matches[matches.length - 1];
+        const last = matched[matched.length - 1];
         document.getElementById('lastOrderCustomer').innerText = last.customer;
         document.getElementById('lastOrderDate').innerText = last.date;
         document.getElementById('lastOrderContainer').innerText = last.containerInfo || 'Wala';
@@ -2046,113 +2103,105 @@
 
         const badge = document.getElementById('lastOrderBadge');
         badge.innerText = last.status;
-        badge.className = last.status === 'PAID' ? 'badge bg-success fs-6' : 'badge bg-danger fs-6';
+        badge.className = last.status === 'PAID' ? 'badge bg-success fs-6' : (last.status === 'PARTIAL' ? 'badge bg-warning text-dark fs-6' : 'badge bg-danger fs-6');
 
         const historyBody = document.getElementById('customerHistoryBody');
         historyBody.innerHTML = '';
-        matches.slice().reverse().forEach(m => {
-          const mCost = m.totalCost || 0;
-          const mNet = m.total - mCost;
+        matched.slice().reverse().forEach(item => {
+          const itemNet = item.netProfit || (item.total - (item.totalCost || 0));
           historyBody.innerHTML += `
             <tr>
-              <td>${m.date}</td>
-              <td><span class="badge bg-secondary">${m.location}</span></td>
-              <td>${m.product}</td>
-              <td>${m.containerInfo || 'Wala'}</td>
-              <td>₱${m.total.toFixed(2)}</td>
-              <td class="text-success">₱${m.paid.toFixed(2)}</td>
-              <td class="text-danger">₱${m.balance.toFixed(2)}</td>
-              <td class="text-success fw-bold">₱${mNet.toFixed(2)}</td>
-              <td><span class="badge ${m.status === 'PAID' ? 'bg-success' : 'bg-danger'}">${m.status}</span></td>
+              <td>${item.date}</td>
+              <td><span class="badge bg-secondary">${item.location}</span></td>
+              <td>${item.product}</td>
+              <td>${item.containerInfo || 'Wala'}</td>
+              <td>₱${item.total.toFixed(2)}</td>
+              <td class="text-success">₱${item.paid.toFixed(2)}</td>
+              <td class="text-danger">₱${item.balance.toFixed(2)}</td>
+              <td class="text-success fw-bold">₱${itemNet.toFixed(2)}</td>
+              <td><span class="badge ${item.status === 'PAID' ? 'bg-success' : 'bg-danger'}">${item.status}</span></td>
             </tr>
           `;
         });
       } else {
-        container.style.display = 'none';
-        notFound.classList.remove('d-none');
+        resultContainer.style.display = 'none';
+        noFound.classList.remove('d-none');
       }
     }
 
     // ================= MONTHLY AUDIT & EXPENSES LOGIC =================
     function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
-      if (!selectedMonth) return;
+      const monthVal = document.getElementById('auditMonth').value; // e.g. "2026-06"
+      if (!monthVal) return;
 
       let totalSales = 0;
       let totalCost = 0;
-      let totalGrossProfit = 0;
-      let totalExpenses = 0;
+      let totalNetProfit = 0;
+      let dailyMap = {};
 
-      // Kalkulahin ang Sales at Cost para sa buwang ito
       transactions.forEach(t => {
-        if (t.date && t.date.startsWith(selectedMonth)) {
+        if (t.date && t.date.startsWith(monthVal)) {
           totalSales += t.total;
-          let c = t.totalCost || 0;
+          const c = t.totalCost || 0;
           totalCost += c;
-          totalGrossProfit += (t.total - c);
+          const np = t.netProfit || (t.total - c);
+          totalNetProfit += np;
+
+          if (!dailyMap[t.date]) {
+            dailyMap[t.date] = { sales: 0, cost: 0, netProfit: 0 };
+          }
+          dailyMap[t.date].sales += t.total;
+          dailyMap[t.date].cost += c;
+          dailyMap[t.date].netProfit += np;
         }
       });
 
-      // Kalkulahin ang Expenses para sa buwang ito
-      Object.keys(monthlyExpensesData).forEach(dateStr => {
-        if (dateStr.startsWith(selectedMonth)) {
-          monthlyExpensesData[dateStr].forEach(exp => {
-            totalExpenses += parseFloat(exp.amount) || 0;
-          });
-        }
-      });
+      // Ibawas ang mga expenses para sa buwang ito
+      let totalExpensesMonth = 0;
+      if (monthlyExpensesData) {
+        Object.keys(monthlyExpensesData).forEach(dateStr => {
+          if (dateStr.startsWith(monthVal)) {
+            monthlyExpensesData[dateStr].forEach(ex => {
+              totalExpensesMonth += parseFloat(ex.amount) || 0;
+            });
+          }
+        });
+      }
 
-      // Boss Adjustments
-      let bossAdd = 0;
-      let bossSub = 0;
+      // Idagdag o ibawas ang D/Eco Boss Adjustments
+      let bossAdjTotal = 0;
       bossAdjustments.forEach(b => {
-        if (b.date && b.date.startsWith(selectedMonth)) {
-          if (b.type === 'ADD') bossAdd += b.amount;
-          else bossSub += b.amount;
+        if (b.date && b.date.startsWith(monthVal)) {
+          if (b.type === 'ADD') bossAdjTotal += b.amount;
+          else bossAdjTotal -= b.amount;
         }
       });
 
-      const netProfit = totalGrossProfit - totalExpenses + bossAdd - bossSub;
+      const finalNetProfit = (totalNetProfit - totalExpensesMonth) + bossAdjTotal;
+      const grossProfit = totalSales - totalCost;
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
-      document.getElementById('auditGrossProfit').innerText = `₱${totalGrossProfit.toFixed(2)}`;
-      document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
-      document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
+      document.getElementById('auditExpenses').innerText = `₱${totalExpensesMonth.toFixed(2)}`;
+      document.getElementById('auditNetProfit').innerText = `₱${finalNetProfit.toFixed(2)}`;
 
-      renderAuditDailyBreakdown(selectedMonth);
-      renderBossLogs();
-    }
+      // Render Daily Breakdown in Audit
+      const dailyBody = document.getElementById('auditDailyBreakdownBody');
+      dailyBody.innerHTML = '';
+      const sortedDates = Object.keys(dailyMap).sort();
 
-    function renderAuditDailyBreakdown(selectedMonth) {
-      const tbody = document.getElementById('auditDailyBreakdownBody');
-      tbody.innerHTML = '';
-
-      // Kunin ang mga natatanging petsa sa buwang ito mula sa transactions
-      let datesMap = {};
-      transactions.forEach(t => {
-        if (t.date && t.date.startsWith(selectedMonth)) {
-          if (!datesMap[t.date]) datesMap[t.date] = { sales: 0, cost: 0, net: 0 };
-          datesMap[t.date].sales += t.total;
-          let c = t.totalCost || 0;
-          datesMap[t.date].cost += c;
-          datesMap[t.date].net += (t.total - c);
-        }
-      });
-
-      const sortedDates = Object.keys(datesMap).sort().reverse();
-
-      sortedDates.forEach(date => {
-        const d = datesMap[date];
-        tbody.innerHTML += `
+      sortedDates.forEach(dateStr => {
+        const dData = dailyMap[dateStr];
+        dailyBody.innerHTML += `
           <tr>
-            <td class="fw-bold">${date}</td>
-            <td class="text-end">₱${d.sales.toFixed(2)}</td>
-            <td class="text-end text-secondary">₱${d.cost.toFixed(2)}</td>
-            <td class="text-end text-success fw-bold">₱${d.net.toFixed(2)}</td>
+            <td class="fw-bold">${dateStr}</td>
+            <td class="text-end">₱${dData.sales.toFixed(2)}</td>
+            <td class="text-end text-secondary">₱${dData.cost.toFixed(2)}</td>
+            <td class="text-end text-success fw-bold">₱${dData.netProfit.toFixed(2)}</td>
             <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-primary" onclick="jumpToDailyReport('${date}')">
-                <i class="fa-solid fa-eye me-1"></i> View Report
+              <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="goToDailyReportDate('${dateStr}')">
+                <i class="fa-solid fa-eye me-1"></i> View
               </button>
             </td>
           </tr>
@@ -2160,48 +2209,47 @@
       });
 
       if (sortedDates.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Walang transaksyon sa buwang ito.</td></tr>`;
+        dailyBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-2">Walang transaksyon sa buwang ito.</td></tr>`;
       }
+
+      renderBossLogs();
     }
 
-    function jumpToDailyReport(dateStr) {
+    function goToDailyReportDate(dateStr) {
       document.getElementById('dailyReportDate').value = dateStr;
       generateDailyReport();
-      const dailyTab = new bootstrap.Tab(document.getElementById('daily-tab'));
-      dailyTab.show();
+      const dailyTabBtn = document.getElementById('daily-tab');
+      if(dailyTabBtn) dailyTabBtn.click();
     }
 
+    // EXPENSES & SALARIES
     function renderExpensesTable() {
       const tbody = document.getElementById('expenseTableBody');
       tbody.innerHTML = '';
 
-      let allExpenses = [];
+      let hasExpense = false;
       Object.keys(monthlyExpensesData).forEach(dateStr => {
-        monthlyExpensesData[dateStr].forEach((exp, idx) => {
-          allExpenses.push({ date: dateStr, desc: exp.desc, amount: exp.amount, originalKey: dateStr, originalIdx: idx });
-        });
+        if (monthlyExpensesData[dateStr]) {
+          monthlyExpensesData[dateStr].forEach((ex, exIndex) => {
+            hasExpense = true;
+            tbody.innerHTML += `
+              <tr>
+                <td><input type="date" class="form-control form-control-sm" value="${ex.date || dateStr}" onchange="updateExpenseField('${dateStr}', ${exIndex}, 'date', this.value)"></td>
+                <td><input type="text" class="form-control form-control-sm" value="${ex.name}" placeholder="e.g., Sahod, Kuryente, Tubig" onchange="updateExpenseField('${dateStr}', ${exIndex}, 'name', this.value)"></td>
+                <td><input type="number" step="0.01" class="form-control form-control-sm text-end" value="${ex.amount}" placeholder="0.00" onchange="updateExpenseField('${dateStr}', ${exIndex}, 'amount', this.value)"></td>
+                <td class="text-center no-print">
+                  <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseItem('${dateStr}', ${exIndex})">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        }
       });
 
-      // Sort by date descending
-      allExpenses.sort((a, b) => b.date.localeCompare(a.date));
-
-      allExpenses.forEach(item => {
-        tbody.innerHTML += `
-          <tr>
-            <td><input type="date" class="form-control form-control-sm" value="${item.date}" onchange="updateExpenseDate('${item.originalKey}', ${item.originalIdx}, this.value)"></td>
-            <td><input type="text" class="form-control form-control-sm" value="${item.desc}" onchange="updateExpenseDesc('${item.originalKey}', ${item.originalIdx}, this.value)"></td>
-            <td><input type="number" step="0.01" class="form-control form-control-sm text-end" value="${item.amount}" onchange="updateExpenseAmount('${item.originalKey}', ${item.originalIdx}, this.value)"></td>
-            <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow('${item.originalKey}', ${item.originalIdx})">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      if (allExpenses.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakatalang salary o expenses. Pindutin ang "Add Expense Line".</td></tr>`;
+      if (!hasExpense) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakatalang expenses o sahod. Pindutin ang "Add Expense Line".</td></tr>`;
       }
       generateMonthlyAudit();
     }
@@ -2211,39 +2259,46 @@
       if (!monthlyExpensesData[today]) {
         monthlyExpensesData[today] = [];
       }
-      monthlyExpensesData[today].push({ desc: 'Salary / Meralco / Expenses', amount: 0 });
+      monthlyExpensesData[today].push({ date: today, name: '', amount: 0 });
       saveData();
       renderExpensesTable();
     }
 
-    function updateExpenseDate(dateKey, idx, newDate) {
-      const item = monthlyExpensesData[dateKey].splice(idx, 1)[0];
-      if (monthlyExpensesData[dateKey].length === 0) delete monthlyExpensesData[dateKey];
-      if (!monthlyExpensesData[newDate]) monthlyExpensesData[newDate] = [];
-      monthlyExpensesData[newDate].push(item);
-      saveData();
-      renderExpensesTable();
+    function updateExpenseField(dateKey, index, field, value) {
+      let list = monthlyExpensesData[dateKey];
+      if (list && list[index]) {
+        if (field === 'amount') {
+          list[index][field] = parseFloat(value) || 0;
+        } else if (field === 'date') {
+          const newDate = value;
+          list[index][field] = newDate;
+          // Ilipat kung nagbago ang petsa
+          if (newDate !== dateKey) {
+            if (!monthlyExpensesData[newDate]) monthlyExpensesData[newDate] = [];
+            monthlyExpensesData[newDate].push(list[index]);
+            list.splice(index, 1);
+            if (list.length === 0) delete monthlyExpensesData[dateKey];
+          }
+        } else {
+          list[index][field] = value;
+        }
+        saveData();
+        renderExpensesTable();
+      }
     }
 
-    function updateExpenseDesc(dateKey, idx, val) {
-      monthlyExpensesData[dateKey][idx].desc = val;
-      saveData();
+    function deleteExpenseItem(dateKey, index) {
+      if (confirm('Sigurado ka bang gusto mong tanggalin ang expense na ito?')) {
+        monthlyExpensesData[dateKey].splice(index, 1);
+        if (monthlyExpensesData[dateKey].length === 0) {
+          delete monthlyExpensesData[dateKey];
+        }
+        saveData();
+        renderExpensesTable();
+      }
     }
 
-    function updateExpenseAmount(dateKey, idx, val) {
-      monthlyExpensesData[dateKey][idx].amount = parseFloat(val) || 0;
-      saveData();
-      generateMonthlyAudit();
-    }
-
-    function deleteExpenseRow(dateKey, idx) {
-      monthlyExpensesData[dateKey].splice(idx, 1);
-      if (monthlyExpensesData[dateKey].length === 0) delete monthlyExpensesData[dateKey];
-      saveData();
-      renderExpensesTable();
-    }
-
-    // Boss Adjustments Form
+    // BOSS ADJUSTMENTS LOGIC
     document.getElementById('bossForm').addEventListener('submit', function(e) {
       e.preventDefault();
       bossAdjustments.push({
@@ -2264,23 +2319,23 @@
       const tbody = document.getElementById('bossLogsBody');
       tbody.innerHTML = '';
       bossAdjustments.slice().reverse().forEach(b => {
-        let typeBadge = b.type === 'ADD' ? '<span class="badge bg-success">Addition (+)</span>' : '<span class="badge bg-danger">Withdrawal (-)</span>';
+        let typeBadge = b.type === 'ADD' ? '<span class="badge bg-success">Capital / Add (+Net Profit)</span>' : '<span class="badge bg-danger">Withdrawal / Cash Out (-Net Profit)</span>';
         tbody.innerHTML += `
           <tr>
             <td>${b.date}</td>
-            <td>${typeBadge} - ${b.notes || 'Wala'}</td>
+            <td>${typeBadge} <small class="text-muted">(${b.notes || 'Wala'})</small></td>
             <td class="fw-bold">₱${b.amount.toFixed(2)}</td>
           </tr>
         `;
       });
-      if(bossAdjustments.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Walang nakatalang Boss Adjustment.</td></tr>`;
+      if (bossAdjustments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Walang nakatalang Boss Adjustment.</td></tr>`;
       }
     }
 
-    // ================= GLOBAL SEARCH =================
+    // GLOBAL SEARCH
     function renderGlobalSearchResults() {
-      const query = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+      const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
       const wrapper = document.getElementById('globalSearchResultsWrapper');
       const tbody = document.getElementById('globalSearchResultsBody');
       tbody.innerHTML = '';
@@ -2290,32 +2345,35 @@
         return;
       }
 
-      const matches = transactions.filter(t =>
+      wrapper.style.display = 'block';
+      let results = transactions.filter(t =>
         t.customer.toLowerCase().includes(query) ||
         t.product.toLowerCase().includes(query) ||
         t.date.includes(query) ||
         t.location.toLowerCase().includes(query)
       );
 
-      wrapper.style.display = 'block';
-
-      matches.slice().reverse().forEach(m => {
+      results.slice().reverse().forEach(t => {
         tbody.innerHTML += `
           <tr>
-            <td>${m.date}</td>
-            <td class="fw-bold">${m.customer}</td>
-            <td><span class="badge bg-secondary">${m.location}</span></td>
-            <td>${m.product}</td>
-            <td>₱${m.total.toFixed(2)}</td>
-            <td class="text-success">₱${m.paid.toFixed(2)}</td>
-            <td class="text-danger">₱${m.balance.toFixed(2)}</td>
-            <td><span class="badge ${m.status === 'PAID' ? 'bg-success' : 'bg-danger'}">${m.status}</span></td>
+            <td>${t.date}</td>
+            <td class="fw-bold">${t.customer}</td>
+            <td><span class="badge bg-secondary">${t.location}</span></td>
+            <td>${t.product}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td class="text-success">₱${t.paid.toFixed(2)}</td>
+            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="goToDailyReportDate('${t.date}')">
+                <i class="fa-solid fa-eye me-1"></i> View Date
+              </button>
+            </td>
           </tr>
         `;
       });
 
-      if (matches.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang nahanap na tugma sa iyong search.</td></tr>`;
+      if (results.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang nahanap na transaksyon na tumutugma sa iyong hinahanap.</td></tr>`;
       }
     }
 
@@ -2324,9 +2382,9 @@
       document.getElementById('globalSearchResultsWrapper').style.display = 'none';
     }
 
-    // ================= EDIT TRANSACTION MODAL =================
-    function openEditTransactionModal(id) {
-      const t = transactions.find(item => item.id === id);
+    // EDIT & DELETE TRANSACTION
+    function openEditTransactionModal(txId) {
+      const t = transactions.find(item => item.id === txId);
       if(!t) return;
 
       document.getElementById('editTxId').value = t.id;
@@ -2354,34 +2412,36 @@
       e.preventDefault();
       const id = parseInt(document.getElementById('editTxId').value);
       const t = transactions.find(item => item.id === id);
-      if(!t) return;
 
-      t.date = document.getElementById('editTxDate').value;
-      t.customer = document.getElementById('editCustomerName').value;
-      t.location = document.getElementById('editLocation').value;
-      t.product = document.getElementById('editProduct').value;
-      t.containerInfo = document.getElementById('editContainerInfo').value;
-      t.totalCost = parseFloat(document.getElementById('editTotalCost').value) || 0;
-      t.total = parseFloat(document.getElementById('editTotal').value) || 0;
-      t.paid = parseFloat(document.getElementById('editPaid').value) || 0;
-      t.balance = parseFloat(document.getElementById('editBalance').value) || 0;
-      t.netProfit = t.total - t.totalCost;
-      t.status = t.balance <= 0 ? 'PAID' : (t.paid > 0 ? 'PARTIAL' : 'UNPAID');
+      if (t) {
+        t.date = document.getElementById('editTxDate').value;
+        t.customer = document.getElementById('editCustomerName').value;
+        t.location = document.getElementById('editLocation').value;
+        t.product = document.getElementById('editProduct').value;
+        t.containerInfo = document.getElementById('editContainerInfo').value;
+        t.totalCost = parseFloat(document.getElementById('editTotalCost').value) || 0;
+        t.total = parseFloat(document.getElementById('editTotal').value) || 0;
+        t.paid = parseFloat(document.getElementById('editPaid').value) || 0;
+        t.balance = parseFloat(document.getElementById('editBalance').value) || 0;
+        t.netProfit = t.total - t.totalCost;
+        t.status = t.balance > 0 ? (t.paid > 0 ? 'PARTIAL' : 'UNPAID') : 'PAID';
 
-      saveData();
-      bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
-      generateDailyReport();
-      renderCreditTable();
-      alert('Tagumpay na na-update ang transaksyon!');
+        saveData();
+        bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
+        generateDailyReport();
+        alert('Tagumpay na na-update ang transaksyon!');
+      }
     });
 
-    function deleteTransaction(id) {
-      if(confirm('Sigurado ka bang gusto mong tanggalin ang transaksyong ito?')) {
-        transactions = transactions.filter(t => t.id !== id);
-        saveData();
-        generateDailyReport();
-        renderCreditTable();
-        alert('Naalis na ang transaksyon.');
+    function deleteTransaction(txId) {
+      if (confirm('Sigurado ka bang gusto mong tanggalin ang transaksyong ito?')) {
+        const index = transactions.findIndex(item => item.id === txId);
+        if (index > -1) {
+          transactions.splice(index, 1);
+          saveData();
+          generateDailyReport();
+          alert('Naalis na ang transaksyon.');
+        }
       }
     }
   </script>

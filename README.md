@@ -1913,7 +1913,6 @@
       currentDayExpenses = dayExpensesTotal;
 
       let dayNetProfit = dayGrossProfit - dayExpensesTotal;
-      // Hatiin ang expenses o i-display ang hiwalay na net profit (Gross Profit minus expenses proportional or total net)
       let dayHiwayNet = dayHiwayGrossProfit - (dayHiwaySales > 0 ? (dayHiwaySales / (daySales || 1)) * dayExpensesTotal : 0);
       let dayByaheNet = dayByaheGrossProfit - (dayByaheSales > 0 ? (dayByaheSales / (daySales || 1)) * dayExpensesTotal : 0);
 
@@ -2572,7 +2571,7 @@
         transactions[tIndex].date = document.getElementById('editTxDate').value;
         transactions[tIndex].customer = document.getElementById('editCustomerName').value;
         transactions[tIndex].location = document.getElementById('editLocation').value;
-        transactions[tIndex].product = document.getElementById('editProduct5').value || document.getElementById('editProduct').value;
+        transactions[tIndex].product = document.getElementById('editProduct').value;
         transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;
         transactions[tIndex].totalCost = newCost;
         transactions[tIndex].netProfit = newTotal - newCost;

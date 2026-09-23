@@ -252,6 +252,7 @@
                 <label class="form-label fw-semibold">Payment Method:</label>
                 <select id="paymentMethod" class="form-select">
                   <option value="Cash">Cash</option>
+                  <option value="Byahe Cash">Byahe Cash</option>
                   <option value="GCash">GCash</option>
                   <option value="Bank Transfer">Bank Transfer (BT)</option>
                   <option value="Cheque">Cheque</option>
@@ -421,6 +422,10 @@
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="text-muted small fw-semibold text-success">(+) Payment sa Utang (Collected):</span>
                     <span class="fw-bold text-success" id="breakdownDebtPayment">+₱0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Less: Byahe Cash</span>
+                    <span class="text-danger small" id="lessByaheCash">-₱0.00</span>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="text-muted small">Less: GCash</span>
@@ -1826,6 +1831,7 @@
       let dayGrossProfit = 0;
       let count = 0;
 
+      let totalByaheCash = 0;
       let totalGCash = 0;
       let totalBT = 0;
       let totalCheque = 0;
@@ -1857,7 +1863,8 @@
               dayDebtPayments += p.amount;
             }
 
-            if (p.method === 'GCash') totalGCash += p.amount;
+            if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
+            else if (p.method === 'GCash') totalGCash += p.amount;
             else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
             else if (p.method === 'Cheque') totalCheque += p.amount;
           }
@@ -1918,7 +1925,7 @@
       let dayByaheNet = dayByaheGrossProfit - (dayByaheSales > 0 ? (dayByaheSales / (daySales || 1)) * dayExpensesTotal : 0);
 
       // Automatic deduction of salary & expenses from cash collections
-      currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque + dayExpensesTotal));
+      currentTargetCashInDrawer = Math.max(0, dayCollected - (totalByaheCash + totalGCash + totalBT + totalCheque + dayExpensesTotal));
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -1932,6 +1939,7 @@
 
       document.getElementById('totalCollectionAll').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('breakdownDebtPayment').innerText = `+₱${dayDebtPayments.toFixed(2)}`;
+      document.getElementById('lessByaheCash').innerText = `-₱${totalByaheCash.toFixed(2)}`;
       document.getElementById('lessGCash').innerText = `-₱${totalGCash.toFixed(2)}`;
       document.getElementById('lessBT').innerText = `-₱${totalBT.toFixed(2)}`;
       document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
@@ -2122,7 +2130,7 @@
             alert('Ang ibinigay na bayad ay mas malaki kaysa sa natitirang balanse!');
             return;
           }
-          let payMethod = prompt('Ilagay ang Payment Method (Cash, GCash, Bank Transfer, Cheque):', 'Cash') || 'Cash';
+          let payMethod = prompt('Ilagay ang Payment Method (Cash, Byahe Cash, GCash, Bank Transfer, Cheque):', 'Cash') || 'Cash';
           let payDate = prompt('Ilagay ang Petsa ng Pagbabayad (YYYY-MM-DD):', getTodayDateString()) || getTodayDateString();
 
           t.paid += payAmt;

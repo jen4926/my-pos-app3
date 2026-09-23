@@ -440,7 +440,7 @@
                   </div>
 
                   <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-muted fw-semibold">Total Cash Counted:</span>
+                    <span class="text-muted fw-semibold">Total Cash Counted (Minus Pondo):</span>
                     <span class="fs-5 fw-bold text-dark" id="totalCountedCash">₱0.00</span>
                   </div>
 
@@ -1220,7 +1220,7 @@
 
         this.reset();
       } else {
-        document.getElementById('loginError').classList.remove('d-none');
+        document.getElementById('loginError').classList.add('d-none');
       }
     });
 
@@ -1844,7 +1844,6 @@
       }
       currentDayExpenses = dayExpensesTotal;
 
-      // ILANGAW / ILLESS DIN ANG SALARY & EXPENSES SA DAILY NET PROFIT
       let dayNetProfit = dayGrossProfit - dayExpensesTotal;
 
       // Automatic deduction of salary & expenses from cash collections
@@ -1870,7 +1869,7 @@
       const selectedDate = document.getElementById('dailyReportDate').value;
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
 
-      let totalCounted = fundInputVal;
+      let totalCountedRaw = 0; // Kabuuang pera sa drawer na binilang (kasama ang pondo)
       let totalPcs = 0;
 
       const counts = document.querySelectorAll('.denom-count');
@@ -1883,27 +1882,31 @@
         const qty = parseInt(input.value) || 0;
         const sub = qty * denom;
         subtotals[index].value = sub.toFixed(2);
-        totalCounted += sub;
+        totalCountedRaw += sub;
         totalPcs += qty;
         breakdownObj.counts[denom] = qty;
       });
 
       const coinsInput = document.querySelector('.denom-coins');
       const coinsVal = parseFloat(coinsInput.value) || 0;
-      totalCounted += coinsVal;
+      totalCountedRaw += coinsVal;
       breakdownObj.coins = coinsVal;
 
       cashBreakdownData[selectedDate] = breakdownObj;
       saveData();
 
+      // I-display ang kabuuang pera sa drawer (kasama ang pondo) sa subtotal table
       document.getElementById('breakdownTotalPcs').innerText = `${totalPcs} pcs`;
-      document.getElementById('breakdownTotalAmount').innerText = `₱${totalCounted.toFixed(2)}`;
+      document.getElementById('breakdownTotalAmount').innerText = `₱${totalCountedRaw.toFixed(2)}`;
 
       const targetWithFund = currentTargetCashInDrawer + fundInputVal;
       document.getElementById('breakdownTargetWithFund').innerText = `₱${targetWithFund.toFixed(2)}`;
-      document.getElementById('totalCountedCash').innerText = `₱${totalCounted.toFixed(2)}`;
 
-      const discrepancy = totalCounted - targetWithFund;
+      // Bawasan ng pondo ang binu-biling total cash bago i-kumpara sa target sales upang hindi ito sumobra bilang benta
+      const totalCountedSalesOnly = Math.max(0, totalCountedRaw - fundInputVal);
+      document.getElementById('totalCountedCash').innerText = `₱${totalCountedSalesOnly.toFixed(2)}`;
+
+      const discrepancy = totalCountedSalesOnly - currentTargetCashInDrawer;
       const discEl = document.getElementById('cashDiscrepancy');
       const alertEl = document.getElementById('cashStatusAlert');
 
@@ -2202,7 +2205,6 @@
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang natagpuang salary o expense para sa paghahanap na ito. Pindutin ang "Add Expense Line" para magdagdag.</td></tr>`;
       }
 
-      // SUB-TOTAL / TOTAL FOOTER SA EXPENSES TABLE
       tfoot.innerHTML = `
         <tr>
           <td colspan="2" class="text-end">SUBTOTAL / TOTAL:</td>
@@ -2288,7 +2290,6 @@
       document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
       document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
 
-      // Render Daily Breakdown inside Audit Tab
       const dailyBreakdownBody = document.getElementById('auditDailyBreakdownBody');
       dailyBreakdownBody.innerHTML = '';
 
@@ -2308,7 +2309,6 @@
       sortedDates.forEach(d => {
         const item = dailyMap[d];
         
-        // Kunin din ang expenses para sa bawat araw upang ma-compute ang tamang Daily Net Profit
         let dayExpSum = 0;
         if (monthlyExpensesData[selectedMonth]) {
           monthlyExpensesData[selectedMonth].forEach(exp => {

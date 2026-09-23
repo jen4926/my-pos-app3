@@ -852,6 +852,9 @@
                 <tbody id="expenseTableBody">
                   <!-- Dynamic Expense Rows -->
                 </tbody>
+                <tfoot class="table-secondary fw-bold" id="expenseTableFooter">
+                  <!-- Dynamic Subtotal / Total Row -->
+                </tfoot>
               </table>
             </div>
           </div>
@@ -1759,7 +1762,7 @@
 
       let daySales = 0;
       let dayCollected = 0;
-      let dayNetProfit = 0;
+      let dayGrossProfit = 0;
       let count = 0;
 
       let totalGCash = 0;
@@ -1770,9 +1773,12 @@
       const filtered = transactions.filter(t => t.date === selectedDate || t.payments.some(p => p.date === selectedDate));
 
       filtered.forEach((t, index) => {
+        const txCost = t.totalCost || 0;
+        const netProf = t.total - txCost;
+
         if(t.date === selectedDate) {
           daySales += t.total;
-          dayNetProfit += (t.netProfit || (t.total - (t.totalCost || 0)));
+          dayGrossProfit += netProf;
         }
        
         t.payments.forEach((p, pIdx) => {
@@ -1794,9 +1800,6 @@
         let locBadge = '<span class="badge bg-primary">Hiway</span>';
         if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
         if (t.location === 'Inventory Only') locBadge = '<span class="badge bg-secondary">Inventory Only</span>';
-
-        const txCost = t.totalCost || 0;
-        const netProf = t.total - txCost;
 
         tbody.innerHTML += `
           <tr>
@@ -1829,18 +1832,20 @@
 
       currentDayDebtPayments = dayDebtPayments;
 
-      // AUTOMATIKONG KINUKUHA ANG SALARY & EXPENSES NG PETSA NA ITO MULA SA MONTHLY EXPENSES DATA
+      // KUNIN ANG SALARY & EXPENSES NG PETSA NA ITO MULA SA MONTHLY EXPENSES DATA
       let dayExpensesTotal = 0;
       const auditMonthStr = selectedDate.substring(0, 7); // YYYY-MM
       if (monthlyExpensesData && monthlyExpensesData[auditMonthStr]) {
         monthlyExpensesData[auditMonthStr].forEach(exp => {
-          // Kung sakaling ang petsa ng expense ay tugma sa napiling araw, o kung nakasulat doon
           if (!exp.date || exp.date === selectedDate || exp.date.startsWith(selectedDate)) {
             dayExpensesTotal += (parseFloat(exp.salaryAmount) || 0) + (parseFloat(exp.expenseAmount) || 0);
           }
         });
       }
       currentDayExpenses = dayExpensesTotal;
+
+      // ILANGAW / ILLESS DIN ANG SALARY & EXPENSES SA DAILY NET PROFIT
+      let dayNetProfit = dayGrossProfit - dayExpensesTotal;
 
       // Automatic deduction of salary & expenses from cash collections
       currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque + dayExpensesTotal));
@@ -1891,7 +1896,6 @@
       cashBreakdownData[selectedDate] = breakdownObj;
       saveData();
 
-      // I-update ang Footer Total ng Breakdown Table
       document.getElementById('breakdownTotalPcs').innerText = `${totalPcs} pcs`;
       document.getElementById('breakdownTotalAmount').innerText = `₱${totalCounted.toFixed(2)}`;
 
@@ -2143,6 +2147,7 @@
 
     function renderExpensesTable() {
       const tbody = document.getElementById('expenseTableBody');
+      const tfoot = document.getElementById('expenseTableFooter');
       const auditMonth = document.getElementById('auditMonth').value;
       const searchQuery = document.getElementById('searchExpenseInput') ? document.getElementById('searchExpenseInput').value.toLowerCase() : '';
       
@@ -2154,6 +2159,8 @@
 
       const expensesList = monthlyExpensesData[auditMonth];
       let hasVisibleRow = false;
+      let totalSalarySum = 0;
+      let totalExpenseSum = 0;
 
       expensesList.forEach((item, index) => {
         const rowText = `${item.date} ${item.salaryName}${item.salaryAmount} ${item.expenseName}${item.expenseAmount}`.toLowerCase();
@@ -2161,6 +2168,9 @@
           return;
         }
         hasVisibleRow = true;
+
+        totalSalarySum += (parseFloat(item.salaryAmount) || 0);
+        totalExpenseSum += (parseFloat(item.expenseAmount) || 0);
 
         tbody.innerHTML += `
           <tr>
@@ -2191,6 +2201,17 @@
       if (!hasVisibleRow) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang natagpuang salary o expense para sa paghahanap na ito. Pindutin ang "Add Expense Line" para magdagdag.</td></tr>`;
       }
+
+      // SUB-TOTAL / TOTAL FOOTER SA EXPENSES TABLE
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="2" class="text-end">SUBTOTAL / TOTAL:</td>
+          <td class="text-end text-danger fw-bold">₱${totalSalarySum.toFixed(2)}</td>
+          <td class="text-end"></td>
+          <td class="text-end text-danger fw-bold">₱${totalExpenseSum.toFixed(2)}</td>
+          <td class="no-print"></td>
+        </tr>
+      `;
     }
 
     function updateExpenseField(index, field, value) {
@@ -2203,7 +2224,7 @@
       saveData();
       renderExpensesTable();
       generateMonthlyAudit();
-      generateDailyReport(); // Para mag-update agad ang Daily Report kung sakaling nakatutok sa araw na iyon
+      generateDailyReport();
     }
 
     function deleteExpenseRow(index) {
@@ -2275,23 +2296,35 @@
       transactions.forEach(t => {
         if (t.date.startsWith(selectedMonth)) {
           if (!dailyMap[t.date]) {
-            dailyMap[t.date] = { sales: 0, cost: 0, profit: 0 };
+            dailyMap[t.date] = { sales: 0, cost: 0, grossProfit: 0 };
           }
           dailyMap[t.date].sales += t.total;
           dailyMap[t.date].cost += (t.totalCost || 0);
-          dailyMap[t.date].profit += (t.netProfit || (t.total - (t.totalCost || 0)));
+          dailyMap[t.date].grossProfit += (t.netProfit || (t.total - (t.totalCost || 0)));
         }
       });
 
       const sortedDates = Object.keys(dailyMap).sort().reverse();
       sortedDates.forEach(d => {
         const item = dailyMap[d];
+        
+        // Kunin din ang expenses para sa bawat araw upang ma-compute ang tamang Daily Net Profit
+        let dayExpSum = 0;
+        if (monthlyExpensesData[selectedMonth]) {
+          monthlyExpensesData[selectedMonth].forEach(exp => {
+            if (!exp.date || exp.date === d || exp.date.startsWith(d)) {
+              dayExpSum += (parseFloat(exp.salaryAmount) || 0) + (parseFloat(exp.expenseAmount) || 0);
+            }
+          });
+        }
+        const dayNetProf = item.grossProfit - dayExpSum;
+
         dailyBreakdownBody.innerHTML += `
           <tr>
             <td class="fw-bold">${d}</td>
             <td class="text-end">₱${item.sales.toFixed(2)}</td>
             <td class="text-end text-secondary">₱${item.cost.toFixed(2)}</td>
-            <td class="text-end text-success fw-bold">₱${item.profit.toFixed(2)}</td>
+            <td class="text-end text-success fw-bold">₱${dayNetProf.toFixed(2)}</td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="jumpToDailyReport('${d}')">
                 <i class="fa-solid fa-eye me-1"></i> View

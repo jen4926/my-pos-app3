@@ -381,6 +381,13 @@
                         <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
                       </tr>
                     </tbody>
+                    <tfoot class="table-secondary fw-bold">
+                      <tr>
+                        <td class="text-end">TOTAL KABUUANG PERA SA DRAWER:</td>
+                        <td id="breakdownTotalPcs" class="text-center">0 pcs</td>
+                        <td id="breakdownTotalAmount" class="text-success">₱0.00</td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               </div>
@@ -1823,6 +1830,7 @@
       }
       currentDayExpenses = dayExpensesTotal;
 
+      // Automatic deduction of salary & expenses from cash collections
       currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque + dayExpensesTotal));
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
@@ -1846,6 +1854,7 @@
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
 
       let totalCounted = fundInputVal;
+      let totalPcs = 0;
 
       const counts = document.querySelectorAll('.denom-count');
       const subtotals = document.querySelectorAll('.denom-subtotal');
@@ -1858,6 +1867,7 @@
         const sub = qty * denom;
         subtotals[index].value = sub.toFixed(2);
         totalCounted += sub;
+        totalPcs += qty;
         breakdownObj.counts[denom] = qty;
       });
 
@@ -1868,6 +1878,10 @@
 
       cashBreakdownData[selectedDate] = breakdownObj;
       saveData();
+
+      // I-update ang Footer Total ng Breakdown Table
+      document.getElementById('breakdownTotalPcs').innerText = `${totalPcs} pcs`;
+      document.getElementById('breakdownTotalAmount').innerText = `₱${totalCounted.toFixed(2)}`;
 
       const targetWithFund = currentTargetCashInDrawer + fundInputVal;
       document.getElementById('breakdownTargetWithFund').innerText = `₱${targetWithFund.toFixed(2)}`;
@@ -2130,7 +2144,7 @@
       let hasVisibleRow = false;
 
       expensesList.forEach((item, index) => {
-        const rowText = `${item.date} ${item.salaryName} ${item.salaryAmount} ${item.expenseName} ${item.expenseAmount}`.toLowerCase();
+        const rowText = `${item.date} ${item.salaryName}${item.salaryAmount} ${item.expenseName}${item.expenseAmount}`.toLowerCase();
         if (searchQuery && !rowText.includes(searchQuery)) {
           return;
         }
@@ -2139,19 +2153,19 @@
         tbody.innerHTML += `
           <tr>
             <td>
-              <input type="date" class="form-control form-control-sm" value="${item.date || auditMonth + '-01'}" onchange="updateExpenseField(${index}, 'date', this.value)">
+              <input type="date" class="form-control form-control-sm" value="${item.date \vert{}\vert{} auditMonth + '-01'}" onchange="updateExpenseField(${index}, 'date', this.value)">
             </td>
             <td>
-              <input type="text" class="form-control form-control-sm" placeholder="e.g. Sahod ni Juan" value="${item.salaryName || ''}" onchange="updateExpenseField(${index}, 'salaryName', this.value)">
+              <input type="text" class="form-control form-control-sm" placeholder="e.g. Sahod ni Juan" value="${item.salaryName \vert{}\vert{} ''}" onchange="updateExpenseField(${index}, 'salaryName', this.value)">
             </td>
             <td>
-              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.salaryAmount || 0}" onchange="updateExpenseField(${index}, 'salaryAmount', this.value)">
+              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.salaryAmount \vert{}\vert{} 0}" onchange="updateExpenseField(${index}, 'salaryAmount', this.value)">
             </td>
             <td>
-              <input type="text" class="form-control form-control-sm" placeholder="e.g. Kuryente / Tubig / Bigas" value="${item.expenseName || ''}" onchange="updateExpenseField(${index}, 'expenseName', this.value)">
+              <input type="text" class="form-control form-control-sm" placeholder="e.g. Kuryente / Tubig / Bigas" value="${item.expenseName \vert{}\vert{} ''}" onchange="updateExpenseField(${index}, 'expenseName', this.value)">
             </td>
             <td>
-              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.expenseAmount || 0}" onchange="updateExpenseField(${index}, 'expenseAmount', this.value)">
+              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.expenseAmount \vert{}\vert{} 0}" onchange="updateExpenseField(${index}, 'expenseAmount', this.value)">
             </td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow(${index})">
@@ -2320,7 +2334,7 @@
       let results = [];
 
       transactions.forEach(t => {
-        let matchStr = `${t.date} ${t.customer} ${t.location} ${t.product} ${t.status}`.toLowerCase();
+        let matchStr = `${t.date} ${t.customer}${t.location} ${t.product}${t.status}`.toLowerCase();
         if (matchStr.includes(query)) {
           results.push({
             date: t.date,
@@ -2399,7 +2413,7 @@
         const newCost = parseFloat(document.getElementById('editTotalCost').value) || 0;
         const newBalance = Math.max(0, newTotal - newPaid);
 
-        transactions[tIndex].date = document.getElementById('editTxDate').value;
+        transactions[tIndex].date = document.getElementById('editTxDate`).value;
         transactions[tIndex].customer = document.getElementById('editCustomerName').value;
         transactions[tIndex].location = document.getElementById('editLocation').value;
         transactions[tIndex].product = document.getElementById('editProduct').value;

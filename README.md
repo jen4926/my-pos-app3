@@ -1829,10 +1829,15 @@
 
       currentDayDebtPayments = dayDebtPayments;
 
+      // AUTOMATIKONG KINUKUHA ANG SALARY & EXPENSES NG PETSA NA ITO MULA SA MONTHLY EXPENSES DATA
       let dayExpensesTotal = 0;
-      if (monthlyExpensesData && monthlyExpensesData[selectedDate]) {
-        monthlyExpensesData[selectedDate].forEach(exp => {
-          dayExpensesTotal += (parseFloat(exp.salaryAmount) || 0) + (parseFloat(exp.expenseAmount) || 0);
+      const auditMonthStr = selectedDate.substring(0, 7); // YYYY-MM
+      if (monthlyExpensesData && monthlyExpensesData[auditMonthStr]) {
+        monthlyExpensesData[auditMonthStr].forEach(exp => {
+          // Kung sakaling ang petsa ng expense ay tugma sa napiling araw, o kung nakasulat doon
+          if (!exp.date || exp.date === selectedDate || exp.date.startsWith(selectedDate)) {
+            dayExpensesTotal += (parseFloat(exp.salaryAmount) || 0) + (parseFloat(exp.expenseAmount) || 0);
+          }
         });
       }
       currentDayExpenses = dayExpensesTotal;
@@ -2198,6 +2203,7 @@
       saveData();
       renderExpensesTable();
       generateMonthlyAudit();
+      generateDailyReport(); // Para mag-update agad ang Daily Report kung sakaling nakatutok sa araw na iyon
     }
 
     function deleteExpenseRow(index) {
@@ -2207,6 +2213,7 @@
         saveData();
         renderExpensesTable();
         generateMonthlyAudit();
+        generateDailyReport();
       }
     }
 

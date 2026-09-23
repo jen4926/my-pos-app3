@@ -1891,7 +1891,7 @@
       let totalCheque = 0;
       let dayDebtPayments = 0;
 
-      const filtered = transactions.filter(t => t.date === selectedDate || t.payments.some(p => p.date === selectedDate));
+      const filtered = transactions.filter(t => t.date === selectedDate || (t.payments && t.payments.some(p => p.date === selectedDate)));
 
       filtered.forEach((t, index) => {
         const txCost = t.totalCost || 0;
@@ -1910,23 +1910,25 @@
           }
         }
        
-        t.payments.forEach((p, pIdx) => {
-          if (p.date === selectedDate) {
-            dayCollected += p.amount;
-            if (t.date !== selectedDate || pIdx > 0) {
-              dayDebtPayments += p.amount;
-            }
+        if (t.payments) {
+          t.payments.forEach((p, pIdx) => {
+            if (p.date === selectedDate) {
+              dayCollected += p.amount;
+              if (t.date !== selectedDate || pIdx > 0) {
+                dayDebtPayments += p.amount;
+              }
 
-            if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
-            else if (p.method === 'GCash') totalGCash += p.amount;
-            else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
-            else if (p.method === 'Cheque') totalCheque += p.amount;
-          }
-        });
+              if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
+              else if (p.method === 'GCash') totalGCash += p.amount;
+              else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
+              else if (p.method === 'Cheque') totalCheque += p.amount;
+            }
+          });
+        }
        
         count++;
 
-        const lastMethod = t.payments.length > 0 ? t.payments[t.payments.length - 1].method : 'N/A';
+        const lastMethod = (t.payments && t.payments.length > 0) ? t.payments[t.payments.length - 1].method : 'N/A';
         let locBadge = '<span class="badge bg-primary">Hiway</span>';
         if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
         if (t.location === 'Inventory Only') locBadge = '<span class="badge bg-secondary">Inventory Only</span>';
@@ -2114,7 +2116,12 @@
       let paidCount = 0;
 
       transactions.forEach(t => {
-        if (t.balance > 0) {
+        // Gumamit ng maliliit na margin para maiwasan ang floating-point mismatch tulad ng 0.00001 balance
+        const currentBalance = Number((t.balance || 0).toFixed(2));
+        const currentPaid = Number((t.paid || 0).toFixed(2));
+        const currentTotal = Number((t.total || 0).toFixed(2));
+
+        if (currentBalance > 0.01) {
           creditCount++;
           let locBadge = '<span class="badge bg-primary">Hiway</span>';
           if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
@@ -2125,10 +2132,10 @@
               <td>${locBadge}</td>
               <td>${t.product}</td>
               <td class="text-secondary fw-semibold">₱${(t.totalCost || 0).toFixed(2)}</td>
-              <td class="text-success">₱${t.paid.toFixed(2)}</td>
-              <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
-              <td>${t.dueDate}</td>
-              <td><span class="badge bg-warning text-dark">${t.status}</span></td>
+              <td class="text-success">₱${currentPaid.toFixed(2)}</td>
+              <td class="text-danger fw-bold">₱${currentBalance.toFixed(2)}</td>
+              <td>${t.dueDate || 'N/A'}</td>
+              <td><span class="badge bg-warning text-dark">${t.status || 'PARTIAL'}</span></td>
               <td class="no-print">
                 <button class="btn btn-sm btn-success" onclick="openPaymentModal(${t.id})">
                   <i class="fa-solid fa-peso-sign me-1"></i> Magbayad
@@ -2136,14 +2143,14 @@
               </td>
             </tr>
           `;
-        } else if (t.total > 0) {
+        } else if (currentTotal > 0 || currentPaid > 0) {
           paidCount++;
           paidTbody.innerHTML += `
             <tr>
               <td class="fw-bold">${t.customer}</td>
               <td>${t.product}</td>
-              <td>₱${t.total.toFixed(2)}</td>
-              <td class="text-success">₱${t.paid.toFixed(2)}</td>
+              <td>₱${currentTotal.toFixed(2)}</td>
+              <td class="text-success">₱${currentPaid.toFixed(2)}</td>
               <td><span class="badge bg-success">PAID / FULL</span></td>
               <td class="text-center no-print">
                 <button class="btn btn-sm btn-outline-primary border-0 p-1" onclick="openPaymentModal(${t.id})" title="Tingnan ang Payment History">
@@ -2192,15 +2199,20 @@
         alert('Mangyaring maglagay ng tamang halaga ng bayad.');
         return;
       }
-      if (payAmt > t.balance) {
+      if (payAmt > t.balance + 0.01) {
         alert('Ang ibinigay na bayad ay mas malaki kaysa sa natitirang balanse!');
         return;
       }
 
-      t.paid += payAmt;
-      t.balance = Math.max(0, t.total - t.paid);
-      if (t.balance === 0) t.status = 'PAID';
-      else t.status = 'PARTIAL';
+      t.paid = Number((t.paid + payAmt).toFixed(2));
+      t.balance = Number(Math.max(0, t.total - t.paid).toFixed(2));
+      
+      if (t.balance <= 0.01) {
+        t.balance = 0;
+        t.status = 'PAID';
+      } else {
+        t.status = 'PARTIAL';
+      }
 
       if (!t.payments) t.payments = [];
       t.payments.push({ amount: payAmt, method: payMethod, date: payDate });

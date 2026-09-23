@@ -1924,8 +1924,23 @@
       let dayHiwayNet = dayHiwayGrossProfit - (dayHiwaySales > 0 ? (dayHiwaySales / (daySales || 1)) * dayExpensesTotal : 0);
       let dayByaheNet = dayByaheGrossProfit - (dayByaheSales > 0 ? (dayByaheSales / (daySales || 1)) * dayExpensesTotal : 0);
 
-      // Automatic deduction of salary & expenses from cash collections
-      currentTargetCashInDrawer = Math.max(0, dayCollected - (totalByaheCash + totalGCash + totalBT + totalCheque + dayExpensesTotal));
+      // Ang bayad sa utang (dayDebtPayments) ay HINDI na isinasama sa target cash in drawer at target cash + pondo
+      const baseSalesCash = daySales - (daySales - dayCollected); // o simpleng kabuuang cash sales na bayad ngayon kung gusto, o hiwalay ang current sales paid
+      // Dito, kinukuha natin ang mga benta para sa araw na ito minus utang na hindi pa bayad, tapos HINDI na idinaragdag ang dayDebtPayments sa target cash
+      let currentDayCashSalesPaid = 0;
+      filtered.forEach(t => {
+        if(t.date === selectedDate) {
+          // Kunin ang cash o paid amount na bahagi ng mismong transaksyon sa araw na ito (hindi kasama ang lumang utang)
+          let todayCashPaid = t.payments.filter(p => p.date === selectedDate && (t.date === selectedDate && t.payments.indexOf(p) === 0)).reduce((acc, p) => acc + p.amount, 0);
+          // Kung sakaling full o partial payment sa mismong araw:
+          currentDayCashSalesPaid += Math.min(t.paid, t.total); // o i-base sa cash/byahe cash/etc na methods para sa araw na ito
+        }
+      });
+
+      // Alternatibong paraan: Kunin ang kabuuang collection ng araw na ito MINUS ang dayDebtPayments para sa target cash (dahil ang dayDebtPayments ay bayad sa utang na hindi dapat maging bahagi ng araw-arawang benta/target drawer kung hiwalay ang koleksyon ng utang)
+      // O kaya: Target Cash = Day Collected - Day Debt Payments - Non-Cash Methods (Byahe Cash, GCash, BT, Cheque) - Expenses
+      let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
+      currentTargetCashInDrawer = Math.max(0, dayCollected - dayDebtPayments - totalNonCashToday - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;

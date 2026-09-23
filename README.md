@@ -1914,6 +1914,7 @@
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
               dayCollected += p.amount;
+              // Kapag ang bayad ay sa ibang araw naganap O kaya ay karagdagang hulog (hindi unang bayad sa parehong petsa ng transaksyon), ituring itong Payment sa Utang
               if (t.date !== selectedDate || pIdx > 0) {
                 dayDebtPayments += p.amount;
               }
@@ -1980,9 +1981,12 @@
       let dayHiwayNet = dayHiwayGrossProfit - (dayHiwaySales > 0 ? (dayHiwaySales / (daySales || 1)) * dayExpensesTotal : 0);
       let dayByaheNet = dayByaheGrossProfit - (dayByaheSales > 0 ? (dayByaheSales / (daySales || 1)) * dayExpensesTotal : 0);
 
-      // Ang bayad sa utang ay hindi isinasama sa target cash in drawer at target cash + pondo
+      // HUWAG ISAMA ANG PAYMENTS SA UTANG SA TARGET CASH IN DRAWER (DAHIL HINDI ITO BENTA SA ARAW NA ITO KUNDI KOLEKSYON NG LUMANG UTANG)
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
-      currentTargetCashInDrawer = Math.max(0, dayCollected - dayDebtPayments - totalNonCashToday - dayExpensesTotal);
+      // Ang basehan ng target cash ay ang kabuuang benta (daySales) minus ang mga hindi cash at minus ang expenses. 
+      // (Tandaan: Ang cash bayad ngayon para sa bagong benta ay nasa daySales, kaya ang daySales ang batayan ng cash sales)
+      let dayCashSalesOnly = daySales - totalNonCashToday; 
+      currentTargetCashInDrawer = Math.max(0, dayCashSalesOnly - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -2116,7 +2120,6 @@
       let paidCount = 0;
 
       transactions.forEach(t => {
-        // Gumamit ng maliliit na margin para maiwasan ang floating-point mismatch tulad ng 0.00001 balance
         const currentBalance = Number((t.balance || 0).toFixed(2));
         const currentPaid = Number((t.paid || 0).toFixed(2));
         const currentTotal = Number((t.total || 0).toFixed(2));

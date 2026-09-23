@@ -1106,11 +1106,18 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // System Users Database
-    let users = JSON.parse(localStorage.getItem('rmv_users')) || [
+    // System Users Database (Hardcoded default check to ensure admin/password works)
+    let defaultUsers = [
       { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
       { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
     ];
+
+    let users = JSON.parse(localStorage.getItem('rmv_users'));
+    if (!users || !users.some(u => u.username === 'admin')) {
+      users = defaultUsers;
+      localStorage.setItem('rmv_users', JSON.stringify(users));
+    }
+
     let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
 
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
@@ -2153,19 +2160,19 @@
         tbody.innerHTML += `
           <tr>
             <td>
-              <input type="date" class="form-control form-control-sm" value="${item.date \vert{}\vert{} auditMonth + '-01'}" onchange="updateExpenseField(${index}, 'date', this.value)">
+              <input type="date" class="form-control form-control-sm" value="${item.date || auditMonth + '-01'}" onchange="updateExpenseField(${index}, 'date', this.value)">
             </td>
             <td>
-              <input type="text" class="form-control form-control-sm" placeholder="e.g. Sahod ni Juan" value="${item.salaryName \vert{}\vert{} ''}" onchange="updateExpenseField(${index}, 'salaryName', this.value)">
+              <input type="text" class="form-control form-control-sm" placeholder="e.g. Sahod ni Juan" value="${item.salaryName || ''}" onchange="updateExpenseField(${index}, 'salaryName', this.value)">
             </td>
             <td>
-              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.salaryAmount \vert{}\vert{} 0}" onchange="updateExpenseField(${index}, 'salaryAmount', this.value)">
+              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.salaryAmount || 0}" onchange="updateExpenseField(${index}, 'salaryAmount', this.value)">
             </td>
             <td>
-              <input type="text" class="form-control form-control-sm" placeholder="e.g. Kuryente / Tubig / Bigas" value="${item.expenseName \vert{}\vert{} ''}" onchange="updateExpenseField(${index}, 'expenseName', this.value)">
+              <input type="text" class="form-control form-control-sm" placeholder="e.g. Kuryente / Tubig / Bigas" value="${item.expenseName || ''}" onchange="updateExpenseField(${index}, 'expenseName', this.value)">
             </td>
             <td>
-              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.expenseAmount \vert{}\vert{} 0}" onchange="updateExpenseField(${index}, 'expenseAmount', this.value)">
+              <input type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0.00" value="${item.expenseAmount || 0}" onchange="updateExpenseField(${index}, 'expenseAmount', this.value)">
             </td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpenseRow(${index})">
@@ -2413,7 +2420,7 @@
         const newCost = parseFloat(document.getElementById('editTotalCost').value) || 0;
         const newBalance = Math.max(0, newTotal - newPaid);
 
-        transactions[tIndex].date = document.getElementById('editTxDate`).value;
+        transactions[tIndex].date = document.getElementById('editTxDate').value;
         transactions[tIndex].customer = document.getElementById('editCustomerName').value;
         transactions[tIndex].location = document.getElementById('editLocation').value;
         transactions[tIndex].product = document.getElementById('editProduct').value;

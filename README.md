@@ -301,26 +301,38 @@
           <div class="row g-3 mb-4">
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light">
-                <span class="text-muted small fw-bold">DAILY TOTAL SALES</span>
-                <h4 class="text-primary mt-1 mb-0" id="dailyTotalSales">₱0.00</h4>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">TOTAL COLLECTION</span>
-                <h4 class="text-success mt-1 mb-0" id="dailyTotalCollected">₱0.00</h4>
+                <span class="text-muted small fw-bold">HIWAY SALES / PROFIT</span>
+                <div class="mt-1">
+                  <span class="text-primary fw-bold" id="dailyHiwaySales">₱0.00</span> <small class="text-muted">(Sales)</small><br>
+                  <span class="text-success small fw-bold" id="dailyHiwayProfit">₱0.00</span> <small class="text-muted">(Profit)</small>
+                </div>
               </div>
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #00897b;">
-                <span class="text-muted small fw-bold">DAILY NET PROFIT</span>
-                <h4 class="text-success fw-bold mt-1 mb-0" id="dailyTotalNetProfit">₱0.00</h4>
+                <span class="text-muted small fw-bold">BYAHE SALES / PROFIT</span>
+                <div class="mt-1">
+                  <span class="text-primary fw-bold" id="dailyByaheSales">₱0.00</span> <small class="text-muted">(Sales)</small><br>
+                  <span class="text-success small fw-bold" id="dailyByaheProfit">₱0.00</span> <small class="text-muted">(Profit)</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
+                <span class="text-muted small fw-bold">TOTAL COLLECTION & NET</span>
+                <div class="mt-1">
+                  <span class="text-success fw-bold" id="dailyTotalCollected">₱0.00</span> <small class="text-muted">(Coll)</small><br>
+                  <span class="text-success fw-bold" id="dailyTotalNetProfit">₱0.00</span> <small class="text-muted">(Net)</small>
+                </div>
               </div>
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;">
-                <span class="text-muted small fw-bold">TRANSACTIONS</span>
-                <h4 class="text-warning mt-1 mb-0" id="dailyTxCount">0</h4>
+                <span class="text-muted small fw-bold">TOTAL SALES & TX</span>
+                <div class="mt-1">
+                  <span class="text-primary fw-bold" id="dailyTotalSales">₱0.00</span> <small class="text-muted">(Total)</small><br>
+                  <span class="text-warning fw-bold" id="dailyTxCount">0</span> <small class="text-muted">(Count)</small>
+                </div>
               </div>
             </div>
           </div>
@@ -766,6 +778,48 @@
             </div>
           </div>
 
+          <!-- HIWAY & BYAHE SUMMARY CARDS FOR MONTHLY AUDIT -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <div class="card p-3 stat-card bg-light border-start border-primary border-4">
+                <span class="text-muted small fw-bold">HIWAY MONTHLY TOTALS</span>
+                <div class="d-flex justify-content-between mt-2">
+                  <div>
+                    <small class="text-muted d-block">Sales:</small>
+                    <h5 class="text-primary mb-0" id="auditHiwaySales">₱0.00</h5>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">Cost (Puhunan):</small>
+                    <h5 class="text-secondary mb-0" id="auditHiwayCost">₱0.00</h5>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">Net Profit:</small>
+                    <h5 class="text-success fw-bold mb-0" id="auditHiwayNetProfit">₱0.00</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card p-3 stat-card bg-light border-start border-info border-4">
+                <span class="text-muted small fw-bold">BYAHE MONTHLY TOTALS</span>
+                <div class="d-flex justify-content-between mt-2">
+                  <div>
+                    <small class="text-muted d-block">Sales:</small>
+                    <h5 class="text-primary mb-0" id="auditByaheSales">₱0.00</h5>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">Cost (Puhunan):</small>
+                    <h5 class="text-secondary mb-0" id="auditByaheCost">₱0.00</h5>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">Net Profit:</small>
+                    <h5 class="text-success fw-bold mb-0" id="auditByaheNetProfit">₱0.00</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="row g-3 mb-4">
             <div class="col-md-2">
               <div class="card p-3 stat-card bg-light">
@@ -809,8 +863,9 @@
                 <thead class="table-light">
                   <tr>
                     <th>Date</th>
-                    <th class="text-end">Total Sales (₱)</th>
-                    <th class="text-end">Total Cost / Puhunan (₱)</th>
+                    <th class="text-end">Hiway Sales (₱)</th>
+                    <th class="text-end">Byahe Sales (₱)</th>
+                    <th class="text-end">Total Cost (₱)</th>
                     <th class="text-end">Net Profit (₱)</th>
                     <th class="text-center no-print" style="width: 140px;">Action / Balikan</th>
                   </tr>
@@ -1761,6 +1816,11 @@
       tbody.innerHTML = '';
 
       let daySales = 0;
+      let dayHiwaySales = 0;
+      let dayByaheSales = 0;
+      let dayHiwayGrossProfit = 0;
+      let dayByaheGrossProfit = 0;
+
       let dayCollected = 0;
       let dayGrossProfit = 0;
       let count = 0;
@@ -1779,6 +1839,14 @@
         if(t.date === selectedDate) {
           daySales += t.total;
           dayGrossProfit += netProf;
+
+          if (t.location === 'Hiway') {
+            dayHiwaySales += t.total;
+            dayHiwayGrossProfit += netProf;
+          } else if (t.location === 'Byahe') {
+            dayByaheSales += t.total;
+            dayByaheGrossProfit += netProf;
+          }
         }
        
         t.payments.forEach((p, pIdx) => {
@@ -1845,9 +1913,17 @@
       currentDayExpenses = dayExpensesTotal;
 
       let dayNetProfit = dayGrossProfit - dayExpensesTotal;
+      // Hatiin ang expenses o i-display ang hiwalay na net profit (Gross Profit minus expenses proportional or total net)
+      let dayHiwayNet = dayHiwayGrossProfit - (dayHiwaySales > 0 ? (dayHiwaySales / (daySales || 1)) * dayExpensesTotal : 0);
+      let dayByaheNet = dayByaheGrossProfit - (dayByaheSales > 0 ? (dayByaheSales / (daySales || 1)) * dayExpensesTotal : 0);
 
       // Automatic deduction of salary & expenses from cash collections
       currentTargetCashInDrawer = Math.max(0, dayCollected - (totalGCash + totalBT + totalCheque + dayExpensesTotal));
+
+      document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
+      document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
+      document.getElementById('dailyByaheSales').innerText = `₱${dayByaheSales.toFixed(2)}`;
+      document.getElementById('dailyByaheProfit').innerText = `₱${dayByaheNet.toFixed(2)}`;
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
@@ -2248,10 +2324,30 @@
       let totalCost = 0;
       let totalExpenses = 0;
 
+      let hiwaySales = 0;
+      let hiwayCost = 0;
+      let hiwayGrossProfit = 0;
+
+      let byaheSales = 0;
+      let byaheCost = 0;
+      let byaheGrossProfit = 0;
+
       transactions.forEach(t => {
         if (t.date.startsWith(selectedMonth)) {
+          const tCost = t.totalCost || 0;
+          const tGross = t.total - tCost;
           totalSales += t.total;
-          totalCost += (t.totalCost || 0);
+          totalCost += tCost;
+
+          if (t.location === 'Hiway') {
+            hiwaySales += t.total;
+            hiwayCost += tCost;
+            hiwayGrossProfit += tGross;
+          } else if (t.location === 'Byahe') {
+            byaheSales += t.total;
+            byaheCost += tCost;
+            byaheGrossProfit += tGross;
+          }
         }
       });
 
@@ -2260,6 +2356,17 @@
           totalExpenses += (parseFloat(exp.salaryAmount) || 0) + (parseFloat(exp.expenseAmount) || 0);
         });
       }
+
+      let hiwayNet = hiwayGrossProfit - (hiwaySales > 0 ? (hiwaySales / (totalSales || 1)) * totalExpenses : 0);
+      let byaheNet = byaheGrossProfit - (byaheSales > 0 ? (byaheSales / (totalSales || 1)) * totalExpenses : 0);
+
+      document.getElementById('auditHiwaySales').innerText = `₱${hiwaySales.toFixed(2)}`;
+      document.getElementById('auditHiwayCost').innerText = `₱${hiwayCost.toFixed(2)}`;
+      document.getElementById('auditHiwayNetProfit').innerText = `₱${hiwayNet.toFixed(2)}`;
+
+      document.getElementById('auditByaheSales').innerText = `₱${byaheSales.toFixed(2)}`;
+      document.getElementById('auditByaheCost').innerText = `₱${byaheCost.toFixed(2)}`;
+      document.getElementById('auditByaheNetProfit').innerText = `₱${byaheNet.toFixed(2)}`;
 
       let bossNetAdjustment = 0;
       const bossBody = document.getElementById('bossLogsBody');
@@ -2297,9 +2404,10 @@
       transactions.forEach(t => {
         if (t.date.startsWith(selectedMonth)) {
           if (!dailyMap[t.date]) {
-            dailyMap[t.date] = { sales: 0, cost: 0, grossProfit: 0 };
+            dailyMap[t.date] = { hiwaySales: 0, byaheSales: 0, cost: 0, grossProfit: 0 };
           }
-          dailyMap[t.date].sales += t.total;
+          if (t.location === 'Hiway') dailyMap[t.date].hiwaySales += t.total;
+          if (t.location === 'Byahe') dailyMap[t.date].byaheSales += t.total;
           dailyMap[t.date].cost += (t.totalCost || 0);
           dailyMap[t.date].grossProfit += (t.netProfit || (t.total - (t.totalCost || 0)));
         }
@@ -2322,7 +2430,8 @@
         dailyBreakdownBody.innerHTML += `
           <tr>
             <td class="fw-bold">${d}</td>
-            <td class="text-end">₱${item.sales.toFixed(2)}</td>
+            <td class="text-end">₱${item.hiwaySales.toFixed(2)}</td>
+            <td class="text-end">₱${item.byaheSales.toFixed(2)}</td>
             <td class="text-end text-secondary">₱${item.cost.toFixed(2)}</td>
             <td class="text-end text-success fw-bold">₱${dayNetProf.toFixed(2)}</td>
             <td class="text-center no-print">
@@ -2335,7 +2444,7 @@
       });
 
       if (sortedDates.length === 0) {
-        dailyBreakdownBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Walang nahanap na transaksyon sa buwang ito.</td></tr>`;
+        dailyBreakdownBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang nahanap na transaksyon sa buwang ito.</td></tr>`;
       }
 
       renderExpensesTable();
@@ -2463,7 +2572,7 @@
         transactions[tIndex].date = document.getElementById('editTxDate').value;
         transactions[tIndex].customer = document.getElementById('editCustomerName').value;
         transactions[tIndex].location = document.getElementById('editLocation').value;
-        transactions[tIndex].product = document.getElementById('editProduct').value;
+        transactions[tIndex].product = document.getElementById('editProduct5').value || document.getElementById('editProduct').value;
         transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;
         transactions[tIndex].totalCost = newCost;
         transactions[tIndex].netProfit = newTotal - newCost;

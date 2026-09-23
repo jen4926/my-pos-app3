@@ -625,6 +625,7 @@
                     <th>Balance (₱)</th>
                     <th>Net Profit (₱)</th>
                     <th>Status</th>
+                    <th class="text-center no-print" style="width: 150px;">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="customerHistoryBody">
@@ -2134,6 +2135,7 @@
 
           saveData();
           renderCreditTable();
+          searchCustomerOrder(); // Refresh Track Customer Table kung naka-open
           alert('Tagumpay na naitala ang pagbabayad!');
         }
       }
@@ -2196,6 +2198,17 @@
               <td class="text-danger">₱${item.balance.toFixed(2)}</td>
               <td class="text-success fw-bold">₱${(item.netProfit || (item.total - (item.totalCost || 0))).toFixed(2)}</td>
               <td>${sBadge}</td>
+              <td class="text-center no-print">
+                <button class="btn btn-sm btn-success py-0 px-2 me-1" onclick="openPaymentModal(${item.id})" title="Magbayad / Add Payment">
+                  <i class="fa-solid fa-peso-sign"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary border-0 p-1 me-1" onclick="openEditTransactionModal(${item.id})" title="Edit Transaction">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteTransaction(${item.id}); searchCustomerOrder();" title="Delete Transaction">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </td>
             </tr>
           `;
         });
@@ -2591,6 +2604,7 @@
         bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
         generateDailyReport();
         renderCreditTable();
+        searchCustomerOrder(); // Refresh Track Customer Table kung naka-open
         alert('Tagumpay na na-update ang transaksyon!');
       }
     });
@@ -2601,6 +2615,7 @@
         saveData();
         generateDailyReport();
         renderCreditTable();
+        searchCustomerOrder(); // Refresh Track Customer Table kung naka-open
         alert('Naalis na ang transaksyon.');
       }
     }

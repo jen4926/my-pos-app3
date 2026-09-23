@@ -942,6 +942,59 @@
     </div>
   </div>
 
+  <!-- MODAL: PAYMENT / BAYAD SA UTANG -->
+  <div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-peso-sign me-2"></i>Magbayad ng Utang (Payment)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="paymentForm">
+          <div class="modal-body">
+            <input type="hidden" id="payTxId">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Customer Name:</label>
+              <input type="text" id="payCustomerName" class="form-control bg-light" readonly>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Total Amount (₱):</label>
+                <input type="text" id="payTotalAmount" class="form-control bg-light" readonly>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Remaining Balance (₱):</label>
+                <input type="text" id="payRemainingBalance" class="form-control bg-light text-danger fw-bold" readonly>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount to Pay Now (₱):</label>
+              <input type="number" step="0.01" min="0.01" id="payAmountNow" class="form-control" required placeholder="0.00">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Payment Method:</label>
+              <select id="payMethod" class="form-select" required>
+                <option value="Cash">Cash</option>
+                <option value="Byahe Cash">Byahe Cash</option>
+                <option value="GCash">GCash</option>
+                <option value="Bank Transfer">Bank Transfer (BT)</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Date of Payment:</label>
+              <input type="date" id="payDate" class="form-control" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>I-save ang Bayad</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: EDIT TRANSACTION -->
   <div class="modal fade" id="editTransactionModal" tabindex="-1">
     <div class="modal-dialog">
@@ -1204,6 +1257,7 @@
     document.getElementById('dailyReportDate').value = todayFormatted;
     document.getElementById('bossDate').value = todayFormatted;
     document.getElementById('newProdDate').value = todayFormatted;
+    document.getElementById('payDate').value = todayFormatted;
     
     const nowObj = new Date();
     document.getElementById('auditMonth').value = `${nowObj.getFullYear()}-${String(nowObj.getMonth() + 1).padStart(2, '0')}`;
@@ -1924,8 +1978,9 @@
       let dayHiwayNet = dayHiwayGrossProfit - (dayHiwaySales > 0 ? (dayHiwaySales / (daySales || 1)) * dayExpensesTotal : 0);
       let dayByaheNet = dayByaheGrossProfit - (dayByaheSales > 0 ? (dayByaheSales / (daySales || 1)) * dayExpensesTotal : 0);
 
-      // Automatic deduction of salary & expenses from cash collections
-      currentTargetCashInDrawer = Math.max(0, dayCollected - (totalByaheCash + totalGCash + totalBT + totalCheque + dayExpensesTotal));
+      // Ang bayad sa utang ay hindi isinasama sa target cash in drawer at target cash + pondo
+      let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
+      currentTargetCashInDrawer = Math.max(0, dayCollected - dayDebtPayments - totalNonCashToday - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -2112,42 +2167,51 @@
       const t = transactions.find(item => item.id === txId);
       if(!t) return;
 
-      let paymentHistoryHTML = '';
-      if(t.payments && t.payments.length > 0) {
-        t.payments.forEach(p => {
-          paymentHistoryHTML += `<li>${p.date} - ₱${p.amount.toFixed(2)} (${p.method})</li>`;
-        });
-      } else {
-        paymentHistoryHTML = `<li>Wala pang naitalang hulog.</li>`;
-      }
+      document.getElementById('payTxId').value = t.id;
+      document.getElementById('payCustomerName').value = t.customer;
+      document.getElementById('payTotalAmount').value = `₱${t.total.toFixed(2)}`;
+      document.getElementById('payRemainingBalance').value = `₱${t.balance.toFixed(2)}`;
+      document.getElementById('payAmountNow').value = t.balance > 0 ? t.balance.toFixed(2) : '0.00';
+      document.getElementById('payMethod').value = 'Cash';
+      document.getElementById('payDate').value = getTodayDateString();
 
-      let promptMsg = `Customer: ${t.customer}\nTotal Amount: ₱${t.total.toFixed(2)}\nNaibayad Na: ₱${t.paid.toFixed(2)}\nNalalabing Utang (Balance): ₱${t.balance.toFixed(2)}\n\nMagkano ang idadagdag na bayad / hulog ngayon?`;
-      let payAmtStr = prompt(promptMsg, t.balance);
-      if(payAmtStr !== null) {
-        let payAmt = parseFloat(payAmtStr) || 0;
-        if(payAmt > 0) {
-          if(payAmt > t.balance) {
-            alert('Ang ibinigay na bayad ay mas malaki kaysa sa natitirang balanse!');
-            return;
-          }
-          let payMethod = prompt('Ilagay ang Payment Method (Cash, Byahe Cash, GCash, Bank Transfer, Cheque):', 'Cash') || 'Cash';
-          let payDate = prompt('Ilagay ang Petsa ng Pagbabayad (YYYY-MM-DD):', getTodayDateString()) || getTodayDateString();
-
-          t.paid += payAmt;
-          t.balance = Math.max(0, t.total - t.paid);
-          if(t.balance === 0) t.status = 'PAID';
-          else t.status = 'PARTIAL';
-
-          if(!t.payments) t.payments = [];
-          t.payments.push({ amount: payAmt, method: payMethod, date: payDate });
-
-          saveData();
-          renderCreditTable();
-          searchCustomerOrder(); // Refresh Track Customer Table kung naka-open
-          alert('Tagumpay na naitala ang pagbabayad!');
-        }
-      }
+      new bootstrap.Modal(document.getElementById('paymentModal')).show();
     }
+
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const txId = parseInt(document.getElementById('payTxId').value);
+      const t = transactions.find(item => item.id === txId);
+      if (!t) return;
+
+      const payAmt = parseFloat(document.getElementById('payAmountNow').value) || 0;
+      const payMethod = document.getElementById('payMethod').value;
+      const payDate = document.getElementById('payDate').value || getTodayDateString();
+
+      if (payAmt <= 0) {
+        alert('Mangyaring maglagay ng tamang halaga ng bayad.');
+        return;
+      }
+      if (payAmt > t.balance) {
+        alert('Ang ibinigay na bayad ay mas malaki kaysa sa natitirang balanse!');
+        return;
+      }
+
+      t.paid += payAmt;
+      t.balance = Math.max(0, t.total - t.paid);
+      if (t.balance === 0) t.status = 'PAID';
+      else t.status = 'PARTIAL';
+
+      if (!t.payments) t.payments = [];
+      t.payments.push({ amount: payAmt, method: payMethod, date: payDate });
+
+      saveData();
+      bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+      renderCreditTable();
+      searchCustomerOrder();
+      generateDailyReport();
+      alert('Tagumpay na naitala ang pagbabayad!');
+    });
 
     // ================= CUSTOMER ORDER LOOKUP =================
     function searchCustomerOrder() {

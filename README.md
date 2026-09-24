@@ -305,7 +305,7 @@
                 <span class="text-muted small fw-bold">HIWAY SALES / PROFIT</span>
                 <div class="mt-1">
                   <span class="text-primary fw-bold" id="dailyHiwaySales">₱0.00</span> <small class="text-muted">(Sales)</small><br>
-                  <span class="text-success small fw-bold" id="dailyHiwayProfit">₱0.00</span> <small class="text-muted">(Profit)</small>
+                  <span class="text-success small fw-bold" id="dailyHiwayProfit">₱0.00</span> <small class="text-muted">(Net)</small>
                 </div>
               </div>
             </div>
@@ -314,7 +314,7 @@
                 <span class="text-muted small fw-bold">BYAHE SALES / PROFIT</span>
                 <div class="mt-1">
                   <span class="text-primary fw-bold" id="dailyByaheSales">₱0.00</span> <small class="text-muted">(Sales)</small><br>
-                  <span class="text-success small fw-bold" id="dailyByaheProfit">₱0.00</span> <small class="text-muted">(Profit)</small>
+                  <span class="text-success small fw-bold" id="dailyByaheProfit">₱0.00</span> <small class="text-muted">(Net)</small>
                 </div>
               </div>
             </div>
@@ -799,7 +799,7 @@
                     <h5 class="text-secondary mb-0" id="auditHiwayCost">₱0.00</h5>
                   </div>
                   <div>
-                    <small class="text-muted d-block">Net Profit:</small>
+                    <small class="text-muted d-block">Hiway Net:</small>
                     <h5 class="text-success fw-bold mb-0" id="auditHiwayNetProfit">₱0.00</h5>
                   </div>
                 </div>
@@ -818,7 +818,7 @@
                     <h5 class="text-secondary mb-0" id="auditByaheCost">₱0.00</h5>
                   </div>
                   <div>
-                    <small class="text-muted d-block">Net Profit:</small>
+                    <small class="text-muted d-block">Byahe Net:</small>
                     <h5 class="text-success fw-bold mb-0" id="auditByaheNetProfit">₱0.00</h5>
                   </div>
                 </div>
@@ -841,7 +841,7 @@
             </div>
             <div class="col-md-2">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #00897b;">
-                <span class="text-muted small fw-bold">GROSS PROFIT</span>
+                <span class="text-muted small fw-bold">SUBTOTAL NET (Hiway + Byahe)</span>
                 <h5 class="text-teal mt-1 mb-0" id="auditGrossProfit" style="color: #00897b;">₱0.00</h5>
               </div>
             </div>
@@ -853,7 +853,7 @@
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">NET PROFIT (Final Kita)</span>
+                <span class="text-muted small fw-bold">FINAL NET PROFIT (Grand Net)</span>
                 <h4 class="text-success fw-bold mt-1 mb-0" id="auditNetProfit">₱0.00</h4>
               </div>
             </div>
@@ -869,10 +869,10 @@
                 <thead class="table-light">
                   <tr>
                     <th>Date</th>
-                    <th class="text-end">Hiway Sales (₱)</th>
-                    <th class="text-end">Byahe Sales (₱)</th>
-                    <th class="text-end">Total Cost (₱)</th>
-                    <th class="text-end">Net Profit (₱)</th>
+                    <th class="text-end">Hiway Net (₱)</th>
+                    <th class="text-end">Byahe Net (₱)</th>
+                    <th class="text-end">Subtotal Net (₱)</th>
+                    <th class="text-end">Final Net Profit (₱)</th>
                     <th class="text-center no-print" style="width: 140px;">Action / Balikan</th>
                   </tr>
                 </thead>
@@ -1335,7 +1335,7 @@
 
         this.reset();
       } else {
-        document.getElementById('loginError').classList.add('d-none');
+        document.getElementById('loginError').classList.remove('d-none');
       }
     });
 
@@ -1914,7 +1914,6 @@
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
               dayCollected += p.amount;
-              // Kapag ang bayad ay sa ibang araw naganap O kaya ay karagdagang hulog (hindi unang bayad sa parehong petsa ng transaksyon), ituring itong Payment sa Utang
               if (t.date !== selectedDate || pIdx > 0) {
                 dayDebtPayments += p.amount;
               }
@@ -1965,9 +1964,8 @@
 
       currentDayDebtPayments = dayDebtPayments;
 
-      // KUNIN ANG SALARY & EXPENSES NG PETSA NA ITO MULA SA MONTHLY EXPENSES DATA
       let dayExpensesTotal = 0;
-      const auditMonthStr = selectedDate.substring(0, 7); // YYYY-MM
+      const auditMonthStr = selectedDate.substring(0, 7);
       if (monthlyExpensesData && monthlyExpensesData[auditMonthStr]) {
         monthlyExpensesData[auditMonthStr].forEach(exp => {
           if (!exp.date || exp.date === selectedDate || exp.date.startsWith(selectedDate)) {
@@ -1977,14 +1975,13 @@
       }
       currentDayExpenses = dayExpensesTotal;
 
-      let dayNetProfit = dayGrossProfit - dayExpensesTotal;
-      let dayHiwayNet = dayHiwayGrossProfit - (dayHiwaySales > 0 ? (dayHiwaySales / (daySales || 1)) * dayExpensesTotal : 0);
-      let dayByaheNet = dayByaheGrossProfit - (dayByaheSales > 0 ? (dayByaheSales / (daySales || 1)) * dayExpensesTotal : 0);
+      // KABUUANG SUBTOTAL NET (Hiway Net + Byahe Net bawas expenses)
+      let dayHiwayNet = dayHiwayGrossProfit;
+      let dayByaheNet = dayByaheGrossProfit;
+      let daySubtotalNet = dayHiwayNet + dayByaheNet;
+      let dayNetProfit = daySubtotalNet - dayExpensesTotal;
 
-      // HUWAG ISAMA ANG PAYMENTS SA UTANG SA TARGET CASH IN DRAWER (DAHIL HINDI ITO BENTA SA ARAW NA ITO KUNDI KOLEKSYON NG LUMANG UTANG)
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
-      // Ang basehan ng target cash ay ang kabuuang benta (daySales) minus ang mga hindi cash at minus ang expenses. 
-      // (Tandaan: Ang cash bayad ngayon para sa bagong benta ay nasa daySales, kaya ang daySales ang batayan ng cash sales)
       let dayCashSalesOnly = daySales - totalNonCashToday; 
       currentTargetCashInDrawer = Math.max(0, dayCashSalesOnly - dayExpensesTotal);
 
@@ -2014,7 +2011,7 @@
       const selectedDate = document.getElementById('dailyReportDate').value;
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
 
-      let totalCountedRaw = 0; // Kabuuang pera sa drawer na binilang (kasama ang pondo)
+      let totalCountedRaw = 0;
       let totalPcs = 0;
 
       const counts = document.querySelectorAll('.denom-count');
@@ -2040,14 +2037,12 @@
       cashBreakdownData[selectedDate] = breakdownObj;
       saveData();
 
-      // I-display ang kabuuang pera sa drawer (kasama ang pondo) sa subtotal table
       document.getElementById('breakdownTotalPcs').innerText = `${totalPcs} pcs`;
       document.getElementById('breakdownTotalAmount').innerText = `₱${totalCountedRaw.toFixed(2)}`;
 
       const targetWithFund = currentTargetCashInDrawer + fundInputVal;
       document.getElementById('breakdownTargetWithFund').innerText = `₱${targetWithFund.toFixed(2)}`;
 
-      // Bawasan ng pondo ang binu-biling total cash bago i-kumpara sa target sales upang hindi ito sumobra bilang benta
       const totalCountedSalesOnly = Math.max(0, totalCountedRaw - fundInputVal);
       document.getElementById('totalCountedCash').innerText = `₱${totalCountedSalesOnly.toFixed(2)}`;
 
@@ -2456,8 +2451,11 @@
         });
       }
 
-      let hiwayNet = hiwayGrossProfit - (hiwaySales > 0 ? (hiwaySales / (totalSales || 1)) * totalExpenses : 0);
-      let byaheNet = byaheGrossProfit - (byaheSales > 0 ? (byaheSales / (totalSales || 1)) * totalExpenses : 0);
+      // Hiway Net at Byahe Net (Gross Profits)
+      let hiwayNet = hiwayGrossProfit;
+      let byaheNet = byaheGrossProfit;
+      // Subtotal Net = Hiway Net + Byahe Net
+      let subtotalNet = hiwayNet + byaheNet;
 
       document.getElementById('auditHiwaySales').innerText = `₱${hiwaySales.toFixed(2)}`;
       document.getElementById('auditHiwayCost').innerText = `₱${hiwayCost.toFixed(2)}`;
@@ -2487,12 +2485,12 @@
         bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Wala pang D/Eco Boss adjustments sa buwang ito.</td></tr>`;
       }
 
-      const grossProfit = totalSales - totalCost;
-      const netProfit = grossProfit - totalExpenses + bossNetAdjustment;
+      // Final Net Profit = Subtotal Net - Salary & Expenses + Boss Adjustment
+      const netProfit = subtotalNet - totalExpenses + bossNetAdjustment;
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
-      document.getElementById('auditGrossProfit').innerText = `₱${grossProfit.toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${subtotalNet.toFixed(2)}`;
       document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
       document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
 
@@ -2503,12 +2501,13 @@
       transactions.forEach(t => {
         if (t.date.startsWith(selectedMonth)) {
           if (!dailyMap[t.date]) {
-            dailyMap[t.date] = { hiwaySales: 0, byaheSales: 0, cost: 0, grossProfit: 0 };
+            dailyMap[t.date] = { hiwayNet: 0, byaheNet: 0, cost: 0, subtotalNet: 0 };
           }
-          if (t.location === 'Hiway') dailyMap[t.date].hiwaySales += t.total;
-          if (t.location === 'Byahe') dailyMap[t.date].byaheSales += t.total;
+          const tGross = t.total - (t.totalCost || 0);
+          if (t.location === 'Hiway') dailyMap[t.date].hiwayNet += tGross;
+          if (t.location === 'Byahe') dailyMap[t.date].byaheNet += tGross;
           dailyMap[t.date].cost += (t.totalCost || 0);
-          dailyMap[t.date].grossProfit += (t.netProfit || (t.total - (t.totalCost || 0)));
+          dailyMap[t.date].subtotalNet += tGross;
         }
       });
 
@@ -2524,15 +2523,15 @@
             }
           });
         }
-        const dayNetProf = item.grossProfit - dayExpSum;
+        const dayFinalNet = item.subtotalNet - dayExpSum;
 
         dailyBreakdownBody.innerHTML += `
           <tr>
             <td class="fw-bold">${d}</td>
-            <td class="text-end">₱${item.hiwaySales.toFixed(2)}</td>
-            <td class="text-end">₱${item.byaheSales.toFixed(2)}</td>
-            <td class="text-end text-secondary">₱${item.cost.toFixed(2)}</td>
-            <td class="text-end text-success fw-bold">₱${dayNetProf.toFixed(2)}</td>
+            <td class="text-end">₱${item.hiwayNet.toFixed(2)}</td>
+            <td class="text-end">₱${item.byaheNet.toFixed(2)}</td>
+            <td class="text-end fw-semibold">₱${item.subtotalNet.toFixed(2)}</td>
+            <td class="text-end text-success fw-bold">₱${dayFinalNet.toFixed(2)}</td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="jumpToDailyReport('${d}')">
                 <i class="fa-solid fa-eye me-1"></i> View
@@ -2691,7 +2690,7 @@
         bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
         generateDailyReport();
         renderCreditTable();
-        searchCustomerOrder(); // Refresh Track Customer Table kung naka-open
+        searchCustomerOrder();
         alert('Tagumpay na na-update ang transaksyon!');
       }
     });
@@ -2702,7 +2701,7 @@
         saveData();
         generateDailyReport();
         renderCreditTable();
-        searchCustomerOrder(); // Refresh Track Customer Table kung naka-open
+        searchCustomerOrder();
         alert('Naalis na ang transaksyon.');
       }
     }

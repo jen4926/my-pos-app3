@@ -451,6 +451,7 @@
                     <span class="fs-6 fw-bold text-success" id="breakdownTargetSales">₱0.00</span>
                   </div>
 
+                  <!-- IDINAGDAG NA TARGET CASH + PONDO SECTION -->
                   <div class="d-flex justify-content-between align-items-center mb-2 bg-warning-subtle p-2 rounded border border-warning-subtle">
                     <span class="fw-bold text-dark small"><i class="fa-solid fa-wallet me-1"></i> Target Cash + Pondo:</span>
                     <span class="fs-5 fw-bold text-primary" id="breakdownTargetWithFund">₱0.00</span>
@@ -2040,8 +2041,10 @@
       let dayNetProfit = daySubtotalNet - dayExpensesTotal;
 
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
+      
+      // Target Cash in Drawer = (Cash Sales Today + Payment sa Utang Collected) - Expenses (Cash Out)
       let dayCashSalesOnly = daySales - totalNonCashToday; 
-      currentTargetCashInDrawer = Math.max(0, dayCashSalesOnly - dayExpensesTotal);
+      currentTargetCashInDrawer = Math.max(0, (dayCashSalesOnly + dayDebtPayments) - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -2512,8 +2515,6 @@
       let hiwayNet = hiwayGrossProfit;
       let byaheNet = byaheGrossProfit;
       
-      // ================= COMPUTATION UPDATE =================
-      // subtotal net = hiway net + byahe net - salary / expenses + d/eco boss
       let bossNetAdjustment = 0;
       let bossSubtotalAdd = 0;
       let bossSubtotalSub = 0;
@@ -2592,7 +2593,6 @@
         `;
       }
 
-      // Formula: subtotal net = hiway net + byahe net - salary / expenses + d/eco boss
       let subtotalNet = hiwayNet + byaheNet - totalExpenses + bossNetAdjustment;
       let netProfit = subtotalNet; // Final Net Profit
 
@@ -2648,9 +2648,7 @@
           }
         });
 
-        // Day Subtotal Net = Hiway Net + Byahe Net
         const dayBaseSubNet = item.hiwayNet + item.byaheNet;
-        // Day Final Net / Subtotal Net with expenses and boss adjustments
         const dayFinalNet = dayBaseSubNet - dayExpSum + dayBossSum;
 
         dailyBreakdownBody.innerHTML += `

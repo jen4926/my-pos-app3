@@ -1973,8 +1973,9 @@
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
               dayCollected += p.amount;
-              // Lahat ng bayad sa utang na naganap ngayong araw ay cash/collection na pumasok sa drawer (maliban kung may non-cash payment method sa utang, pero standard ay cash collection)
-              dayDebtPayments += p.amount;
+              if (t.date !== selectedDate || pIdx > 0) {
+                dayDebtPayments += p.amount;
+              }
 
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
               else if (p.method === 'GCash') totalGCash += p.amount;
@@ -2039,10 +2040,8 @@
       let dayNetProfit = daySubtotalNet - dayExpensesTotal;
 
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
-      
-      // Target Cash in Drawer = Cash Sales Today (Sales - Non-Cash) + Collected Debt Payments Today - Expenses (Cash Out)
       let dayCashSalesOnly = daySales - totalNonCashToday; 
-      currentTargetCashInDrawer = Math.max(0, dayCashSalesOnly + dayDebtPayments - dayExpensesTotal);
+      currentTargetCashInDrawer = Math.max(0, dayCashSalesOnly - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -2532,6 +2531,7 @@
       const searchBossQuery = document.getElementById('searchBossInput') ? document.getElementById('searchBossInput').value.toLowerCase() : '';
       let filteredBossCount = 0;
 
+      // I-group ang boss adjustments per day para sa per-day subtotal view
       let bossByDate = {};
       bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
@@ -2577,6 +2577,8 @@
           }
         });
 
+        // Subtotal row per day para sa D/Eco Boss
+        let dayNetDiff = dayAddTotal - daySubTotal;
         bossBody.innerHTML += `
           <tr class="table-light fw-semibold">
             <td colspan="2" class="text-end text-muted small">Subtotal para sa ${dateKey}:</td>
@@ -2822,7 +2824,7 @@
         transactions[tIndex].date = document.getElementById('editTxDate').value;
         transactions[tIndex].customer = document.getElementById('editCustomerName').value;
         transactions[tIndex].location = document.getElementById('editLocation').value;
-        transactions[tIndex].product = document.getElementById('editProduct-value') || document.getElementById('editProduct').value;
+        transactions[tIndex].product = document.getElementById('editProduct').value;
         transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;
         transactions[tIndex].totalCost = newCost;
         transactions[tIndex].netProfit = newTotal - newCost;

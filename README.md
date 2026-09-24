@@ -1525,7 +1525,7 @@
 
     function manualSaveData() {
       saveData();
-      alert('Tagumpay na nai-save ang lahat ng data sa Local Storage!');
+      alert('Tagumpay na na-save ang lahat ng data sa Local Storage!');
     }
 
     function handleEnterNext(event, currentInput) {
@@ -2329,7 +2329,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-3">Walang na-encode na transaksyon sa petsang ito.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-3">Wala pang na-encode na transaksyon sa petsang ito.</td></tr>`;
       }
 
       currentDayDebtPayments = dayDebtPayments;
@@ -2350,10 +2350,14 @@
       let daySubtotalNet = dayHiwayNet + dayByaheNet;
       let dayNetProfit = daySubtotalNet - dayExpensesTotal;
 
+      // FIXED TARGET CASH COMPUTATION: (Sales + Payment sa Utang + Pondo - Byahe Cash - GCash - BT - Cheque - Salary & Expenses = Target Cash)
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
+      let cashSalesToday = daySales - totalNonCashToday; 
       
-      let dayCashSalesOnly = daySales - totalNonCashToday; 
-      currentTargetCashInDrawer = Math.max(0, (dayCashSalesOnly + dayDebtPayments) - dayExpensesTotal);
+      const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
+      
+      // Target Cash in Drawer (strictly cash sales + debt payments collected in cash - cash expenses out)
+      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -2410,12 +2414,15 @@
       document.getElementById('breakdownTotalPcs').innerText = `${totalPcs} pcs`;
       document.getElementById('breakdownTotalAmount').innerText = `₱${totalCountedRaw.toFixed(2)}`;
 
+      // Target Cash + Pondo
       const targetWithFund = currentTargetCashInDrawer + fundInputVal;
       document.getElementById('breakdownTargetWithFund').innerText = `₱${targetWithFund.toFixed(2)}`;
 
+      // Total Cash Counted (Minus Pondo para sa comparison kontra Target Cash)
       const totalCountedSalesOnly = Math.max(0, totalCountedRaw - fundInputVal);
       document.getElementById('totalCountedCash').innerText = `₱${totalCountedSalesOnly.toFixed(2)}`;
 
+      // Discrepancy / Over-Short = Total Counted Cash - Target Cash in Drawer
       const discrepancy = totalCountedSalesOnly - currentTargetCashInDrawer;
       const discEl = document.getElementById('cashDiscrepancy');
       const alertEl = document.getElementById('cashStatusAlert');

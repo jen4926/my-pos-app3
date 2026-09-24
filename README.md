@@ -112,7 +112,6 @@
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
-        <!-- BAGONG MGA LEDGER BUTTONS SA ITAAS -->
         <li class="nav-item">
           <button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button" onclick="renderStandaloneExpensesLedger()">
             <i class="fa-solid fa-receipt me-1"></i> Salary & Expenses
@@ -835,8 +834,17 @@
               <button class="btn btn-danger fw-bold" onclick="addStandaloneExpenseRow()">
                 <i class="fa-solid fa-plus me-1"></i> Add Expense / Salary Line
               </button>
-              <label class="fw-bold ms-2 me-1">Filter Month:</label>
-              <input type="month" id="standaloneExpenseMonth" class="form-control" onchange="renderStandaloneExpensesLedger()">
+              
+              <!-- PER-DAY FILTER TOGGLE / DATE SELECTOR -->
+              <div class="d-flex align-items-center gap-1 ms-2">
+                <label class="fw-bold small text-nowrap">View:</label>
+                <select id="expenseViewMode" class="form-select form-select-sm" onchange="toggleExpenseViewMode()">
+                  <option value="month">Buwanan (Month)</option>
+                  <option value="day">Pangkalahatang Araw (Per Day)</option>
+                </select>
+                <input type="month" id="standaloneExpenseMonth" class="form-control form-control-sm" onchange="renderStandaloneExpensesLedger()">
+                <input type="date" id="standaloneExpenseDate" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneExpensesLedger()">
+              </div>
             </div>
           </div>
 
@@ -902,8 +910,17 @@
               <button class="btn btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#bossModal">
                 <i class="fa-solid fa-plus me-1"></i> Add Boss Adjustment
               </button>
-              <label class="fw-bold ms-2 me-1">Filter Month:</label>
-              <input type="month" id="standaloneBossMonth" class="form-control" onchange="renderStandaloneBossLedger()">
+              
+              <!-- PER-DAY FILTER TOGGLE / DATE SELECTOR SA BOSS LEDGER -->
+              <div class="d-flex align-items-center gap-1 ms-2">
+                <label class="fw-bold small text-nowrap">View:</label>
+                <select id="bossViewMode" class="form-select form-select-sm" onchange="toggleBossViewMode()">
+                  <option value="month">Buwanan (Month)</option>
+                  <option value="day">Pangkalahatang Araw (Per Day)</option>
+                </select>
+                <input type="month" id="standaloneBossMonth" class="form-control form-control-sm" onchange="renderStandaloneBossLedger()">
+                <input type="date" id="standaloneBossDate" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneBossLedger()">
+              </div>
             </div>
           </div>
 
@@ -1105,7 +1122,7 @@
             </div>
           </div>
 
-          <!-- SALARY & EXPENSES BREAKDOWN (MAY HIWALAY NA COLUMN AT SEARCH BAR) -->
+          <!-- SALARY & EXPENSES BREAKDOWN -->
           <div class="card p-3 bg-light mb-4 border">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-receipt me-2"></i>Itemized Salary & Expenses Breakdown</h6>
@@ -1114,7 +1131,6 @@
               </button>
             </div>
             
-            <!-- SEARCH BAR PARA SA EXPENSES AT SALARY -->
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
               <input type="text" id="searchExpenseInput" class="form-control" placeholder="I-search ang pangalan ng Salary o Expense o petsa..." oninput="renderExpensesTable()">
@@ -1142,7 +1158,7 @@
             </div>
           </div>
 
-          <!-- D/ECO BOSS TRANSACTIONS LOG (MAY SEARCH BAR AT PER-DAY SUBTOTAL) -->
+          <!-- D/ECO BOSS TRANSACTIONS LOG -->
           <div class="card p-3 bg-light mb-4 border">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Transactions Log</h6>
@@ -1151,7 +1167,6 @@
               </button>
             </div>
             
-            <!-- SEARCH BAR PARA SA D/ECO BOSS LOGS -->
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
               <input type="text" id="searchBossInput" class="form-control" placeholder="I-search ang petsa, uri o notes sa D/Eco Boss log..." oninput="generateMonthlyAudit()">
@@ -1460,7 +1475,7 @@
     </div>
   </div>
 
-  <!-- Modal para sa Pagdaragdag ng Bagong Produkto (May Supplier Selection) -->
+  <!-- Modal para sa Pagdaragdag ng Bagong Produkto -->
   <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -1551,7 +1566,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // System Users Database (Hardcoded default check to ensure admin/password works)
+    // System Users Database
     let defaultUsers = [
       { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
       { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
@@ -1568,7 +1583,6 @@
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory'));
     
-    // Default initial inventory populated with Palm, Coco, and the required Dedicated Products list
     const defaultDedicatedNames = [
       "VMC White", "Busco", "Bais", "Balayan", "Crystal", "Passi", "GB", "Dark", "Casa", "Baron", "Cali", "Matling", "RD", "SW", "King", "GW", "Farola", "Asin", "Countess", "CS", "Polaris", "Lard Big", "Marg Big", "Small Marg", "I", "II", "III", "Harina", "CF", "Polaris"
     ];
@@ -1622,6 +1636,8 @@
     document.getElementById('payDate').value = todayFormatted;
     document.getElementById('inventorySheetDate').value = todayFormatted;
     document.getElementById('returnDate').value = todayFormatted;
+    document.getElementById('standaloneExpenseDate').value = todayFormatted;
+    document.getElementById('standaloneBossDate').value = todayFormatted;
     
     const nowObj = new Date();
     const currentMonthStr = `${nowObj.getFullYear()}-${String(nowObj.getMonth() + 1).padStart(2, '0')}`;
@@ -2067,7 +2083,7 @@
       renderDailyInventorySheet();
     });
 
-    // ================= ADD PRODUCT / STOCK IN (WITH SUPPLIER) =================
+    // ================= ADD PRODUCT / STOCK IN =================
     document.getElementById('addProductForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const prodDate = document.getElementById('newProdDate').value || getTodayDateString();
@@ -2382,13 +2398,30 @@
     }
 
     // ================= STANDALONE SALARY & EXPENSES LEDGER LOGIC =================
-    function addStandaloneExpenseRow() {
-      const selectedMonth = document.getElementById('standaloneExpenseMonth').value || currentMonthStr;
-      if (!monthlyExpensesData[selectedMonth]) {
-        monthlyExpensesData[selectedMonth] = [];
+    function toggleExpenseViewMode() {
+      const mode = document.getElementById('expenseViewMode').value;
+      const monthInput = document.getElementById('standaloneExpenseMonth');
+      const dateInput = document.getElementById('standaloneExpenseDate');
+      if (mode === 'day') {
+        monthInput.style.display = 'none';
+        dateInput.style.display = 'block';
+      } else {
+        monthInput.style.display = 'block';
+        dateInput.style.display = 'none';
       }
-      monthlyExpensesData[selectedMonth].push({
-        date: selectedMonth + '-01',
+      renderStandaloneExpensesLedger();
+    }
+
+    function addStandaloneExpenseRow() {
+      const mode = document.getElementById('expenseViewMode').value;
+      const targetDate = mode === 'day' ? (document.getElementById('standaloneExpenseDate').value || todayFormatted) : ((document.getElementById('standaloneExpenseMonth').value || currentMonthStr) + '-01');
+      const targetMonthKey = targetDate.substring(0, 7);
+
+      if (!monthlyExpensesData[targetMonthKey]) {
+        monthlyExpensesData[targetMonthKey] = [];
+      }
+      monthlyExpensesData[targetMonthKey].push({
+        date: targetDate,
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -2401,24 +2434,32 @@
     }
 
     function renderStandaloneExpensesLedger() {
-      const selectedMonth = document.getElementById('standaloneExpenseMonth').value || currentMonthStr;
+      const mode = document.getElementById('expenseViewMode').value;
+      const targetMonthKey = document.getElementById('standaloneExpenseMonth').value || currentMonthStr;
+      const targetDateKey = document.getElementById('standaloneExpenseDate').value || todayFormatted;
+      
       const tbody = document.getElementById('standaloneExpenseTableBody');
       const tfoot = document.getElementById('standaloneExpenseTableFooter');
       const searchQuery = document.getElementById('searchStandaloneExpenseInput') ? document.getElementById('searchStandaloneExpenseInput').value.toLowerCase() : '';
       
       tbody.innerHTML = '';
 
-      if (!monthlyExpensesData[selectedMonth]) {
-        monthlyExpensesData[selectedMonth] = [];
+      if (!monthlyExpensesData[targetMonthKey]) {
+        monthlyExpensesData[targetMonthKey] = [];
       }
 
-      const expensesList = monthlyExpensesData[selectedMonth];
+      const expensesList = monthlyExpensesData[targetMonthKey];
       let hasVisibleRow = false;
       let totalSalarySum = 0;
       let totalExpenseSum = 0;
 
       expensesList.forEach((item, index) => {
-        const rowText = `${item.date} ${item.salaryName}${item.salaryAmount} ${item.expenseName}${item.expenseAmount}`.toLowerCase();
+        const itemDate = item.date || (targetMonthKey + '-01');
+        if (mode === 'day' && itemDate !== targetDateKey) {
+          return;
+        }
+
+        const rowText = `${itemDate} ${item.salaryName}${item.salaryAmount} ${item.expenseName}${item.expenseAmount}`.toLowerCase();
         if (searchQuery && !rowText.includes(searchQuery)) {
           return;
         }
@@ -2430,7 +2471,7 @@
         tbody.innerHTML += `
           <tr>
             <td>
-              <input type="date" class="form-control form-control-sm" value="${item.date || selectedMonth + '-01'}" onchange="updateStandaloneExpenseField(${index}, 'date', this.value)">
+              <input type="date" class="form-control form-control-sm" value="${itemDate}" onchange="updateStandaloneExpenseField(${index}, 'date', this.value)">
             </td>
             <td>
               <input type="text" class="form-control form-control-sm" placeholder="e.g. Sahod ni Juan" value="${item.salaryName || ''}" onchange="updateStandaloneExpenseField(${index}, 'salaryName', this.value)">
@@ -2454,7 +2495,7 @@
       });
 
       if (!hasVisibleRow) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang nakitang salary o expenses sa buwang ito. Pindutin ang "Add Expense / Salary Line" para magdagdag.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang nakitang salary o expenses para sa napiling araw/buwan. Pindutin ang "Add Expense / Salary Line" para magdagdag.</td></tr>`;
       }
 
       let combinedTotal = totalSalarySum + totalExpenseSum;
@@ -2501,8 +2542,25 @@
     }
 
     // ================= STANDALONE D/ECO BOSS LEDGER LOGIC =================
+    function toggleBossViewMode() {
+      const mode = document.getElementById('bossViewMode').value;
+      const monthInput = document.getElementById('standaloneBossMonth');
+      const dateInput = document.getElementById('standaloneBossDate');
+      if (mode === 'day') {
+        monthInput.style.display = 'none';
+        dateInput.style.display = 'block';
+      } else {
+        monthInput.style.display = 'block';
+        dateInput.style.display = 'none';
+      }
+      renderStandaloneBossLedger();
+    }
+
     function renderStandaloneBossLedger() {
+      const mode = document.getElementById('bossViewMode').value;
       const selectedMonth = document.getElementById('standaloneBossMonth').value || currentMonthStr;
+      const selectedDate = document.getElementById('standaloneBossDate').value || todayFormatted;
+
       const tbody = document.getElementById('standaloneBossTableBody');
       const tfoot = document.getElementById('standaloneBossTableFooter');
       const searchQuery = document.getElementById('searchStandaloneBossInput') ? document.getElementById('searchStandaloneBossInput').value.toLowerCase() : '';
@@ -2515,6 +2573,8 @@
 
       bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
+          if (mode === 'day' && b.date !== selectedDate) return;
+
           let rowText = `${b.date} ${b.type} ${b.amount} ${b.notes}`.toLowerCase();
           if (searchQuery && !rowText.includes(searchQuery)) return;
 
@@ -2542,7 +2602,7 @@
       });
 
       if (countVisible === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakitang D/Eco Boss adjustments sa buwang ito.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakitang D/Eco Boss adjustments sa panahong ito.</td></tr>`;
         tfoot.innerHTML = '';
       } else {
         let netBoss = totalAdd - totalSub;
@@ -3232,7 +3292,7 @@
       }
 
       let subtotalNet = hiwayNet + byaheNet - totalExpenses + bossNetAdjustment;
-      let netProfit = subtotalNet; // Final Net Profit
+      let netProfit = subtotalNet;
 
       document.getElementById('auditHiwaySales').innerText = `₱${hiwaySales.toFixed(2)}`;
       document.getElementById('auditHiwayCost').innerText = `₱${hiwayCost.toFixed(2)}`;

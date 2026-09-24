@@ -447,7 +447,7 @@
                   <hr class="my-1">
 
                   <div class="d-flex justify-content-between align-items-center my-2 bg-light p-2 rounded">
-                    <span class="fw-bold text-dark">Target Cash in Drawer (Sales):</span>
+                    <span class="fw-bold text-dark">Target Cash in Drawer (Sales + Payment):</span>
                     <span class="fs-6 fw-bold text-success" id="breakdownTargetSales">₱0.00</span>
                   </div>
 
@@ -2043,6 +2043,7 @@
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
       
       // Target Cash in Drawer = (Cash Sales Today + Payment sa Utang Collected) - Expenses (Cash Out)
+      // Note: dayDebtPayments ay isinasama sa Target Cash pero HINDI idinaragdag sa daySales para hindi madagdagan ang Gross Sales.
       let dayCashSalesOnly = daySales - totalNonCashToday; 
       currentTargetCashInDrawer = Math.max(0, (dayCashSalesOnly + dayDebtPayments) - dayExpensesTotal);
 

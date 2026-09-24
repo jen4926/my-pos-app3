@@ -840,10 +840,10 @@
                 <label class="fw-bold small text-nowrap">View:</label>
                 <select id="expenseViewMode" class="form-select form-select-sm" onchange="toggleExpenseViewMode()">
                   <option value="month">Buwanan (Month)</option>
-                  <option value="day">Pangkalahatang Araw (Per Day)</option>
+                  <option value="day" selected>Pangkalahatang Araw (Per Day)</option>
                 </select>
-                <input type="month" id="standaloneExpenseMonth" class="form-control form-control-sm" onchange="renderStandaloneExpensesLedger()">
-                <input type="date" id="standaloneExpenseDate" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneExpensesLedger()">
+                <input type="month" id="standaloneExpenseMonth" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneExpensesLedger()">
+                <input type="date" id="standaloneExpenseDate" class="form-control form-control-sm" onchange="renderStandaloneExpensesLedger()">
               </div>
             </div>
           </div>
@@ -2421,7 +2421,7 @@
         monthlyExpensesData[targetMonthKey] = [];
       }
       monthlyExpensesData[targetMonthKey].push({
-        date: targetDate,
+        date: targetDate, // Auto date batay sa napiling petsa o ngayon
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -2455,6 +2455,8 @@
 
       expensesList.forEach((item, index) => {
         const itemDate = item.date || (targetMonthKey + '-01');
+        
+        // Kapag naka-day view, ipapakita lamang ang mga nakatala sa eksaktong araw na iyon
         if (mode === 'day' && itemDate !== targetDateKey) {
           return;
         }
@@ -2495,7 +2497,7 @@
       });
 
       if (!hasVisibleRow) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang nakitang salary o expenses para sa napiling araw/buwan. Pindutin ang "Add Expense / Salary Line" para magdagdag.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakitang salary o expenses para sa araw na ito. Pindutin ang "Add Expense / Salary Line" para magdagdag ng bagong talaan para sa araw na ito.</td></tr>`;
       }
 
       let combinedTotal = totalSalarySum + totalExpenseSum;
@@ -3064,7 +3066,7 @@
         monthlyExpensesData[auditMonth] = [];
       }
       monthlyExpensesData[auditMonth].push({
-        date: auditMonth + '-01',
+        date: todayFormatted, // Auto date sa kasalukuyang araw
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -3106,7 +3108,7 @@
         tbody.innerHTML += `
           <tr>
             <td>
-              <input type="date" class="form-control form-control-sm" value="${item.date || auditMonth + '-01'}" onchange="updateExpenseField(${index}, 'date', this.value)">
+              <input type="date" class="form-control form-control-sm" value="${item.date || todayFormatted}" onchange="updateExpenseField(${index}, 'date', this.value)">
             </td>
             <td>
               <input type="text" class="form-control form-control-sm" placeholder="e.g. Sahod ni Juan" value="${item.salaryName || ''}" onchange="updateExpenseField(${index}, 'salaryName', this.value)">
@@ -3543,7 +3545,7 @@
         transactions[tIndex].netProfit = newTotal - newCost;
         transactions[tIndex].total = newTotal;
         transactions[tIndex].paid = newPaid;
-        transactions[tIndex].balance = newBalance;
+        transactions[tInput = newBalance];
         transactions[tIndex].status = newBalance === 0 ? 'PAID' : (newPaid > 0 ? 'PARTIAL' : 'UNPAID');
 
         if (transactions[tIndex].payments && transactions[tIndex].payments.length > 0) {

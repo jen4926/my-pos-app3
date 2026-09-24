@@ -108,7 +108,7 @@
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory(); renderCustomerSalesLog(); renderDailyInventorySheet();">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTables(); renderStockInHistory(); renderCustomerSalesLog(); renderDailyInventorySheet();">
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
@@ -674,6 +674,29 @@
                 <input type="date" id="inventorySheetDate" class="form-control form-control-sm" onchange="renderDailyInventorySheet()">
               </div>
             </div>
+            
+            <!-- Per-Day Table 1: Palm & Coco -->
+            <h6 class="fw-bold text-primary mb-2">Palm & Coco Inventory Sheet</h6>
+            <div class="table-responsive mb-4">
+              <table class="table table-bordered table-hover align-middle bg-white">
+                <thead class="table-dark text-center">
+                  <tr>
+                    <th class="text-start">Product Name</th>
+                    <th>Beginning Stock</th>
+                    <th>Stock In (+Add)</th>
+                    <th>Return / Isauli</th>
+                    <th>Total Out (Sold)</th>
+                    <th class="table-success">Ending Stock (Lilipat Bukas)</th>
+                  </tr>
+                </thead>
+                <tbody id="dailyPalmCocoSheetBody">
+                  <!-- Dynamic Palm & Coco Per-Day Rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Per-Day Table 2: Dedicated Products -->
+            <h6 class="fw-bold text-primary mb-2">Dedicated Products Inventory Sheet (VMC White, Busco, Bais, Balayan, Crystal, Passi, GB, Dark, Casa, Baron, Cali, Matling, RD, SW, King, GW, Farola, Asin, Countess, CS, Polaris, Lard Big, Marg Big, Small Marg, I, II, III, Harina, CF)</h6>
             <div class="table-responsive">
               <table class="table table-bordered table-hover align-middle bg-white">
                 <thead class="table-dark text-center">
@@ -686,13 +709,15 @@
                     <th class="table-success">Ending Stock (Lilipat Bukas)</th>
                   </tr>
                 </thead>
-                <tbody id="dailyInventorySheetBody">
-                  <!-- Dynamic Per-Day Inventory Rows -->
+                <tbody id="dailyDedicatedSheetBody">
+                  <!-- Dynamic Dedicated Products Per-Day Rows -->
                 </tbody>
               </table>
             </div>
           </div>
 
+          <!-- Master Inventory Table 1: Palm & Coco -->
+          <h5 class="fw-bold text-primary mb-2">Palm & Coco Inventory Master List</h5>
           <div class="table-responsive mb-4">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark text-center">
@@ -707,8 +732,30 @@
                   <th class="col-action no-print"><i class="fa-solid fa-trash"></i></th>
                 </tr>
               </thead>
-              <tbody id="inventoryTableBody">
-                <!-- Dynamic Content -->
+              <tbody id="palmCocoInventoryTableBody">
+                <!-- Dynamic Palm & Coco Content -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Master Inventory Table 2: Dedicated Products List -->
+          <h5 class="fw-bold text-primary mb-2">Dedicated Products Inventory Master List</h5>
+          <div class="table-responsive mb-4">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-dark text-center">
+                <tr>
+                  <th class="text-start">Product Name</th>
+                  <th>Cost / Unit (₱)</th>
+                  <th>Price / Unit (₱)</th>
+                  <th>Beginning Stock</th>
+                  <th>Stock In (+Add)</th>
+                  <th>Sold</th>
+                  <th>Ending Stock</th>
+                  <th class="col-action no-print"><i class="fa-solid fa-trash"></i></th>
+                </tr>
+              </thead>
+              <tbody id="dedicatedInventoryTableBody">
+                <!-- Dynamic Dedicated Products Content -->
               </tbody>
               <tfoot class="table-secondary fw-bold text-center" id="inventoryTableFooter">
                 <!-- Total Row rendered dynamically -->
@@ -1377,7 +1424,41 @@
     let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
 
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
-    let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
+    let inventory = JSON.parse(localStorage.getItem('rmv_inventory'));
+    
+    // Default initial inventory populated with Palm, Coco, and the required Dedicated Products list
+    const defaultDedicatedNames = [
+      "VMC White", "Busco", "Bais", "Balayan", "Crystal", "Passi", "GB", "Dark", "Casa", "Baron", "Cali", "Matling", "RD", "SW", "King", "GW", "Farola", "Asin", "Countess", "CS", "Polaris", "Lard Big", "Marg Big", "Small Marg", "I", "II", "III", "Harina", "CF", "Polaris"
+    ];
+
+    if (!inventory) {
+      inventory = [
+        { name: "Palm", cost: 0, price: 0, beginning: 0, stockIn: 0, ending: 0, category: "palmcoco" },
+        { name: "Coco", cost: 0, price: 0, beginning: 0, stockIn: 0, ending: 0, category: "palmcoco" }
+      ];
+      defaultDedicatedNames.forEach(name => {
+        inventory.push({ name: name, cost: 0, price: 0, beginning: 0, stockIn: 0, ending: 0, category: "dedicated" });
+      });
+      localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
+    } else {
+      // Ensure all required dedicated products exist in inventory data model if loading legacy storage
+      inventory.forEach(item => {
+        if (!item.category) {
+          const lowerName = item.name.toLowerCase();
+          if (lowerName.includes('palm') || lowerName.includes('coco')) {
+            item.category = 'palmcoco';
+          } else {
+            item.category = 'dedicated';
+          }
+        }
+      });
+      defaultDedicatedNames.forEach(defName => {
+        if (!inventory.some(i => i.name.toLowerCase() === defName.toLowerCase())) {
+          inventory.push({ name: defName, cost: 0, price: 0, beginning: 0, stockIn: 0, ending: 0, category: "dedicated" });
+        }
+      });
+    }
+
     let stockInHistory = JSON.parse(localStorage.getItem('rmv_stockInHistory')) || [];
     let returnHistory = JSON.parse(localStorage.getItem('rmv_returnHistory')) || [];
     let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
@@ -1419,7 +1500,7 @@
       loadMoneyBreakdown();
       generateDailyReport();
       renderCreditTable();
-      renderInventoryTable();
+      renderInventoryTables();
       renderStockInHistory();
       renderCustomerSalesLog();
       renderDailyInventorySheet();
@@ -1767,13 +1848,16 @@
               invItem.ending = Math.max(0, invItem.ending - qty);
             }
           } else {
+            const lowerN = name.toLowerCase();
+            const cat = (lowerN.includes('palm') || lowerN.includes('coco')) ? 'palmcoco' : 'dedicated';
             inventory.push({
               name: name,
               cost: cost,
               price: price,
               beginning: isInventoryOnly ? qty : 0,
               stockIn: isInventoryOnly ? qty : 0,
-              ending: qty
+              ending: qty,
+              category: cat
             });
           }
 
@@ -1833,7 +1917,7 @@
       toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
-      renderInventoryTable();
+      renderInventoryTables();
       renderDailyInventorySheet();
     });
 
@@ -1854,13 +1938,16 @@
         existing.stockIn += qty;
         existing.ending += qty;
       } else {
+        const lowerN = name.toLowerCase();
+        const cat = (lowerN.includes('palm') || lowerN.includes('coco')) ? 'palmcoco' : 'dedicated';
         inventory.push({
           name: name,
           cost: cost,
           price: price,
           beginning: qty,
           stockIn: 0,
-          ending: qty
+          ending: qty,
+          category: cat
         });
       }
 
@@ -1878,7 +1965,7 @@
       bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
       this.reset();
       document.getElementById('newProdDate').value = getTodayDateString();
-      renderInventoryTable();
+      renderInventoryTables();
       renderStockInHistory();
       renderDailyInventorySheet();
       alert('Tagumpay na naidagdag ang produkto at nailagay sa talaan kasama ang supplier!');
@@ -1900,15 +1987,18 @@
 
       let invItem = inventory.find(i => i.name.toLowerCase() === rName.toLowerCase());
       if (invItem) {
-        invItem.ending += rQty; // Direct addition back to inventory
+        invItem.ending += rQty; 
       } else {
+        const lowerN = rName.toLowerCase();
+        const cat = (lowerN.includes('palm') || lowerN.includes('coco')) ? 'palmcoco' : 'dedicated';
         inventory.push({
           name: rName,
           cost: 0,
           price: 0,
           beginning: 0,
           stockIn: rQty,
-          ending: rQty
+          ending: rQty,
+          category: cat
         });
       }
 
@@ -1924,15 +2014,18 @@
       bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
       this.reset();
       document.getElementById('returnDate').value = getTodayDateString();
-      renderInventoryTable();
+      renderInventoryTables();
       renderDailyInventorySheet();
       alert('Tagumpay na naisailalim sa Return at nadagdag ulit sa inventory stock!');
     });
 
-    function renderInventoryTable() {
-      const tbody = document.getElementById('inventoryTableBody');
+    function renderInventoryTables() {
+      const palmCocoTbody = document.getElementById('palmCocoInventoryTableBody');
+      const dedicatedTbody = document.getElementById('dedicatedInventoryTableBody');
       const tfoot = document.getElementById('inventoryTableFooter');
-      tbody.innerHTML = '';
+      
+      palmCocoTbody.innerHTML = '';
+      dedicatedTbody.innerHTML = '';
 
       let totalCostVal = 0;
       let totalInventoryValue = 0;
@@ -1944,7 +2037,7 @@
         totalCostVal += (item.ending * item.cost);
         totalInventoryValue += (item.ending * item.price);
 
-        tbody.innerHTML += `
+        const rowHTML = `
           <tr>
             <td><input type="text" class="form-control form-control-sm fw-bold" value="${item.name}" onchange="updateInventoryItem(${index}, 'name', this.value)"></td>
             <td><input type="number" step="0.01" class="form-control form-control-sm text-center" value="${item.cost}" onchange="updateInventoryItem(${index}, 'cost', this.value)"></td>
@@ -1960,10 +2053,19 @@
             </td>
           </tr>
         `;
+
+        if (item.category === 'palmcoco') {
+          palmCocoTbody.insertAdjacentHTML('beforeend', rowHTML);
+        } else {
+          dedicatedTbody.insertAdjacentHTML('beforeend', rowHTML);
+        }
       });
 
-      if (inventory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang nakatalang produkto sa inventory.</td></tr>`;
+      if (palmCocoTbody.children.length === 0) {
+        palmCocoTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang nakatalang Palm & Coco.</td></tr>`;
+      }
+      if (dedicatedTbody.children.length === 0) {
+        dedicatedTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang nakatalang dedicated products.</td></tr>`;
       }
 
       tfoot.innerHTML = `
@@ -1979,18 +2081,24 @@
     function updateInventoryItem(index, field, value) {
       if (field === 'name') {
         inventory[index].name = value.trim();
+        const lowerN = inventory[index].name.toLowerCase();
+        if (lowerN.includes('palm') || lowerN.includes('coco')) {
+          inventory[index].category = 'palmcoco';
+        } else {
+          inventory[index].category = 'dedicated';
+        }
       } else {
         inventory[index][field] = parseFloat(value) || 0;
       }
       saveData();
-      renderInventoryTable();
+      renderInventoryTables();
     }
 
     function deleteInventoryItem(index) {
       if (confirm('Sigurado ka bang gusto mong tanggalin ang produktong ito sa inventory?')) {
         inventory.splice(index, 1);
         saveData();
-        renderInventoryTable();
+        renderInventoryTables();
         alert('Naalis na sa inventory ang produkto.');
       }
     }
@@ -2067,16 +2175,18 @@
     // ================= PER-DAY INVENTORY SHEET (AUTO ENDING TO BEGINNING) =================
     function renderDailyInventorySheet() {
       const selectedDate = document.getElementById('inventorySheetDate').value || getTodayDateString();
-      const tbody = document.getElementById('dailyInventorySheetBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
+      const palmCocoBody = document.getElementById('dailyPalmCocoSheetBody');
+      const dedicatedBody = document.getElementById('dailyDedicatedSheetBody');
+      if (!palmCocoBody || !dedicatedBody) return;
+
+      palmCocoBody.innerHTML = '';
+      dedicatedBody.innerHTML = '';
 
       inventory.forEach(item => {
         let soldToday = 0;
         let stockInToday = 0;
         let returnToday = 0;
 
-        // Compute sales (out) for this product on selected date
         transactions.forEach(t => {
           if (t.date === selectedDate && t.itemsList) {
             t.itemsList.forEach(i => {
@@ -2087,30 +2197,26 @@
           }
         });
 
-        // Compute stock-in for this product on selected date
         stockInHistory.forEach(s => {
           if (s.date === selectedDate && s.product.toLowerCase() === item.name.toLowerCase()) {
             stockInToday += s.qty;
           }
         });
 
-        // Compute returns for this product on selected date
         returnHistory.forEach(r => {
           if (r.date === selectedDate && r.product.toLowerCase() === item.name.toLowerCase()) {
             returnToday += r.qty;
           }
         });
 
-        // Rolling Beginning and Ending Calculation per day
         let currentTotalEnding = Math.max(0, item.ending);
         let beginningToday = currentTotalEnding + soldToday - stockInToday - returnToday;
         if (beginningToday < 0) beginningToday = 0;
 
-        // Ending today = Beginning + StockIn + Return - Sold (Automatic roll over to next day beginning)
         let endingToday = beginningToday + stockInToday + returnToday - soldToday;
         if (endingToday < 0) endingToday = 0;
 
-        tbody.innerHTML += `
+        const rowHTML = `
           <tr>
             <td class="fw-bold">${item.name}</td>
             <td class="text-center fw-semibold text-secondary">${beginningToday}</td>
@@ -2120,11 +2226,13 @@
             <td class="text-center fw-bold text-success table-success fs-6">${endingToday}</td>
           </tr>
         `;
-      });
 
-      if (inventory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang produktong nakatala sa inventory sheet para sa petsang ito.</td></tr>`;
-      }
+        if (item.category === 'palmcoco') {
+          palmCocoBody.insertAdjacentHTML('beforeend', rowHTML);
+        } else {
+          dedicatedBody.insertAdjacentHTML('beforeend', rowHTML);
+        }
+      });
     }
 
     // ================= DAILY REPORT & MONEY BREAKDOWN LOGIC =================
@@ -3034,7 +3142,7 @@
         const newBalance = Math.max(0, newTotal - newPaid);
 
         transactions[tIndex].date = document.getElementById('editTxDate').value;
-        transactions[tIndex].customer = document.getElementById('editCustomerName.value');
+        transactions[tIndex].customer = document.getElementById('editCustomerName').value;
         transactions[tIndex].location = document.getElementById('editLocation').value;
         transactions[tIndex].product = document.getElementById('editProduct').value;
         transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;

@@ -108,7 +108,7 @@
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory(); renderCustomerSalesLog();">
+          <button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTable(); renderStockInHistory(); renderCustomerSalesLog(); renderDailyInventorySheet();">
             <i class="fa-solid fa-boxes-stacked me-1"></i> Inventory
           </button>
         </li>
@@ -656,9 +656,40 @@
               <button class="btn btn-outline-secondary" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Inventory
               </button>
+              <button class="btn btn-info text-white fw-bold me-1" data-bs-toggle="modal" data-bs-target="#returnModal">
+                <i class="fa-solid fa-rotate-left me-1"></i> Item Return / Isauli
+              </button>
               <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
                 <i class="fa-solid fa-plus me-1"></i> Add Product
               </button>
+            </div>
+          </div>
+
+          <!-- PER-DAY INVENTORY SHEET VIEW -->
+          <div class="card p-3 bg-light border mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Per-Day Inventory Sheet (Beginning, Out/Sold & Ending)</h5>
+              <div class="d-flex align-items-center gap-2">
+                <label class="fw-bold small">Piliin ang Araw (Date):</label>
+                <input type="date" id="inventorySheetDate" class="form-control form-control-sm" onchange="renderDailyInventorySheet()">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle bg-white">
+                <thead class="table-dark text-center">
+                  <tr>
+                    <th class="text-start">Product Name</th>
+                    <th>Beginning Stock</th>
+                    <th>Stock In (+Add)</th>
+                    <th>Return / Isauli</th>
+                    <th>Total Out (Sold)</th>
+                    <th class="table-success">Ending Stock (Lilipat Bukas)</th>
+                  </tr>
+                </thead>
+                <tbody id="dailyInventorySheetBody">
+                  <!-- Dynamic Per-Day Inventory Rows -->
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -687,11 +718,11 @@
 
           <div class="card p-3 bg-light border mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Talaan kung kelan nagdadagdag ng Produkto (Stock-In History)</h5>
+              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Talaan kung kelan nagdadagdag ng Produkto (Stock-In History & Supplier)</h5>
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="searchStockInInput" class="form-control" placeholder="I-search ang pangalan ng produkto o petsa..." oninput="renderStockInHistory()">
+              <input type="text" id="searchStockInInput" class="form-control" placeholder="I-search ang pangalan ng produkto, supplier o petsa..." oninput="renderStockInHistory()">
             </div>
             <div class="table-responsive">
               <table class="table table-bordered table-hover align-middle bg-white">
@@ -700,6 +731,7 @@
                     <th>Petsa (Date Added)</th>
                     <th>Product Name</th>
                     <th class="text-center">Ibinagdag (Stock In Qty)</th>
+                    <th>Supplier / Galing Kay</th>
                     <th>Uri / Note</th>
                   </tr>
                 </thead>
@@ -1239,12 +1271,12 @@
     </div>
   </div>
 
-  <!-- Modal para sa Pagdaragdag ng Bagong Produkto -->
+  <!-- Modal para sa Pagdaragdag ng Bagong Produkto (May Supplier Selection) -->
   <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-box-open me-2"></i>Add New Product</h5>
+          <h5 class="modal-title"><i class="fa-solid fa-box-open me-2"></i>Add Product / Stock-In (Pili Supplier)</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <form id="addProductForm">
@@ -1257,6 +1289,10 @@
               <label class="form-label fw-semibold">Product Name:</label>
               <input type="text" id="newProdName" class="form-control" placeholder="e.g., Semento" required>
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Supplier / Galing Kay:</label>
+              <input type="text" id="newProdSupplier" class="form-control" placeholder="e.g. Supplier A, ABC Trading" required>
+            </div>
             <div class="row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Cost / Unit (₱):</label>
@@ -1268,13 +1304,56 @@
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Beginning Stock / Stock In Qty:</label>
-              <input type="number" id="newProdStock" class="form-control" value="0" min="0" required>
+              <label class="form-label fw-semibold">Quantity (Dami):</label>
+              <input type="number" id="newProdStock" class="form-control" value="1" min="1" required>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Product</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Stock In</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ITEM RETURN / ISAULI -->
+  <div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-rotate-left me-2"></i>Item Return / Isauli sa Inventory</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="returnForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Date (Petsa ng Return):</label>
+              <input type="date" id="returnDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Product Name (Pangalan ng Item):</label>
+              <input type="text" id="returnProductName" class="form-control" placeholder="e.g. Semento" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Quantity na Isinauli (Qty):</label>
+              <input type="number" id="returnQty" class="form-control" value="1" min="1" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Uri ng Return / Dahilan:</label>
+              <select id="returnType" class="form-select">
+                <option value="Customer Return">Customer Return (Ibinalik ng Customer - Nadagdag sa Stock)</option>
+                <option value="Supplier Replacement">Supplier Replacement (Pinadala ng Supplier)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Notes / Customer Name:</label>
+              <input type="text" id="returnNotes" class="form-control" placeholder="e.g., Sobrang kuha ni Juan">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-info text-white fw-bold"><i class="fa-solid fa-check me-1"></i>I-save ang Return</button>
           </div>
         </form>
       </div>
@@ -1300,6 +1379,7 @@
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
     let stockInHistory = JSON.parse(localStorage.getItem('rmv_stockInHistory')) || [];
+    let returnHistory = JSON.parse(localStorage.getItem('rmv_returnHistory')) || [];
     let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
@@ -1318,6 +1398,8 @@
     document.getElementById('bossDate').value = todayFormatted;
     document.getElementById('newProdDate').value = todayFormatted;
     document.getElementById('payDate').value = todayFormatted;
+    document.getElementById('inventorySheetDate').value = todayFormatted;
+    document.getElementById('returnDate').value = todayFormatted;
     
     const nowObj = new Date();
     document.getElementById('auditMonth').value = `${nowObj.getFullYear()}-${String(nowObj.getMonth() + 1).padStart(2, '0')}`;
@@ -1338,6 +1420,9 @@
       generateDailyReport();
       renderCreditTable();
       renderInventoryTable();
+      renderStockInHistory();
+      renderCustomerSalesLog();
+      renderDailyInventorySheet();
       renderExpensesTable();
     };
 
@@ -1345,6 +1430,7 @@
       localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
       localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
       localStorage.setItem('rmv_stockInHistory', JSON.stringify(stockInHistory));
+      localStorage.setItem('rmv_returnHistory', JSON.stringify(returnHistory));
       localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
@@ -1696,6 +1782,7 @@
               date: saleDate,
               product: name,
               qty: qty,
+              supplier: 'Direct Inventory Only',
               note: `Manual Entry / ${custName}`
             });
           }
@@ -1746,13 +1833,16 @@
       toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
+      renderInventoryTable();
+      renderDailyInventorySheet();
     });
 
-    // ================= ADD PRODUCT, EDIT & STOCK-IN INVENTORY LOGIC =================
+    // ================= ADD PRODUCT / STOCK IN (WITH SUPPLIER) =================
     document.getElementById('addProductForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const prodDate = document.getElementById('newProdDate').value || getTodayDateString();
       const name = document.getElementById('newProdName').value.trim();
+      const supplier = document.getElementById('newProdSupplier').value.trim() || 'General Supplier';
       const cost = parseFloat(document.getElementById('newProdCost').value) || 0;
       const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
       const qty = parseInt(document.getElementById('newProdStock').value) || 0;
@@ -1779,6 +1869,7 @@
           date: prodDate,
           product: name,
           qty: qty,
+          supplier: supplier,
           note: existing ? 'Nagdagdag ng Stock' : 'Bagong Produkto / Beginning Stock'
         });
       }
@@ -1789,7 +1880,53 @@
       document.getElementById('newProdDate').value = getTodayDateString();
       renderInventoryTable();
       renderStockInHistory();
-      alert('Tagumpay na naidagdag ang produkto at nailagay sa talaan!');
+      renderDailyInventorySheet();
+      alert('Tagumpay na naidagdag ang produkto at nailagay sa talaan kasama ang supplier!');
+    });
+
+    // ================= ITEM RETURN / ISAULI LOGIC =================
+    document.getElementById('returnForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const rDate = document.getElementById('returnDate').value || getTodayDateString();
+      const rName = document.getElementById('returnProductName').value.trim();
+      const rQty = parseInt(document.getElementById('returnQty').value) || 0;
+      const rType = document.getElementById('returnType').value;
+      const rNotes = document.getElementById('returnNotes').value.trim();
+
+      if (rQty <= 0) {
+        alert('Ilagay ang tamang quantity.');
+        return;
+      }
+
+      let invItem = inventory.find(i => i.name.toLowerCase() === rName.toLowerCase());
+      if (invItem) {
+        invItem.ending += rQty; // Direct addition back to inventory
+      } else {
+        inventory.push({
+          name: rName,
+          cost: 0,
+          price: 0,
+          beginning: 0,
+          stockIn: rQty,
+          ending: rQty
+        });
+      }
+
+      returnHistory.push({
+        date: rDate,
+        product: rName,
+        qty: rQty,
+        type: rType,
+        notes: rNotes
+      });
+
+      saveData();
+      bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
+      this.reset();
+      document.getElementById('returnDate').value = getTodayDateString();
+      renderInventoryTable();
+      renderDailyInventorySheet();
+      alert('Tagumpay na naisailalim sa Return at nadagdag ulit sa inventory stock!');
     });
 
     function renderInventoryTable() {
@@ -1836,6 +1973,7 @@
         </tr>
       `;
       renderCustomerSalesLog();
+      renderDailyInventorySheet();
     }
 
     function updateInventoryItem(index, field, value) {
@@ -1863,7 +2001,7 @@
       tbody.innerHTML = '';
 
       const filtered = stockInHistory.filter(item =>
-        item.product.toLowerCase().includes(searchQuery) || item.date.includes(searchQuery)
+        item.product.toLowerCase().includes(searchQuery) || item.date.includes(searchQuery) || (item.supplier && item.supplier.toLowerCase().includes(searchQuery))
       );
 
       filtered.slice().reverse().forEach(item => {
@@ -1872,13 +2010,14 @@
             <td>${item.date}</td>
             <td class="fw-bold">${item.product}</td>
             <td class="text-center text-success fw-bold">+${item.qty}</td>
+            <td><span class="badge bg-secondary">${item.supplier || 'N/A'}</span></td>
             <td><span class="badge bg-info text-dark">${item.note}</span></td>
           </tr>
         `;
       });
 
       if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Walang nakitang tala ng pagdadagdag ng produkto.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Walang nakitang tala ng pagdadagdag ng produkto.</td></tr>`;
       }
     }
 
@@ -1922,6 +2061,69 @@
 
       if (logs.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Wala pang naitalang benta sa mga customer.</td></tr>`;
+      }
+    }
+
+    // ================= PER-DAY INVENTORY SHEET (AUTO ENDING TO BEGINNING) =================
+    function renderDailyInventorySheet() {
+      const selectedDate = document.getElementById('inventorySheetDate').value || getTodayDateString();
+      const tbody = document.getElementById('dailyInventorySheetBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      inventory.forEach(item => {
+        let soldToday = 0;
+        let stockInToday = 0;
+        let returnToday = 0;
+
+        // Compute sales (out) for this product on selected date
+        transactions.forEach(t => {
+          if (t.date === selectedDate && t.itemsList) {
+            t.itemsList.forEach(i => {
+              if (i.name.toLowerCase() === item.name.toLowerCase()) {
+                soldToday += i.qty;
+              }
+            });
+          }
+        });
+
+        // Compute stock-in for this product on selected date
+        stockInHistory.forEach(s => {
+          if (s.date === selectedDate && s.product.toLowerCase() === item.name.toLowerCase()) {
+            stockInToday += s.qty;
+          }
+        });
+
+        // Compute returns for this product on selected date
+        returnHistory.forEach(r => {
+          if (r.date === selectedDate && r.product.toLowerCase() === item.name.toLowerCase()) {
+            returnToday += r.qty;
+          }
+        });
+
+        // Rolling Beginning and Ending Calculation per day
+        let currentTotalEnding = Math.max(0, item.ending);
+        let beginningToday = currentTotalEnding + soldToday - stockInToday - returnToday;
+        if (beginningToday < 0) beginningToday = 0;
+
+        // Ending today = Beginning + StockIn + Return - Sold (Automatic roll over to next day beginning)
+        let endingToday = beginningToday + stockInToday + returnToday - soldToday;
+        if (endingToday < 0) endingToday = 0;
+
+        tbody.innerHTML += `
+          <tr>
+            <td class="fw-bold">${item.name}</td>
+            <td class="text-center fw-semibold text-secondary">${beginningToday}</td>
+            <td class="text-center text-success fw-bold">+${stockInToday}</td>
+            <td class="text-center text-info fw-bold">+${returnToday}</td>
+            <td class="text-center text-danger fw-bold">-${soldToday}</td>
+            <td class="text-center fw-bold text-success table-success fs-6">${endingToday}</td>
+          </tr>
+        `;
+      });
+
+      if (inventory.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang produktong nakatala sa inventory sheet para sa petsang ito.</td></tr>`;
       }
     }
 
@@ -2042,8 +2244,6 @@
 
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
       
-      // Target Cash in Drawer = (Cash Sales Today + Payment sa Utang Collected) - Expenses (Cash Out)
-      // Note: dayDebtPayments ay isinasama sa Target Cash pero HINDI idinaragdag sa daySales para hindi madagdagan ang Gross Sales.
       let dayCashSalesOnly = daySales - totalNonCashToday; 
       currentTargetCashInDrawer = Math.max(0, (dayCashSalesOnly + dayDebtPayments) - dayExpensesTotal);
 
@@ -2834,7 +3034,7 @@
         const newBalance = Math.max(0, newTotal - newPaid);
 
         transactions[tIndex].date = document.getElementById('editTxDate').value;
-        transactions[tIndex].customer = document.getElementById('editCustomerName').value;
+        transactions[tIndex].customer = document.getElementById('editCustomerName.value');
         transactions[tIndex].location = document.getElementById('editLocation').value;
         transactions[tIndex].product = document.getElementById('editProduct').value;
         transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;

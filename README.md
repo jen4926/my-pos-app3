@@ -920,24 +920,39 @@
             </div>
           </div>
 
-          <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Transactions Log</h6>
-          <div class="table-responsive mb-4">
-            <table class="table table-sm table-bordered bg-white align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th style="width: 150px;">Date</th>
-                  <th>Description / Type</th>
-                  <th style="width: 180px;" class="text-end">Amount (₱)</th>
-                  <th class="text-center no-print" style="width: 120px;">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="bossLogsBody">
-                <!-- Dynamic Content -->
-              </tbody>
-              <tfoot class="table-secondary fw-bold" id="bossLogsFooter">
-                <!-- Subtotal row rendered dynamically -->
-              </tfoot>
-            </table>
+          <!-- D/ECO BOSS TRANSACTIONS LOG (MAY SEARCH BAR AT PER-DAY SUBTOTAL) -->
+          <div class="card p-3 bg-light mb-4 border">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Transactions Log</h6>
+              <button class="btn btn-sm btn-outline-warning text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#bossModal">
+                <i class="fa-solid fa-plus me-1"></i> Add Boss Adjustment
+              </button>
+            </div>
+            
+            <!-- SEARCH BAR PARA SA D/ECO BOSS LOGS -->
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" id="searchBossInput" class="form-control" placeholder="I-search ang petsa, uri o notes sa D/Eco Boss log..." oninput="generateMonthlyAudit()">
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered bg-white align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 150px;">Date</th>
+                    <th>Description / Type</th>
+                    <th style="width: 180px;" class="text-end">Amount (₱)</th>
+                    <th class="text-center no-print" style="width: 120px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="bossLogsBody">
+                  <!-- Dynamic Content -->
+                </tbody>
+                <tfoot class="table-secondary fw-bold" id="bossLogsFooter">
+                  <!-- Subtotal row rendered dynamically -->
+                </tfoot>
+              </table>
+            </div>
           </div>
 
         </div>
@@ -2513,40 +2528,73 @@
       const bossFooter = document.getElementById('bossLogsFooter');
       bossBody.innerHTML = '';
       
-      bossAdjustments.forEach((b, index) => {
+      const searchBossQuery = document.getElementById('searchBossInput') ? document.getElementById('searchBossInput').value.toLowerCase() : '';
+      let filteredBossCount = 0;
+
+      // I-group ang boss adjustments per day para sa per-day subtotal view
+      let bossByDate = {};
+      bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
-          let val = parseFloat(b.amount) || 0;
+          let rowText = `${b.date} ${b.type} ${b.amount} ${b.notes}`.toLowerCase();
+          if (searchBossQuery && !rowText.includes(searchBossQuery)) return;
+
+          if (!bossByDate[b.date]) {
+            bossByDate[b.date] = [];
+          }
+          bossByDate[b.date].push({ ...b, originalIndex });
+        }
+      });
+
+      const sortedBossDates = Object.keys(bossByDate).sort().reverse();
+      sortedBossDates.forEach(dateKey => {
+        let dayAddTotal = 0;
+        let daySubTotal = 0;
+
+        bossByDate[dateKey].forEach(item => {
+          filteredBossCount++;
+          let val = parseFloat(item.amount) || 0;
           let actionButtons = `
             <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-primary border-0 p-1 me-1" onclick="openEditBossModal(${index})" title="Edit Adjustment">
+              <button class="btn btn-sm btn-outline-primary border-0 p-1 me-1" onclick="openEditBossModal(${item.originalIndex})" title="Edit Adjustment">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteBossAdjustment(${index})" title="Delete Adjustment">
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteBossAdjustment(${item.originalIndex})" title="Delete Adjustment">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </td>
           `;
 
-          if (b.type === 'ADD') {
+          if (item.type === 'ADD') {
             bossNetAdjustment += val;
             bossSubtotalAdd += val;
-            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-success">Boss Addition</span> ${b.notes}</td><td class="text-end text-success">+₱${val.toFixed(2)}</td>${actionButtons}</tr>`;
+            dayAddTotal += val;
+            bossBody.innerHTML += `<tr><td>${item.date}</td><td><span class="badge bg-success">Boss Addition</span> ${item.notes}</td><td class="text-end text-success">+₱${val.toFixed(2)}</td>${actionButtons}</tr>`;
           } else {
             bossNetAdjustment -= val;
             bossSubtotalSub += val;
-            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-danger">Boss Withdrawal</span> ${b.notes}</td><td class="text-end text-danger">-₱${val.toFixed(2)}</td>${actionButtons}</tr>`;
+            daySubTotal += val;
+            bossBody.innerHTML += `<tr><td>${item.date}</td><td><span class="badge bg-danger">Boss Withdrawal</span> ${item.notes}</td><td class="text-end text-danger">-₱${val.toFixed(2)}</td>${actionButtons}</tr>`;
           }
-        }
+        });
+
+        // Subtotal row per day para sa D/Eco Boss
+        let dayNetDiff = dayAddTotal - daySubTotal;
+        bossBody.innerHTML += `
+          <tr class="table-light fw-semibold">
+            <td colspan="2" class="text-end text-muted small">Subtotal para sa ${dateKey}:</td>
+            <td class="text-end text-muted small">Add: +₱${dayAddTotal.toFixed(2)} | With: -₱${daySubTotal.toFixed(2)}</td>
+            <td class="no-print"></td>
+          </tr>
+        `;
       });
 
-      const filteredBossCount = bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).length;
       if (filteredBossCount === 0) {
-        bossBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-2">Wala pang D/Eco Boss adjustments sa buwang ito.</td></tr>`;
+        bossBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-2">Wala pang D/Eco Boss adjustments na nahanap.</td></tr>`;
         bossFooter.innerHTML = '';
       } else {
         bossFooter.innerHTML = `
           <tr>
-            <td colspan="2" class="text-end">SUBTOTAL (Additions: <span class="text-success">+₱${bossSubtotalAdd.toFixed(2)}</span> | Withdrawals: <span class="text-danger">-₱${bossSubtotalSub.toFixed(2)}</span>):</td>
+            <td colspan="2" class="text-end">KABUUANG SUBTOTAL (Additions: <span class="text-success">+₱${bossSubtotalAdd.toFixed(2)}</span> | Withdrawals: <span class="text-danger">-₱${bossSubtotalSub.toFixed(2)}</span>):</td>
             <td class="text-end fw-bold ${bossNetAdjustment >= 0 ? 'text-success' : 'text-danger'}">₱${bossNetAdjustment.toFixed(2)}</td>
             <td class="no-print"></td>
           </tr>

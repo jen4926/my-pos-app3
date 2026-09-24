@@ -1176,8 +1176,8 @@
             <div class="mb-3">
               <label class="form-label fw-semibold">Adjustment Type:</label>
               <select id="bossType" class="form-select">
-                <option value="ADD">Boss Addition / Capital Cash In (+ Net Profit)</option>
-                <option value="SUB">Boss Withdrawal / Cash Out (- Net Profit)</option>
+                <option value="ADD">Boss Addition / Capital Cash In (+ Subtotal Net)</option>
+                <option value="SUB">Boss Withdrawal / Cash Out (- Subtotal Net)</option>
               </select>
             </div>
             <div class="mb-3">
@@ -1216,8 +1216,8 @@
             <div class="mb-3">
               <label class="form-label fw-semibold">Adjustment Type:</label>
               <select id="editBossType" class="form-select">
-                <option value="ADD">Boss Addition / Capital Cash In (+ Net Profit)</option>
-                <option value="SUB">Boss Withdrawal / Cash Out (- Net Profit)</option>
+                <option value="ADD">Boss Addition / Capital Cash In (+ Subtotal Net)</option>
+                <option value="SUB">Boss Withdrawal / Cash Out (- Subtotal Net)</option>
               </select>
             </div>
             <div class="mb-3">
@@ -2511,16 +2511,9 @@
 
       let hiwayNet = hiwayGrossProfit;
       let byaheNet = byaheGrossProfit;
-      let subtotalNet = hiwayNet + byaheNet;
-
-      document.getElementById('auditHiwaySales').innerText = `₱${hiwaySales.toFixed(2)}`;
-      document.getElementById('auditHiwayCost').innerText = `₱${hiwayCost.toFixed(2)}`;
-      document.getElementById('auditHiwayNetProfit').innerText = `₱${hiwayNet.toFixed(2)}`;
-
-      document.getElementById('auditByaheSales').innerText = `₱${byaheSales.toFixed(2)}`;
-      document.getElementById('auditByaheCost').innerText = `₱${byaheCost.toFixed(2)}`;
-      document.getElementById('auditByaheNetProfit').innerText = `₱${byaheNet.toFixed(2)}`;
-
+      
+      // ================= COMPUTATION UPDATE =================
+      // subtotal net = hiway net + byahe net - salary / expenses + d/eco boss
       let bossNetAdjustment = 0;
       let bossSubtotalAdd = 0;
       let bossSubtotalSub = 0;
@@ -2531,7 +2524,6 @@
       const searchBossQuery = document.getElementById('searchBossInput') ? document.getElementById('searchBossInput').value.toLowerCase() : '';
       let filteredBossCount = 0;
 
-      // I-group ang boss adjustments per day para sa per-day subtotal view
       let bossByDate = {};
       bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
@@ -2577,7 +2569,6 @@
           }
         });
 
-        // Subtotal row per day para sa D/Eco Boss
         let dayNetDiff = dayAddTotal - daySubTotal;
         bossBody.innerHTML += `
           <tr class="table-light fw-semibold">
@@ -2601,7 +2592,17 @@
         `;
       }
 
-      const netProfit = subtotalNet - totalExpenses + bossNetAdjustment;
+      // Formula: subtotal net = hiway net + byahe net - salary / expenses + d/eco boss
+      let subtotalNet = hiwayNet + byaheNet - totalExpenses + bossNetAdjustment;
+      let netProfit = subtotalNet; // Final Net Profit
+
+      document.getElementById('auditHiwaySales').innerText = `₱${hiwaySales.toFixed(2)}`;
+      document.getElementById('auditHiwayCost').innerText = `₱${hiwayCost.toFixed(2)}`;
+      document.getElementById('auditHiwayNetProfit').innerText = `₱${hiwayNet.toFixed(2)}`;
+
+      document.getElementById('auditByaheSales').innerText = `₱${byaheSales.toFixed(2)}`;
+      document.getElementById('auditByaheCost').innerText = `₱${byaheCost.toFixed(2)}`;
+      document.getElementById('auditByaheNetProfit').innerText = `₱${byaheNet.toFixed(2)}`;
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
@@ -2622,7 +2623,7 @@
           if (t.location === 'Hiway') dailyMap[t.date].hiwayNet += tGross;
           if (t.location === 'Byahe') dailyMap[t.date].byaheNet += tGross;
           dailyMap[t.date].cost += (t.totalCost || 0);
-          dailyMap[t.date].subtotalNet += tGross;
+          dailyMap[t.date].subtotalNet += (dailyMap[t.date].hiwayNet + dailyMap[t.date].byaheNet);
         }
       });
 
@@ -2638,14 +2639,26 @@
             }
           });
         }
-        const dayFinalNet = item.subtotalNet - dayExpSum;
+
+        let dayBossSum = 0;
+        bossAdjustments.forEach(b => {
+          if (b.date === d) {
+            if (b.type === 'ADD') dayBossSum += (parseFloat(b.amount) || 0);
+            else dayBossSum -= (parseFloat(b.amount) || 0);
+          }
+        });
+
+        // Day Subtotal Net = Hiway Net + Byahe Net
+        const dayBaseSubNet = item.hiwayNet + item.byaheNet;
+        // Day Final Net / Subtotal Net with expenses and boss adjustments
+        const dayFinalNet = dayBaseSubNet - dayExpSum + dayBossSum;
 
         dailyBreakdownBody.innerHTML += `
           <tr>
             <td class="fw-bold">${d}</td>
             <td class="text-end">₱${item.hiwayNet.toFixed(2)}</td>
             <td class="text-end">₱${item.byaheNet.toFixed(2)}</td>
-            <td class="text-end fw-semibold">₱${item.subtotalNet.toFixed(2)}</td>
+            <td class="text-end fw-semibold">₱${dayBaseSubNet.toFixed(2)}</td>
             <td class="text-end text-success fw-bold">₱${dayFinalNet.toFixed(2)}</td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="jumpToDailyReport('${d}')">

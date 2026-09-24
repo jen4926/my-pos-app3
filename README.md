@@ -922,17 +922,21 @@
 
           <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Transactions Log</h6>
           <div class="table-responsive mb-4">
-            <table class="table table-sm table-bordered bg-white">
+            <table class="table table-sm table-bordered bg-white align-middle">
               <thead class="table-light">
                 <tr>
-                  <th>Date</th>
+                  <th style="width: 150px;">Date</th>
                   <th>Description / Type</th>
-                  <th>Amount (₱)</th>
+                  <th style="width: 180px;" class="text-end">Amount (₱)</th>
+                  <th class="text-center no-print" style="width: 120px;">Actions</th>
                 </tr>
               </thead>
               <tbody id="bossLogsBody">
                 <!-- Dynamic Content -->
               </tbody>
+              <tfoot class="table-secondary fw-bold" id="bossLogsFooter">
+                <!-- Subtotal row rendered dynamically -->
+              </tfoot>
             </table>
           </div>
 
@@ -1173,6 +1177,46 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="submit" class="btn btn-dark"><i class="fa-solid fa-floppy-disk me-1"></i>Save Adjustment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT D/ECO BOSS ADJUSTMENT -->
+  <div class="modal fade" id="editBossModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-pen-to-square me-2"></i>Edit D/Eco Boss Adjustment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="editBossForm">
+          <div class="modal-body">
+            <input type="hidden" id="editBossIndex">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Date:</label>
+              <input type="date" id="editBossDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Adjustment Type:</label>
+              <select id="editBossType" class="form-select">
+                <option value="ADD">Boss Addition / Capital Cash In (+ Net Profit)</option>
+                <option value="SUB">Boss Withdrawal / Cash Out (- Net Profit)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount (₱):</label>
+              <input type="number" step="0.01" id="editBossAmount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Notes / Description:</label>
+              <input type="text" id="editBossNotes" class="form-control" placeholder="e.g., Personal Withdrawal, Additional Capital">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-dark"><i class="fa-solid fa-floppy-disk me-1"></i>Update Adjustment</button>
           </div>
         </form>
       </div>
@@ -1975,7 +2019,6 @@
       }
       currentDayExpenses = dayExpensesTotal;
 
-      // KABUUANG SUBTOTAL NET (Hiway Net + Byahe Net bawas expenses)
       let dayHiwayNet = dayHiwayGrossProfit;
       let dayByaheNet = dayByaheGrossProfit;
       let daySubtotalNet = dayHiwayNet + dayByaheNet;
@@ -2451,10 +2494,8 @@
         });
       }
 
-      // Hiway Net at Byahe Net (Gross Profits)
       let hiwayNet = hiwayGrossProfit;
       let byaheNet = byaheGrossProfit;
-      // Subtotal Net = Hiway Net + Byahe Net
       let subtotalNet = hiwayNet + byaheNet;
 
       document.getElementById('auditHiwaySales').innerText = `₱${hiwaySales.toFixed(2)}`;
@@ -2466,26 +2507,52 @@
       document.getElementById('auditByaheNetProfit').innerText = `₱${byaheNet.toFixed(2)}`;
 
       let bossNetAdjustment = 0;
+      let bossSubtotalAdd = 0;
+      let bossSubtotalSub = 0;
       const bossBody = document.getElementById('bossLogsBody');
+      const bossFooter = document.getElementById('bossLogsFooter');
       bossBody.innerHTML = '';
-      bossAdjustments.forEach(b => {
+      
+      bossAdjustments.forEach((b, index) => {
         if (b.date.startsWith(selectedMonth)) {
           let val = parseFloat(b.amount) || 0;
+          let actionButtons = `
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-primary border-0 p-1 me-1" onclick="openEditBossModal(${index})" title="Edit Adjustment">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteBossAdjustment(${index})" title="Delete Adjustment">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          `;
+
           if (b.type === 'ADD') {
             bossNetAdjustment += val;
-            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-success">Boss Addition</span> ${b.notes}</td><td class="text-success">+₱${val.toFixed(2)}</td></tr>`;
+            bossSubtotalAdd += val;
+            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-success">Boss Addition</span> ${b.notes}</td><td class="text-end text-success">+₱${val.toFixed(2)}</td>${actionButtons}</tr>`;
           } else {
             bossNetAdjustment -= val;
-            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-danger">Boss Withdrawal</span> ${b.notes}</td><td class="text-danger">-₱${val.toFixed(2)}</td></tr>`;
+            bossSubtotalSub += val;
+            bossBody.innerHTML += `<tr><td>${b.date}</td><td><span class="badge bg-danger">Boss Withdrawal</span> ${b.notes}</td><td class="text-end text-danger">-₱${val.toFixed(2)}</td>${actionButtons}</tr>`;
           }
         }
       });
 
-      if (bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).length === 0) {
-        bossBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">Wala pang D/Eco Boss adjustments sa buwang ito.</td></tr>`;
+      const filteredBossCount = bossAdjustments.filter(b => b.date.startsWith(selectedMonth)).length;
+      if (filteredBossCount === 0) {
+        bossBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-2">Wala pang D/Eco Boss adjustments sa buwang ito.</td></tr>`;
+        bossFooter.innerHTML = '';
+      } else {
+        bossFooter.innerHTML = `
+          <tr>
+            <td colspan="2" class="text-end">SUBTOTAL (Additions: <span class="text-success">+₱${bossSubtotalAdd.toFixed(2)}</span> | Withdrawals: <span class="text-danger">-₱${bossSubtotalSub.toFixed(2)}</span>):</td>
+            <td class="text-end fw-bold ${bossNetAdjustment >= 0 ? 'text-success' : 'text-danger'}">₱${bossNetAdjustment.toFixed(2)}</td>
+            <td class="no-print"></td>
+          </tr>
+        `;
       }
 
-      // Final Net Profit = Subtotal Net - Salary & Expenses + Boss Adjustment
       const netProfit = subtotalNet - totalExpenses + bossNetAdjustment;
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
@@ -2571,6 +2638,45 @@
       generateMonthlyAudit();
       alert('Tagumpay na naidagdag ang D/Eco Boss adjustment!');
     });
+
+    function openEditBossModal(index) {
+      const b = bossAdjustments[index];
+      if (!b) return;
+
+      document.getElementById('editBossIndex').value = index;
+      document.getElementById('editBossDate').value = b.date;
+      document.getElementById('editBossType').value = b.type;
+      document.getElementById('editBossAmount').value = b.amount;
+      document.getElementById('editBossNotes').value = b.notes;
+
+      new bootstrap.Modal(document.getElementById('editBossModal')).show();
+    }
+
+    document.getElementById('editBossForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const index = parseInt(document.getElementById('editBossIndex').value);
+      if (index > -1 && bossAdjustments[index]) {
+        bossAdjustments[index] = {
+          date: document.getElementById('editBossDate').value,
+          type: document.getElementById('editBossType').value,
+          amount: parseFloat(document.getElementById('editBossAmount').value) || 0,
+          notes: document.getElementById('editBossNotes').value.trim()
+        };
+        saveData();
+        bootstrap.Modal.getInstance(document.getElementById('editBossModal')).hide();
+        generateMonthlyAudit();
+        alert('Tagumpay na na-update ang D/Eco Boss adjustment!');
+      }
+    });
+
+    function deleteBossAdjustment(index) {
+      if (confirm('Sigurado ka bang gusto mong tanggalin ang adjustment na ito?')) {
+        bossAdjustments.splice(index, 1);
+        saveData();
+        generateMonthlyAudit();
+        alert('Naalis na ang adjustment.');
+      }
+    }
 
     // ================= GLOBAL SEARCH LOGIC =================
     function renderGlobalSearchResults() {

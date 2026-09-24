@@ -2818,7 +2818,7 @@
       const total = parseFloat(document.getElementById('editTotal').value) || 0;
       const paid = parseFloat(document.getElementById('editPaid').value) || 0;
       const balance = Math.max(0, total - paid);
-      document.getElementById('editBalance').value = balance.toFixed(2);
+      document.getElementById('balance').value = balance.toFixed(2);
     }
 
     document.getElementById('editTransactionForm').addEventListener('submit', function(e) {

@@ -98,7 +98,7 @@
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable()">
+          <button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable(); renderStandalonePayments();">
             <i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments
           </button>
         </li>
@@ -516,10 +516,45 @@
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title text-primary m-0"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit & Utang Ledger</h4>
-            <button class="btn btn-outline-secondary" onclick="window.print()">
-              <i class="fa-solid fa-print me-1"></i> Print Utang List
-            </button>
+            <div class="d-flex gap-2 align-items-center">
+              <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="fa-solid fa-print me-1"></i> Print Utang List
+              </button>
+              <button class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#standalonePaymentModal">
+                <i class="fa-solid fa-plus me-1"></i> Add Manual Payment / Collection
+              </button>
+            </div>
           </div>
+
+          <!-- STANDALONE MANUAL PAYMENT / COLLECTION LEDGER TABLE -->
+          <div class="card p-3 bg-light border mb-4">
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-receipt me-2"></i>Standalone Manual Payments & Collections History (Araw-arawang Bayad sa Lumang Utang)</h6>
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+              <input type="text" id="searchStandalonePaymentInput" class="form-control" placeholder="I-search ang pangalan ng customer o petsa..." oninput="renderStandalonePayments()">
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle bg-white">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date (Petsa)</th>
+                    <th>Customer Name</th>
+                    <th>Payment Method</th>
+                    <th class="text-end">Amount Paid (₱)</th>
+                    <th>Notes / Remarks</th>
+                    <th class="col-action no-print text-center"><i class="fa-solid fa-trash"></i></th>
+                  </tr>
+                </thead>
+                <tbody id="standalonePaymentTableBody">
+                  <!-- Dynamic Standalone Payment Rows -->
+                </tbody>
+                <tfoot class="table-secondary fw-bold" id="standalonePaymentTableFooter">
+                  <!-- Total Subtotal -->
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
           <div class="table-responsive mb-5">
             <table class="table table-hover align-middle">
               <thead class="table-dark">
@@ -1198,6 +1233,52 @@
     </div>
   </div>
 
+  <!-- MODAL: STANDALONE MANUAL PAYMENT / COLLECTION -->
+  <div class="modal fade" id="standalonePaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Add Manual Payment / Collection</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="standalonePaymentForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Date (Petsa ng Bayad):</label>
+              <input type="date" id="stdPayDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Customer Name:</label>
+              <input type="text" id="stdPayCustomer" class="form-control" placeholder="e.g. Juan Dela Cruz" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount Paid (₱):</label>
+              <input type="number" step="0.01" min="0.01" id="stdPayAmount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Payment Method:</label>
+              <select id="stdPayMethod" class="form-select" required>
+                <option value="Cash">Cash</option>
+                <option value="Byahe Cash">Byahe Cash</option>
+                <option value="GCash">GCash</option>
+                <option value="Bank Transfer">Bank Transfer (BT)</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Notes / Remarks (Optional):</label>
+              <input type="text" id="stdPayNotes" class="form-control" placeholder="e.g., Bayad sa lumang utang na hindi naka-encode">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Collection</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: PAYMENT / BAYAD SA UTANG -->
   <div class="modal fade" id="paymentModal" tabindex="-1">
     <div class="modal-dialog">
@@ -1619,6 +1700,7 @@
     let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
+    let standalonePayments = JSON.parse(localStorage.getItem('rmv_standalonePayments')) || [];
 
     function getTodayDateString() {
       const now = new Date();
@@ -1638,6 +1720,7 @@
     document.getElementById('returnDate').value = todayFormatted;
     document.getElementById('standaloneExpenseDate').value = todayFormatted;
     document.getElementById('standaloneBossDate').value = todayFormatted;
+    document.getElementById('stdPayDate').value = todayFormatted;
    
     const nowObj = new Date();
     const currentMonthStr = `${nowObj.getFullYear()}-${String(nowObj.getMonth() + 1).padStart(2, '0')}`;
@@ -1660,6 +1743,7 @@
       loadMoneyBreakdown();
       generateDailyReport();
       renderCreditTable();
+      renderStandalonePayments();
       renderInventoryTables();
       renderStockInHistory();
       renderCustomerSalesLog();
@@ -1677,6 +1761,7 @@
       localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
+      localStorage.setItem('rmv_standalonePayments', JSON.stringify(standalonePayments));
       localStorage.setItem('rmv_users', JSON.stringify(users));
       if (currentUser) {
         localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
@@ -2397,6 +2482,94 @@
       });
     }
 
+    // ================= STANDALONE UTANG & PAYMENTS LEDGER LOGIC =================
+    document.getElementById('standalonePaymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const pDate = document.getElementById('stdPayDate').value || todayFormatted;
+      const pCust = document.getElementById('stdPayCustomer').value.trim();
+      const pAmt = parseFloat(document.getElementById('stdPayAmount').value) || 0;
+      const pMethod = document.getElementById('stdPayMethod').value;
+      const pNotes = document.getElementById('stdPayNotes').value.trim() || 'Manual Collection sa Lumang Utang';
+
+      if (pAmt <= 0) {
+        alert('Maglagay ng tamang halaga ng bayad.');
+        return;
+      }
+
+      standalonePayments.push({
+        date: pDate,
+        customer: pCust,
+        amount: pAmt,
+        method: pMethod,
+        notes: pNotes
+      });
+
+      saveData();
+      bootstrap.Modal.getInstance(document.getElementById('standalonePaymentModal')).hide();
+      this.reset();
+      document.getElementById('stdPayDate').value = getTodayDateString();
+      renderStandalonePayments();
+      generateDailyReport();
+      alert('Tagumpay na naidagdag ang manual payment sa ledger at naisama na sa Cash Audit & Deductions!');
+    });
+
+    function renderStandalonePayments() {
+      const tbody = document.getElementById('standalonePaymentTableBody');
+      const tfoot = document.getElementById('standalonePaymentTableFooter');
+      const searchQuery = document.getElementById('searchStandalonePaymentInput') ? document.getElementById('searchStandalonePaymentInput').value.toLowerCase() : '';
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      let totalPaidSum = 0;
+      let countVisible = 0;
+
+      standalonePayments.forEach((p, index) => {
+        const rowText = `${p.date} ${p.customer} ${p.method} ${p.notes}`.toLowerCase();
+        if (searchQuery && !rowText.includes(searchQuery)) return;
+
+        countVisible++;
+        totalPaidSum += p.amount;
+
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.date}</td>
+            <td class="fw-bold">${p.customer}</td>
+            <td><span class="badge bg-secondary">${p.method}</span></td>
+            <td class="text-end text-success fw-bold">₱${p.amount.toFixed(2)}</td>
+            <td>${p.notes}</td>
+            <td class="text-center no-print">
+              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteStandalonePayment(${index})" title="Delete Payment">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (countVisible === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakitang manual payment o collection sa lumang utang. Pindutin ang "Add Manual Payment / Collection" para magdagdag.</td></tr>`;
+        tfoot.innerHTML = '';
+      } else {
+        tfoot.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-end">KABUUANG MANUAL PAYMENTS / COLLECTIONS:</td>
+            <td class="text-end text-success fw-bold">₱${totalPaidSum.toFixed(2)}</td>
+            <td colspan="2" class="no-print"></td>
+          </tr>
+        `;
+      }
+    }
+
+    function deleteStandalonePayment(index) {
+      if (confirm('Sigurado ka bang gusto mong tanggalin ang manual payment na ito?')) {
+        standalonePayments.splice(index, 1);
+        saveData();
+        renderStandalonePayments();
+        generateDailyReport();
+        alert('Naalis na ang payment record.');
+      }
+    }
+
     // ================= STANDALONE SALARY & EXPENSES LEDGER LOGIC =================
     function toggleExpenseViewMode() {
       const mode = document.getElementById('expenseViewMode').value;
@@ -2456,7 +2629,6 @@
       expensesList.forEach((item, index) => {
         const itemDate = item.date || (targetMonthKey + '-01');
        
-        // Kapag naka-day view, ipapakita lamang ang mga nakatala sa eksaktong araw na iyon
         if (mode === 'day' && itemDate !== targetDateKey) {
           return;
         }
@@ -2715,7 +2887,21 @@
         `;
       });
 
-      if (filtered.length === 0) {
+      // ISAMA SA COLLECTION AT DEBT PAYMENTS ANG MGA STANDALONE MANUAL PAYMENTS SA NAPILING PETSA
+      if (standalonePayments) {
+        standalonePayments.forEach(p => {
+          if (p.date === selectedDate) {
+            dayCollected += p.amount;
+            dayDebtPayments += p.amount;
+            if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
+            else if (p.method === 'GCash') totalGCash += p.amount;
+            else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
+            else if (p.method === 'Cheque') totalCheque += p.amount;
+          }
+        });
+      }
+
+      if (filtered.length === 0 && standalonePayments.filter(p => p.date === selectedDate).length === 0) {
         tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-3">Wala pang na-encode na transaksyon sa petsang ito.</td></tr>`;
       }
 
@@ -2742,6 +2928,7 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
+      // ANG TARGET CASH IN DRAWER AY KASAMANG IBINABABA (KINA-CALCULATE) ANG DAY DEBT PAYMENTS (KASAMA ANG MANUAL PAYMENTS)
       currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
@@ -3368,7 +3555,7 @@
       });
 
       if (sortedDates.length === 0) {
-        dailyBreakdownBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang nahanap na transaksyon sa buwang ito.</td></tr>`;
+        dailyBreakdownBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nahanap na transaksyon sa buwang ito.</td></tr>`;
       }
 
       renderExpensesTable();

@@ -18,13 +18,6 @@
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
     .inventory-input { width: 95px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
-   
-    /* Login Backdrop overlay */
-    #loginOverlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(13, 71, 161, 0.85); z-index: 9999;
-      display: flex; justify-content: center; align-items: center;
-    }
 
     /* PRINT STYLES */
     @media print {
@@ -33,7 +26,7 @@
         color: #000 !important;
         font-size: 12pt;
       }
-      .navbar, #loginOverlay, .btn, .nav, .modal, .no-print {
+      .navbar, .btn, .nav, .modal, .no-print {
         display: none !important;
       }
       .card {
@@ -54,31 +47,6 @@
   </style>
 </head>
 <body>
-
-  <!-- ================= 0. LOGIN OVERLAY ================= -->
-  <div id="loginOverlay">
-    <div class="card p-4 shadow-lg" style="width: 380px; border-top: 5px solid #1976d2;">
-      <div class="text-center mb-3">
-        <i class="fa-solid fa-store fa-3x text-primary mb-2"></i>
-        <h4 class="fw-bold">RMVillasis Enterprises</h4>
-        <p class="text-muted small">Mangyaring mag-log in upang magpatuloy</p>
-      </div>
-      <form id="loginForm">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Username:</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. admin" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Password:</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
-        </div>
-        <div id="loginError" class="alert alert-danger p-2 small d-none">
-          Mali ang username o password!
-        </div>
-        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
-      </form>
-    </div>
-  </div>
 
   <!-- Navbar -->
   <nav class="navbar navbar-dark expand-lg mb-4">
@@ -122,14 +90,14 @@
             <i class="fa-solid fa-user-tie me-1"></i> D/Eco Boss
           </button>
         </li>
-        <li class="nav-item admin-only">
+        <li class="nav-item">
           <button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()">
             <i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit
           </button>
         </li>
       </ul>
 
-      <!-- User Profile, Save, Refresh Button & Account Controls -->
+      <!-- Save & Refresh Button -->
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()" title="Save Data to Local Storage">
           <i class="fa-solid fa-floppy-disk me-1"></i> Save Data
@@ -137,17 +105,6 @@
         <button class="btn btn-outline-light btn-sm fw-semibold" onclick="location.reload()" title="Refresh Page">
           <i class="fa-solid fa-rotate me-1"></i> Refresh
         </button>
-        <div class="dropdown text-end text-white">
-          <a href="#" class="d-block link-light text-decoration-none dropdown-toggle fw-bold" id="userDropdown" data-bs-toggle="dropdown">
-            <i class="fa-solid fa-circle-user fa-lg me-1"></i> <span id="currentUserName">User</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end text-small shadow">
-            <li><a class="dropdown-item" href="#" onclick="openChangeProfileModal()"><i class="fa-solid fa-key me-2"></i>Change Name / Password</a></li>
-            <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users & Admins</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2">Tag Out</i></a></li>
-          </ul>
-        </div>
       </div>
     </div>
   </nav>
@@ -1401,86 +1358,6 @@
     </div>
   </div>
 
-  <!-- MODAL: CHANGE PROFILE -->
-  <div class="modal fade" id="changeProfileModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-id-card me-2"></i>Edit My Profile</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <form id="changeProfileForm">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Display Name:</label>
-              <input type="text" id="profDisplayName" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">New Password:</label>
-              <input type="password" id="profPassword" class="form-control" placeholder="Iwanang blangko kung ayaw palitan">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: USER MANAGEMENT -->
-  <div class="modal fade" id="userManagementModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-users-gear me-2"></i>User & Admin Accounts Management</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <h6 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-plus me-1"></i>Add New System User / Admin</h6>
-          <form id="newUserForm" class="row g-2 mb-4 bg-light p-3 border rounded">
-            <div class="col-md-3">
-              <input type="text" id="newAccName" class="form-control form-control-sm" placeholder="Full Name" required>
-            </div>
-            <div class="col-md-3">
-              <input type="text" id="newAccUser" class="form-control form-control-sm" placeholder="Username" required>
-            </div>
-            <div class="col-md-3">
-              <input type="password" id="newAccPass" class="form-control form-control-sm" placeholder="Password" required>
-            </div>
-            <div class="col-md-2">
-              <select id="newAccRole" class="form-select form-select-sm">
-                <option value="Staff">Staff</option>
-                <option value="Admin">Admin</option>
-              </select>
-            </div>
-            <div class="col-md-1">
-              <button type="submit" class="btn btn-sm btn-success w-100"><i class="fa-solid fa-plus"></i></button>
-            </div>
-          </form>
-
-          <h6 class="fw-bold mb-2"><i class="fa-solid fa-users me-1"></i>Existing System Users</h6>
-          <div class="table-responsive">
-            <table class="table table-bordered align-middle table-sm">
-              <thead class="table-light">
-                <tr>
-                  <th>Name</th>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th class="text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="userListBody">
-                <!-- User rows rendered dynamically -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal para sa D/Eco Boss Adjustment -->
   <div class="modal fade" id="bossModal" tabindex="-1">
     <div class="modal-dialog">
@@ -1651,20 +1528,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // System Users Database (Admin username & password set to 'admin')
-    let defaultUsers = [
-      { id: 1, name: "System Administrator", username: "admin", password: "admin", role: "Admin" },
-      { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
-    ];
-
-    let users = JSON.parse(localStorage.getItem('rmv_users'));
-    if (!users || !users.some(u => u.username === 'admin')) {
-      users = defaultUsers;
-      localStorage.setItem('rmv_users', JSON.stringify(users));
-    }
-
-    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
-
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory'));
     
@@ -1734,15 +1597,6 @@
 
     window.onload = function() {
       addPosRow();
-     
-      if (currentUser) {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
-        const adminElements = document.querySelectorAll('.admin-only');
-        adminElements.forEach(el => {
-          el.style.display = currentUser.role === 'Admin' ? 'block' : 'none';
-        });
-      }
 
       loadMoneyBreakdown();
       generateDailyReport();
@@ -1766,12 +1620,6 @@
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
       localStorage.setItem('rmv_standalonePayments', JSON.stringify(standalonePayments));
-      localStorage.setItem('rmv_users', JSON.stringify(users));
-      if (currentUser) {
-        localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
-      } else {
-        localStorage.removeItem('rmv_current_user');
-      }
     }
 
     function manualSaveData() {
@@ -1788,104 +1636,6 @@
           inputs[currentIndex + 1].focus();
           inputs[currentIndex + 1].select();
         }
-      }
-    }
-
-    // ================= AUTHENTICATION LOGIC =================
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const u = document.getElementById('loginUsername').value.trim();
-      const p = document.getElementById('loginPassword').value.trim();
-
-      const found = users.find(user => user.username === u && user.password === p);
-
-      if (found) {
-        currentUser = found;
-        saveData();
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('loginError').classList.add('d-none');
-        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
-       
-        const adminElements = document.querySelectorAll('.admin-only');
-        adminElements.forEach(el => {
-          el.style.display = currentUser.role === 'Admin' ? 'block' : 'none';
-        });
-
-        this.reset();
-      } else {
-        document.getElementById('loginError').classList.remove('d-none');
-      }
-    });
-
-    function logout() {
-      currentUser = null;
-      localStorage.removeItem('rmv_current_user');
-      document.getElementById('loginOverlay').style.display = 'flex';
-    }
-
-    function openChangeProfileModal() {
-      if(!currentUser) return;
-      document.getElementById('profDisplayName').value = currentUser.name;
-      document.getElementById('profPassword').value = '';
-      new bootstrap.Modal(document.getElementById('changeProfileModal')).show();
-    }
-
-    document.getElementById('changeProfileForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      currentUser.name = document.getElementById('profDisplayName').value;
-      const newPass = document.getElementById('profPassword').value;
-      if(newPass) currentUser.password = newPass;
-
-      const uIndex = users.findIndex(u => u.id === currentUser.id);
-      if(uIndex > -1) users[uIndex] = currentUser;
-
-      saveData();
-      document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
-      alert('Profile successfully updated!');
-      bootstrap.Modal.getInstance(document.getElementById('changeProfileModal')).hide();
-    });
-
-    function openUserManagementModal() {
-      renderUserList();
-      new bootstrap.Modal(document.getElementById('userManagementModal')).show();
-    }
-
-    function renderUserList() {
-      const tbody = document.getElementById('userListBody');
-      tbody.innerHTML = '';
-      users.forEach((u, index) => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${u.name}</td>
-            <td><code>${u.username}</code></td>
-            <td><span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-secondary'}">${u.role}</span></td>
-            <td class="text-center">
-              ${u.id !== 1 ? `<button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteUser(${index})"><i class="fa-solid fa-trash"></i></button>` : `<small class="text-muted">Master</small>`}
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    document.getElementById('newUserForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      users.push({
-        id: Date.now(),
-        name: document.getElementById('newAccName').value,
-        username: document.getElementById('newAccUser').value,
-        password: document.getElementById('newAccPass').value,
-        role: document.getElementById('newAccRole').value
-      });
-      saveData();
-      this.reset();
-      renderUserList();
-    });
-
-    function deleteUser(index) {
-      if(confirm('Sigurado ka bang gusto mong alisin ang user na ito?')) {
-        users.splice(index, 1);
-        saveData();
-        renderUserList();
       }
     }
 
@@ -2844,7 +2594,6 @@
             dayByaheGrossProfit += netProf;
           }
 
-          // Kunin ang natitirang balance/utang para sa transaksyong ginawa sa araw na ito
           dayTotalCreditBalance += (parseFloat(t.balance) || 0);
         }
        
@@ -2896,7 +2645,6 @@
         `;
       });
 
-      // Isama rin ang mga nakatalang standalone manual payments para sa napiling petsa sa koleksyon at breakdown
       if (standalonePayments) {
         standalonePayments.forEach(p => {
           if (p.date === selectedDate) {
@@ -2933,7 +2681,6 @@
       
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
       
-      // Target Cash in Drawer = Cash Sales - Utang/Balance + Payment sa lumang utang - Expenses
       currentTargetCashInDrawer = Math.max(0, cashSalesToday - dayTotalCreditBalance + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
@@ -3259,7 +3006,7 @@
         monthlyExpensesData[auditMonth] = [];
       }
       monthlyExpensesData[auditMonth].push({
-        date: todayFormatted, // Auto date sa kasalukuyang araw
+        date: todayFormatted,
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',

@@ -1651,9 +1651,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // System Users Database
+    // System Users Database (Admin username & password set to 'admin')
     let defaultUsers = [
-      { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
+      { id: 1, name: "System Administrator", username: "admin", password: "admin", role: "Admin" },
       { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
     ];
 

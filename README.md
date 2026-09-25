@@ -1651,14 +1651,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // System Users Database (NA-UPDATE NA ANG USERNAME AT PASSWORD DITO)
+    // System Users Database (Updated Username & Password)
     let defaultUsers = [
-      { id: 1, name: "System Administrator", username: "rmv_admin", password: "rmv_secure2026", role: "Admin" },
-      { id: 2, name: "Juan Cashier", username: "rmv_staff", password: "staff1234", role: "Staff" }
+      { id: 1, name: "System Administrator", username: "rmvillasis_admin", password: "AdminSecure2026!", role: "Admin" },
+      { id: 2, name: "Juan Cashier", username: "rmvillasis_staff", password: "StaffPass2026!", role: "Staff" }
     ];
 
     let users = JSON.parse(localStorage.getItem('rmv_users'));
-    if (!users || !users.some(u => u.username === 'rmv_admin')) {
+    if (!users || !users.some(u => u.username === 'rmvillasis_admin')) {
       users = defaultUsers;
       localStorage.setItem('rmv_users', JSON.stringify(users));
     }

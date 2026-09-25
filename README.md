@@ -453,6 +453,10 @@
                     <span class="text-muted small text-danger">Less: Salary & Expenses (Cash Out):</span>
                     <span class="text-danger small" id="lessExpenses">-₱0.00</span>
                   </div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small text-danger">Less: Remaining Balance (Unpaid Credit):</span>
+                    <span class="text-danger small" id="lessRemainingBalance">-₱0.00</span>
+                  </div>
 
                   <hr class="my-1">
 
@@ -2819,6 +2823,7 @@
       let totalBT = 0;
       let totalCheque = 0;
       let dayDebtPayments = 0;
+      let dayRemainingBalance = 0;
 
       const filtered = transactions.filter(t => t.date === selectedDate || (t.payments && t.payments.some(p => p.date === selectedDate)));
 
@@ -2829,6 +2834,7 @@
         if(t.date === selectedDate) {
           daySales += t.total;
           dayGrossProfit += netProf;
+          dayRemainingBalance += (t.balance || 0);
 
           if (t.location === 'Hiway') {
             dayHiwaySales += t.total;
@@ -2928,8 +2934,8 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      // Tandaan: Dito ay kinukuha lamang ang Aktuwal na Nakolektang Bayad (dayDebtPayments) at Cash Sales minus expenses. HINDI na isinasama o ibinabawas ang natirang utang (Remaining Balance).
-      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
+      // I-less o ibabawas ang Remaining Balance (utang) sa cash target para hindi ito masama sa bibilanging cash sa drawer
+      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal - dayRemainingBalance);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -2948,6 +2954,7 @@
       document.getElementById('lessBT').innerText = `-₱${totalBT.toFixed(2)}`;
       document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
       document.getElementById('lessExpenses').innerText = `-₱${dayExpensesTotal.toFixed(2)}`;
+      document.getElementById('lessRemainingBalance').innerText = `-₱${dayRemainingBalance.toFixed(2)}`;
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
 
       loadMoneyBreakdown();

@@ -19,11 +19,11 @@
     .inventory-input { width: 95px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
    
-    /* Login Backdrop overlay - Naka-display: none na para direktang makapasok */
+    /* Login Backdrop overlay */
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(13, 71, 161, 0.85); z-index: 9999;
-      display: none; justify-content: center; align-items: center;
+      display: flex; justify-content: center; align-items: center;
     }
 
     /* PRINT STYLES */
@@ -61,14 +61,12 @@
       <div class="text-center mb-3">
         <i class="fa-solid fa-store fa-3x text-primary mb-2"></i>
         <h4 class="fw-bold">RMVillasis Enterprises</h4>
-        <p class="text-muted small" id="loginSubtitle">Mangyaring mag-log in upang magpatuloy</p>
+        <p class="text-muted small">Mangyaring mag-log in upang magpatuloy</p>
       </div>
-
-      <!-- Login Form View -->
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label fw-semibold">Username:</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. rmvillasis_admin" required>
+          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. admin" required>
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold">Password:</label>
@@ -77,53 +75,8 @@
         <div id="loginError" class="alert alert-danger p-2 small d-none">
           Mali ang username o password!
         </div>
-        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
-        <div class="text-center">
-          <button type="button" class="btn btn-link btn-sm text-decoration-none text-muted" id="btnShowForgot">
-            <i class="fa-solid fa-key me-1"></i> Forgot Password?
-          </button>
-        </div>
+        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
       </form>
-
-      <!-- Forgot Password View (Hidden by default) -->
-      <form id="forgotPasswordForm" class="d-none">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Ilagay ang Username:</label>
-          <input type="text" id="forgotUsername" class="form-control" placeholder="e.g. rmvillasis_admin" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Gmail Address (Na nakarehistro):</label>
-          <input type="email" id="forgotEmail" class="form-control" placeholder="e.g. yourname@gmail.com" required>
-        </div>
-        <div id="forgotMsg" class="alert p-2 small d-none"></div>
-        
-        <!-- Step 1 Send Code Button -->
-        <button type="button" id="sendCodeBtn" class="btn btn-warning w-100 fw-bold py-2 mb-2 text-dark">
-          <i class="fa-solid fa-paper-plane me-2"></i>Magpadala ng Code sa Gmail
-        </button>
-
-        <!-- Step 2 Verification & New Password Fields -->
-        <div id="recoveryStepsContainer" class="d-none">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Ilagay ang 6-Digit Code:</label>
-            <input type="text" id="recoveryCodeInput" class="form-control text-center fs-5 fw-bold" placeholder="123456">
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Bagong Password:</label>
-            <input type="password" id="newResetPassword" class="form-control" placeholder="Ilagay ang bagong password">
-          </div>
-          <button type="submit" class="btn btn-success w-100 fw-bold py-2 mb-2">
-            <i class="fa-solid fa-check me-2"></i>Palitan ang Password
-          </button>
-        </div>
-
-        <div class="text-center mt-2">
-          <button type="button" class="btn btn-link btn-sm text-decoration-none" id="btnBackToLogin">
-            <i class="fa-solid fa-arrow-left me-1"></i> Bumalik sa Log In
-          </button>
-        </div>
-      </form>
-
     </div>
   </div>
 
@@ -500,10 +453,6 @@
                     <span class="text-muted small text-danger">Less: Salary & Expenses (Cash Out):</span>
                     <span class="text-danger small" id="lessExpenses">-₱0.00</span>
                   </div>
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="text-muted small text-danger fw-bold">Less: Unpaid Credit / Utang:</span>
-                    <span class="text-danger fw-bold small" id="lessCreditBalance">-₱0.00</span>
-                  </div>
 
                   <hr class="my-1">
 
@@ -567,45 +516,10 @@
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="card-title text-primary m-0"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit & Utang Ledger</h4>
-            <div class="d-flex gap-2 align-items-center">
-              <button class="btn btn-outline-secondary" onclick="window.print()">
-                <i class="fa-solid fa-print me-1"></i> Print Utang List
-              </button>
-              <button class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#standalonePaymentModal">
-                <i class="fa-solid fa-plus me-1"></i> Add Manual Payment / Collection
-              </button>
-            </div>
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+              <i class="fa-solid fa-print me-1"></i> Print Utang List
+            </button>
           </div>
-
-          <!-- STANDALONE MANUAL PAYMENT / COLLECTION LEDGER TABLE -->
-          <div class="card p-3 bg-light border mb-4">
-            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-receipt me-2"></i>Standalone Manual Payments & Collections History (Araw-arawang Bayad)</h6>
-            <div class="input-group mb-3">
-              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="searchStandalonePaymentInput" class="form-control" placeholder="I-search ang pangalan ng customer o petsa..." oninput="renderStandalonePayments()">
-            </div>
-            <div class="table-responsive">
-              <table class="table table-bordered align-middle bg-white">
-                <thead class="table-light">
-                  <tr>
-                    <th>Date (Petsa)</th>
-                    <th>Customer Name</th>
-                    <th>Payment Method</th>
-                    <th class="text-end">Amount Paid (₱)</th>
-                    <th>Notes / Remarks</th>
-                    <th class="col-action no-print text-center"><i class="fa-solid fa-trash"></i></th>
-                  </tr>
-                </thead>
-                <tbody id="standalonePaymentTableBody">
-                  <!-- Dynamic Standalone Payment Rows -->
-                </tbody>
-                <tfoot class="table-secondary fw-bold" id="standalonePaymentTableFooter">
-                  <!-- Total Subtotal -->
-                </tfoot>
-              </table>
-            </div>
-          </div>
-
           <div class="table-responsive mb-5">
             <table class="table table-hover align-middle">
               <thead class="table-dark">
@@ -769,7 +683,7 @@
                 <input type="date" id="inventorySheetDate" class="form-control form-control-sm" onchange="renderDailyInventorySheet()">
               </div>
             </div>
-            
+           
             <!-- Per-Day Table 1: Palm & Coco -->
             <h6 class="fw-bold text-primary mb-2">Palm & Coco Inventory Sheet</h6>
             <div class="table-responsive mb-4">
@@ -920,7 +834,7 @@
               <button class="btn btn-danger fw-bold" onclick="addStandaloneExpenseRow()">
                 <i class="fa-solid fa-plus me-1"></i> Add Expense / Salary Line
               </button>
-              
+             
               <!-- PER-DAY FILTER TOGGLE / DATE SELECTOR -->
               <div class="d-flex align-items-center gap-1 ms-2">
                 <label class="fw-bold small text-nowrap">View:</label>
@@ -996,7 +910,7 @@
               <button class="btn btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#bossModal">
                 <i class="fa-solid fa-plus me-1"></i> Add Boss Adjustment
               </button>
-              
+             
               <!-- PER-DAY FILTER TOGGLE / DATE SELECTOR SA BOSS LEDGER -->
               <div class="d-flex align-items-center gap-1 ms-2">
                 <label class="fw-bold small text-nowrap">View:</label>
@@ -1216,7 +1130,7 @@
                 <i class="fa-solid fa-plus me-1"></i> Add Expense Line
               </button>
             </div>
-            
+           
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
               <input type="text" id="searchExpenseInput" class="form-control" placeholder="I-search ang pangalan ng Salary o Expense o petsa..." oninput="renderExpensesTable()">
@@ -1252,7 +1166,7 @@
                 <i class="fa-solid fa-plus me-1"></i> Add Boss Adjustment
               </button>
             </div>
-            
+           
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
               <input type="text" id="searchBossInput" class="form-control" placeholder="I-search ang petsa, uri o notes sa D/Eco Boss log..." oninput="generateMonthlyAudit()">
@@ -1281,52 +1195,6 @@
         </div>
       </div>
 
-    </div>
-  </div>
-
-  <!-- MODAL: STANDALONE MANUAL PAYMENT / COLLECTION -->
-  <div class="modal fade" id="standalonePaymentModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Add Manual Payment / Collection</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <form id="standalonePaymentForm">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Date (Petsa ng Bayad):</label>
-              <input type="date" id="stdPayDate" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Customer Name:</label>
-              <input type="text" id="stdPayCustomer" class="form-control" placeholder="e.g. Juan Dela Cruz" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Amount Paid (₱):</label>
-              <input type="number" step="0.01" min="0.01" id="stdPayAmount" class="form-control" placeholder="0.00" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Payment Method:</label>
-              <select id="stdPayMethod" class="form-select" required>
-                <option value="Cash">Cash</option>
-                <option value="Byahe Cash">Byahe Cash</option>
-                <option value="GCash">GCash</option>
-                <option value="Bank Transfer">Bank Transfer (BT)</option>
-                <option value="Cheque">Cheque</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Notes / Remarks (Optional):</label>
-              <input type="text" id="stdPayNotes" class="form-control" placeholder="e.g., Partial payment sa lumang utang">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Save Collection</button>
-          </div>
-        </form>
-      </div>
     </div>
   </div>
 
@@ -1698,26 +1566,23 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // System Users Database (Updated Username & Password)
+    // System Users Database
     let defaultUsers = [
-      { id: 1, name: "System Administrator", username: "rmvillasis_admin", password: "AdminSecure2026!", email: "rmvillasis.admin@gmail.com", role: "Admin" },
-      { id: 2, name: "Juan Cashier", username: "rmvillasis_staff", password: "StaffPass2026!", email: "rmvillasis.staff@gmail.com", role: "Staff" }
+      { id: 1, name: "System Administrator", username: "admin", password: "password", role: "Admin" },
+      { id: 2, name: "Juan Cashier", username: "cashier", password: "password", role: "Staff" }
     ];
 
     let users = JSON.parse(localStorage.getItem('rmv_users'));
-    if (!users || !users.some(u => u.username === 'rmvillasis_admin')) {
+    if (!users || !users.some(u => u.username === 'admin')) {
       users = defaultUsers;
       localStorage.setItem('rmv_users', JSON.stringify(users));
     }
 
-    // DIRETSONG NAKA-LOG IN AGAD SA ADMIN ACCOUNT (Walang mawawalang encode)
-    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || {
-      id: 1, name: "System Administrator", username: "rmvillasis_admin", password: "AdminSecure2026!", email: "rmvillasis.admin@gmail.com", role: "Admin"
-    };
+    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
 
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory'));
-    
+   
     const defaultDedicatedNames = [
       "VMC White", "Busco", "Bais", "Balayan", "Crystal", "Passi", "GB", "Dark", "Casa", "Baron", "Cali", "Matling", "RD", "SW", "King", "GW", "Farola", "Asin", "Countess", "CS", "Polaris", "Lard Big", "Marg Big", "Small Marg", "I", "II", "III", "Harina", "CF", "Polaris"
     ];
@@ -1754,7 +1619,6 @@
     let bossAdjustments = JSON.parse(localStorage.getItem('rmv_bossAdjustments')) || [];
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
-    let standalonePayments = JSON.parse(localStorage.getItem('rmv_standalonePayments')) || [];
 
     function getTodayDateString() {
       const now = new Date();
@@ -1774,8 +1638,7 @@
     document.getElementById('returnDate').value = todayFormatted;
     document.getElementById('standaloneExpenseDate').value = todayFormatted;
     document.getElementById('standaloneBossDate').value = todayFormatted;
-    document.getElementById('stdPayDate').value = todayFormatted;
-    
+   
     const nowObj = new Date();
     const currentMonthStr = `${nowObj.getFullYear()}-${String(nowObj.getMonth() + 1).padStart(2, '0')}`;
     document.getElementById('auditMonth').value = currentMonthStr;
@@ -1797,7 +1660,6 @@
       loadMoneyBreakdown();
       generateDailyReport();
       renderCreditTable();
-      renderStandalonePayments();
       renderInventoryTables();
       renderStockInHistory();
       renderCustomerSalesLog();
@@ -1815,7 +1677,6 @@
       localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
-      localStorage.setItem('rmv_standalonePayments', JSON.stringify(standalonePayments));
       localStorage.setItem('rmv_users', JSON.stringify(users));
       if (currentUser) {
         localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
@@ -1841,7 +1702,7 @@
       }
     }
 
-    // ================= AUTHENTICATION & FORGOT PASSWORD LOGIC =================
+    // ================= AUTHENTICATION LOGIC =================
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const u = document.getElementById('loginUsername').value.trim();
@@ -1865,81 +1726,6 @@
       } else {
         document.getElementById('loginError').classList.remove('d-none');
       }
-    });
-
-    document.getElementById('btnShowForgot').addEventListener('click', function(e) {
-      e.preventDefault();
-      document.getElementById('loginForm').classList.add('d-none');
-      document.getElementById('forgotPasswordForm').classList.remove('d-none');
-      document.getElementById('loginSubtitle').innerText = "Pag-recover ng Password gamit ang Gmail";
-      document.getElementById('forgotMsg').classList.add('d-none');
-      document.getElementById('recoveryStepsContainer').classList.add('d-none');
-      document.getElementById('sendCodeBtn').style.display = 'block';
-    });
-
-    document.getElementById('btnBackToLogin').addEventListener('click', function(e) {
-      e.preventDefault();
-      document.getElementById('forgotPasswordForm').classList.add('d-none');
-      document.getElementById('loginForm').classList.remove('d-none');
-      document.getElementById('loginSubtitle').innerText = "Mangyaring mag-log in upang magpatuloy";
-    });
-
-    let generatedRecoveryCode = "";
-    let targetRecoveryUser = null;
-
-    document.getElementById('sendCodeBtn').addEventListener('click', function(e) {
-      e.preventDefault();
-      const uVal = document.getElementById('forgotUsername').value.trim();
-      const emailVal = document.getElementById('forgotEmail').value.trim();
-      const msgBox = document.getElementById('forgotMsg');
-
-      targetRecoveryUser = users.find(u => u.username === uVal);
-
-      if (!targetRecoveryUser) {
-        msgBox.className = "alert alert-danger p-2 small";
-        msgBox.innerText = "Walang nakitang ganitong Username!";
-        msgBox.classList.remove('d-none');
-        return;
-      }
-
-      generatedRecoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      msgBox.className = "alert alert-success p-2 small";
-      msgBox.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Naipadala na ang 6-digit code sa Gmail: <b>${emailVal}</b>.<br><small class="text-dark"><b>(Demo Code: ${generatedRecoveryCode})</b></small>`;
-      msgBox.classList.remove('d-none');
-
-      document.getElementById('sendCodeBtn').style.display = 'none';
-      document.getElementById('recoveryStepsContainer').classList.remove('d-none');
-    });
-
-    document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const enteredCode = document.getElementById('recoveryCodeInput').value.trim();
-      const newPass = document.getElementById('newResetPassword').value.trim();
-      const msgBox = document.getElementById('forgotMsg');
-
-      if (enteredCode !== generatedRecoveryCode) {
-        msgBox.className = "alert alert-danger p-2 small";
-        msgBox.innerText = "Mali ang 6-digit code na inilagay mo!";
-        msgBox.classList.remove('d-none');
-        return;
-      }
-
-      if (!newPass || newPass.length < 5) {
-        msgBox.className = "alert alert-danger p-2 small";
-        msgBox.innerText = "Masyadong maikli ang bagong password (dapat at least 5 characters).";
-        msgBox.classList.remove('d-none');
-        return;
-      }
-
-      targetRecoveryUser.password = newPass;
-      saveData();
-
-      alert('Tagumpay na nabago ang iyong password! Maaari ka na ngayong mag-log in.');
-      document.getElementById('forgotPasswordForm').classList.add('d-none');
-      document.getElementById('loginForm').classList.remove('d-none');
-      document.getElementById('loginSubtitle').innerText = "Mangyaring mag-log in upang magpatuloy";
-      this.reset();
     });
 
     function logout() {
@@ -2363,7 +2149,7 @@
 
       let invItem = inventory.find(i => i.name.toLowerCase() === rName.toLowerCase());
       if (invItem) {
-        invItem.ending += rQty; 
+        invItem.ending += rQty;
       } else {
         const lowerN = rName.toLowerCase();
         const cat = (lowerN.includes('palm') || lowerN.includes('coco')) ? 'palmcoco' : 'dedicated';
@@ -2399,7 +2185,7 @@
       const palmCocoTbody = document.getElementById('palmCocoInventoryTableBody');
       const dedicatedTbody = document.getElementById('dedicatedInventoryTableBody');
       const tfoot = document.getElementById('inventoryTableFooter');
-      
+     
       palmCocoTbody.innerHTML = '';
       dedicatedTbody.innerHTML = '';
 
@@ -2481,7 +2267,7 @@
 
     function renderStockInHistory() {
       const tbody = document.getElementById('stockInHistoryBody');
-      const searchQuery = document.getElementById('searchStockInInput') ? document.getElementById('searchStockInInput'].value.toLowerCase() : '';
+      const searchQuery = document.getElementById('searchStockInInput') ? document.getElementById('searchStockInInput').value.toLowerCase() : '';
       tbody.innerHTML = '';
 
       const filtered = stockInHistory.filter(item =>
@@ -2611,95 +2397,7 @@
       });
     }
 
-    // ================= STANDALONE UTANG & PAYMENTS LEDGER LOGIC =================
-    document.getElementById('standalonePaymentForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const pDate = document.getElementById('stdPayDate').value || todayFormatted;
-      const pCust = document.getElementById('stdPayCustomer').value.trim();
-      const pAmt = parseFloat(document.getElementById('stdPayAmount').value) || 0;
-      const pMethod = document.getElementById('stdPayMethod').value;
-      const pNotes = document.getElementById('stdPayNotes').value.trim() || 'Manual Collection';
-
-      if (pAmt <= 0) {
-        alert('Maglagay ng tamang halaga ng bayad.');
-        return;
-      }
-
-      standalonePayments.push({
-        date: pDate,
-        customer: pCust,
-        amount: pAmt,
-        method: pMethod,
-        notes: pNotes
-      });
-
-      saveData();
-      bootstrap.Modal.getInstance(document.getElementById('standalonePaymentModal')).hide();
-      this.reset();
-      document.getElementById('stdPayDate').value = getTodayDateString();
-      renderStandalonePayments();
-      generateDailyReport();
-      alert('Tagumpay na naidagdag ang manual payment sa ledger at nailess sa collection!');
-    });
-
-    function renderStandalonePayments() {
-      const tbody = document.getElementById('standalonePaymentTableBody');
-      const tfoot = document.getElementById('standalonePaymentTableFooter');
-      const searchQuery = document.getElementById('searchStandalonePaymentInput') ? document.getElementById('searchStandalonePaymentInput').value.toLowerCase() : '';
-      if (!tbody) return;
-
-      tbody.innerHTML = '';
-      let totalPaidSum = 0;
-      let countVisible = 0;
-
-      standalonePayments.forEach((p, index) => {
-        const rowText = `${p.date} ${p.customer} ${p.method} ${p.notes}`.toLowerCase();
-        if (searchQuery && !rowText.includes(searchQuery)) return;
-
-        countVisible++;
-        totalPaidSum += p.amount;
-
-        tbody.innerHTML += `
-          <tr>
-            <td>${p.date}</td>
-            <td class="fw-bold">${p.customer}</td>
-            <td><span class="badge bg-secondary">${p.method}</span></td>
-            <td class="text-end text-success fw-bold">₱${p.amount.toFixed(2)}</td>
-            <td>${p.notes}</td>
-            <td class="text-center no-print">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteStandalonePayment(${index})" title="Delete Payment">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      if (countVisible === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakitang manual payment o collection.</td></tr>`;
-        tfoot.innerHTML = '';
-      } else {
-        tfoot.innerHTML = `
-          <tr>
-            <td colspan="3" class="text-end">KABUUANG MANUAL PAYMENTS / COLLECTIONS:</td>
-            <td class="text-end text-success fw-bold">₱${totalPaidSum.toFixed(2)}</td>
-            <td colspan="2" class="no-print"></td>
-          </tr>
-        `;
-      }
-    }
-
-    function deleteStandalonePayment(index) {
-      if (confirm('Sigurado ka bang gusto mong tanggalin ang manual payment na ito?')) {
-        standalonePayments.splice(index, 1);
-        saveData();
-        renderStandalonePayments();
-        generateDailyReport();
-        alert('Naalis na ang payment record.');
-      }
-    }
-
-    // ================= STANDALONE SALARY & EXPENSES STANDALONE LEDGER LOGIC =================
+    // ================= STANDALONE SALARY & EXPENSES LEDGER LOGIC =================
     function toggleExpenseViewMode() {
       const mode = document.getElementById('expenseViewMode').value;
       const monthInput = document.getElementById('standaloneExpenseMonth');
@@ -2723,7 +2421,7 @@
         monthlyExpensesData[targetMonthKey] = [];
       }
       monthlyExpensesData[targetMonthKey].push({
-        date: targetDate, 
+        date: targetDate, // Auto date batay sa napiling petsa o ngayon
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -2739,11 +2437,11 @@
       const mode = document.getElementById('expenseViewMode').value;
       const targetMonthKey = document.getElementById('standaloneExpenseMonth').value || currentMonthStr;
       const targetDateKey = document.getElementById('standaloneExpenseDate').value || todayFormatted;
-      
+     
       const tbody = document.getElementById('standaloneExpenseTableBody');
       const tfoot = document.getElementById('standaloneExpenseTableFooter');
       const searchQuery = document.getElementById('searchStandaloneExpenseInput') ? document.getElementById('searchStandaloneExpenseInput').value.toLowerCase() : '';
-      
+     
       tbody.innerHTML = '';
 
       if (!monthlyExpensesData[targetMonthKey]) {
@@ -2757,7 +2455,8 @@
 
       expensesList.forEach((item, index) => {
         const itemDate = item.date || (targetMonthKey + '-01');
-        
+       
+        // Kapag naka-day view, ipapakita lamang ang mga nakatala sa eksaktong araw na iyon
         if (mode === 'day' && itemDate !== targetDateKey) {
           return;
         }
@@ -2798,7 +2497,7 @@
       });
 
       if (!hasVisibleRow) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakitang salary o expenses para sa araw na ito. Pindutin ang "Add Expense / Salary Line" para magdagdag.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakitang salary o expenses para sa araw na ito. Pindutin ang "Add Expense / Salary Line" para magdagdag ng bagong talaan para sa araw na ito.</td></tr>`;
       }
 
       let combinedTotal = totalSalarySum + totalExpenseSum;
@@ -2867,7 +2566,7 @@
       const tbody = document.getElementById('standaloneBossTableBody');
       const tfoot = document.getElementById('standaloneBossTableFooter');
       const searchQuery = document.getElementById('searchStandaloneBossInput') ? document.getElementById('searchStandaloneBossInput').value.toLowerCase() : '';
-      
+     
       tbody.innerHTML = '';
 
       let totalAdd = 0;
@@ -2948,7 +2647,6 @@
       let totalBT = 0;
       let totalCheque = 0;
       let dayDebtPayments = 0;
-      let dayTotalCreditBalance = 0;
 
       const filtered = transactions.filter(t => t.date === selectedDate || (t.payments && t.payments.some(p => p.date === selectedDate)));
 
@@ -2967,8 +2665,6 @@
             dayByaheSales += t.total;
             dayByaheGrossProfit += netProf;
           }
-
-          dayTotalCreditBalance += (parseFloat(t.balance) || 0);
         }
        
         if (t.payments) {
@@ -3019,17 +2715,8 @@
         `;
       });
 
-      if (standalonePayments) {
-        standalonePayments.forEach(p => {
-          if (p.date === selectedDate) {
-            dayCollected += p.amount;
-            dayDebtPayments += p.amount;
-            if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
-            else if (p.method === 'GCash') totalGCash += p.amount;
-            else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
-            else if (p.method === 'Cheque') totalCheque += p.amount;
-          }
-        });
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-3">Wala pang na-encode na transaksyon sa petsang ito.</td></tr>`;
       }
 
       currentDayDebtPayments = dayDebtPayments;
@@ -3051,11 +2738,11 @@
       let dayNetProfit = daySubtotalNet - dayExpensesTotal;
 
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
-      let cashSalesToday = daySales - totalNonCashToday; 
-      
+      let cashSalesToday = daySales - totalNonCashToday;
+     
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
-      
-      currentTargetCashInDrawer = Math.max(0, cashSalesToday - dayTotalCreditBalance + dayDebtPayments - dayExpensesTotal);
+     
+      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -3074,7 +2761,6 @@
       document.getElementById('lessBT').innerText = `-₱${totalBT.toFixed(2)}`;
       document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
       document.getElementById('lessExpenses').innerText = `-₱${dayExpensesTotal.toFixed(2)}`;
-      document.getElementById('lessCreditBalance').innerText = `-₱${dayTotalCreditBalance.toFixed(2)}`;
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
 
       loadMoneyBreakdown();
@@ -3277,7 +2963,7 @@
 
       t.paid = Number((t.paid + payAmt).toFixed(2));
       t.balance = Number(Math.max(0, t.total - t.paid).toFixed(2));
-      
+     
       if (t.balance <= 0.01) {
         t.balance = 0;
         t.status = 'PAID';
@@ -3380,7 +3066,7 @@
         monthlyExpensesData[auditMonth] = [];
       }
       monthlyExpensesData[auditMonth].push({
-        date: todayFormatted,
+        date: todayFormatted, // Auto date sa kasalukuyang araw
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -3397,7 +3083,7 @@
       const tfoot = document.getElementById('expenseTableFooter');
       const auditMonth = document.getElementById('auditMonth').value;
       const searchQuery = document.getElementById('searchExpenseInput') ? document.getElementById('searchExpenseInput').value.toLowerCase() : '';
-      
+     
       tbody.innerHTML = '';
 
       if (!monthlyExpensesData[auditMonth]) {
@@ -3487,7 +3173,7 @@
     }
 
     function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value; 
+      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
       if (!selectedMonth) return;
 
       let totalSales = 0;
@@ -3529,14 +3215,14 @@
 
       let hiwayNet = hiwayGrossProfit;
       let byaheNet = byaheGrossProfit;
-      
+     
       let bossNetAdjustment = 0;
       let bossSubtotalAdd = 0;
       let bossSubtotalSub = 0;
       const bossBody = document.getElementById('bossLogsBody');
       const bossFooter = document.getElementById('bossLogsFooter');
       bossBody.innerHTML = '';
-      
+     
       const searchBossQuery = document.getElementById('searchBossInput') ? document.getElementById('searchBossInput').value.toLowerCase() : '';
       let filteredBossCount = 0;
 
@@ -3544,7 +3230,7 @@
       bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
           let rowText = `${b.date} ${b.type} ${b.amount} ${b.notes}`.toLowerCase();
-          if (searchBossQuery && !rowText.includes(searchBossQuery)) return;
+          if (searchBossQuery && !rowText.includes(searchQuery)) return;
 
           if (!bossByDate[b.date]) {
             bossByDate[b.date] = [];
@@ -3644,7 +3330,7 @@
       const sortedDates = Object.keys(dailyMap).sort().reverse();
       sortedDates.forEach(d => {
         const item = dailyMap[d];
-        
+       
         let dayExpSum = 0;
         if (monthlyExpensesData[selectedMonth]) {
           monthlyExpensesData[selectedMonth].forEach(exp => {
@@ -3682,7 +3368,7 @@
       });
 
       if (sortedDates.length === 0) {
-        dailyBreakdownBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nahanap na transaksyon sa buwang ito.</td></tr>`;
+        dailyBreakdownBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang nahanap na transaksyon sa buwang ito.</td></tr>`;
       }
 
       renderExpensesTable();
@@ -3836,7 +3522,7 @@
       const total = parseFloat(document.getElementById('editTotal').value) || 0;
       const paid = parseFloat(document.getElementById('editPaid').value) || 0;
       const balance = Math.max(0, total - paid);
-      document.getElementById('editBalance').value = balance.toFixed(2);
+      document.getElementById('balance').value = balance.toFixed(2);
     }
 
     document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
@@ -3859,7 +3545,7 @@
         transactions[tIndex].netProfit = newTotal - newCost;
         transactions[tIndex].total = newTotal;
         transactions[tIndex].paid = newPaid;
-        transactions[tIndex].balance = newBalance;
+        transactions[tInput = newBalance];
         transactions[tIndex].status = newBalance === 0 ? 'PAID' : (newPaid > 0 ? 'PARTIAL' : 'UNPAID');
 
         if (transactions[tIndex].payments && transactions[tIndex].payments.length > 0) {

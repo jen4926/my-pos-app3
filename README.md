@@ -234,7 +234,7 @@
                 </div>
                 <div class="col-md-4 container-qty-group" style="display: none;">
                   <label class="form-label fw-semibold">Ilang Container / Lalagyan:</label>
-                  <input type="number" min="1" id="containerQty" class="form-control" value="1" placeholder="Hal. 2">
+                  <input type="number" step="any" min="0.5" id="containerQty" class="form-control" value="1" placeholder="Hal. 2">
                 </div>
                 <div class="col-md-4 container-deposit-group" style="display: none;">
                   <label class="form-label fw-semibold">Halaga ng Deposito bawat Isa (₱):</label>
@@ -1594,7 +1594,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Quantity (Dami):</label>
-              <input type="number" id="newProdStock" class="form-control" value="1" min="1" required>
+              <input type="number" step="any" id="newProdStock" class="form-control" value="1" min="0.5" required>
             </div>
           </div>
           <div class="modal-footer">
@@ -1626,7 +1626,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Quantity na Isinauli (Qty):</label>
-              <input type="number" id="returnQty" class="form-control" value="1" min="1" required>
+              <input type="number" step="any" id="returnQty" class="form-control" value="1" min="0.5" required>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Uri ng Return / Dahilan:</label>
@@ -1937,7 +1937,7 @@
           <td>
             <input type="text" class="form-control form-control-sm pos-desc" placeholder="Description / Specification">
           </td>
-          <td><input type="number" class="form-control form-control-sm pos-qty" value="1" min="1" oninput="calculateTotal()" required></td>
+          <td><input type="number" step="any" min="0.5" class="form-control form-control-sm pos-qty" value="1" oninput="calculateTotal()" required></td>
           <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm pos-cost" placeholder="0.00" oninput="calculateTotal()" ${isInventoryOnly ? '' : 'required'}></td>
           <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm pos-price" placeholder="0.00" oninput="calculateTotal()" ${isInventoryOnly ? '' : 'required'}></td>
           <td ${displayStyle}><input type="number" step="0.01" class="form-control form-control-sm bg-light pos-subtotal" placeholder="0.00" readonly></td>
@@ -2127,7 +2127,7 @@
       let cInfo = "Wala";
       if (!isInventoryOnly) {
         const cStatus = document.getElementById('containerStatus').value;
-        const cQty = document.getElementById('containerQty').value || 0;
+        const cQty = parseFloat(document.getElementById('containerQty').value) || 0;
         const cRate = parseFloat(document.getElementById('containerDepositRate').value) || 0;
 
         if (cStatus === 'HIRAM') {
@@ -2180,7 +2180,7 @@
       const supplier = document.getElementById('newProdSupplier').value.trim() || 'General Supplier';
       const cost = parseFloat(document.getElementById('newProdCost').value) || 0;
       const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
-      const qty = parseInt(document.getElementById('newProdStock').value) || 0;
+      const qty = parseFloat(document.getElementById('newProdStock').value) || 0;
 
       let existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
       if(existing) {
@@ -2227,7 +2227,7 @@
       e.preventDefault();
       const rDate = document.getElementById('returnDate').value || getTodayDateString();
       const rName = document.getElementById('returnProductName').value.trim();
-      const rQty = parseInt(document.getElementById('returnQty').value) || 0;
+      const rQty = parseFloat(document.getElementById('returnQty').value) || 0;
       const rType = document.getElementById('returnType').value;
       const rNotes = document.getElementById('returnNotes').value.trim();
 
@@ -2296,7 +2296,7 @@
             <td class="text-center">${item.beginning}</td>
             <td class="text-center text-success fw-bold">+${item.stockIn}</td>
             <td class="text-center text-danger">${sold}</td>
-            <td><input type="number" class="form-control form-control-sm text-center fw-bold text-primary inventory-input mx-auto" value="${item.ending}" onchange="updateInventoryItem(${index}, 'ending', this.value)"></td>
+            <td><input type="number" step="any" class="form-control form-control-sm text-center fw-bold text-primary inventory-input mx-auto" value="${item.ending}" onchange="updateInventoryItem(${index}, 'ending', this.value)"></td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteInventoryItem(${index})" title="Tanggalin ang Produkto">
                 <i class="fa-solid fa-trash-can"></i>
@@ -2974,7 +2974,7 @@
 
       counts.forEach((input, index) => {
         const denom = parseFloat(input.getAttribute('data-denom'));
-        const qty = parseInt(input.value) || 0;
+        const qty = parseFloat(input.value) || 0;
         const sub = qty * denom;
         subtotals[index].value = sub.toFixed(2);
         totalCountedRaw += sub;
@@ -2990,7 +2990,7 @@
       cashBreakdownData[selectedDate] = breakdownObj;
       saveData();
 
-      document.getElementById('breakdownTotalPcs').innerText = `${totalPcs} pcs`;
+      document.getElementById('breakdownTotalPcs').innerText = `${Number.isInteger(totalPcs) ? totalPcs : totalPcs.toFixed(1)} pcs`;
       document.getElementById('breakdownTotalAmount').innerText = `₱${totalCountedRaw.toFixed(2)}`;
 
       const targetWithFund = currentTargetCashInDrawer + fundInputVal;

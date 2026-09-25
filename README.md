@@ -61,8 +61,10 @@
       <div class="text-center mb-3">
         <i class="fa-solid fa-store fa-3x text-primary mb-2"></i>
         <h4 class="fw-bold">RMVillasis Enterprises</h4>
-        <p class="text-muted small">Mangyaring mag-log in upang magpatuloy</p>
+        <p class="text-muted small" id="loginSubtitle">Mangyaring mag-log in upang magpatuloy</p>
       </div>
+
+      <!-- Login Form View -->
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label fw-semibold">Username:</label>
@@ -75,8 +77,53 @@
         <div id="loginError" class="alert alert-danger p-2 small d-none">
           Mali ang username o password!
         </div>
-        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
+        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
+        <div class="text-center">
+          <button type="button" class="btn btn-link btn-sm text-decoration-none text-muted" onclick="showForgotPasswordView()">
+            <i class="fa-solid fa-key me-1"></i> Forgot Password?
+          </button>
+        </div>
       </form>
+
+      <!-- Forgot Password View (Hidden by default) -->
+      <form id="forgotPasswordForm" class="d-none">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Ilagay ang Username:</label>
+          <input type="text" id="forgotUsername" class="form-control" placeholder="e.g. rmvillasis_admin" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Gmail Address (Na nakarehistro):</label>
+          <input type="email" id="forgotEmail" class="form-control" placeholder="e.g. yourname@gmail.com" required>
+        </div>
+        <div id="forgotMsg" class="alert p-2 small d-none"></div>
+        
+        <!-- Step 1 Send Code Button -->
+        <button type="button" id="sendCodeBtn" class="btn btn-warning w-100 fw-bold py-2 mb-2 text-dark" onclick="sendRecoveryCode()">
+          <i class="fa-solid fa-paper-plane me-2"></i>Magpadala ng Code sa Gmail
+        </button>
+
+        <!-- Step 2 Verification & New Password Fields -->
+        <div id="recoveryStepsContainer" class="d-none">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Ilagay ang 6-Digit Code:</label>
+            <input type="text" id="recoveryCodeInput" class="form-control text-center fs-5 fw-bold" placeholder="123456">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Bagong Password:</label>
+            <input type="password" id="newResetPassword" class="form-control" placeholder="Ilagay ang bagong password">
+          </div>
+          <button type="submit" class="btn btn-success w-100 fw-bold py-2 mb-2">
+            <i class="fa-solid fa-check me-2"></i>Palitan ang Password
+          </button>
+        </div>
+
+        <div class="text-center mt-2">
+          <button type="button" class="btn btn-link btn-sm text-decoration-none" onclick="showLoginView()">
+            <i class="fa-solid fa-arrow-left me-1"></i> Bumalik sa Log In
+          </button>
+        </div>
+      </form>
+
     </div>
   </div>
 
@@ -1653,8 +1700,8 @@
   <script>
     // System Users Database (Updated Username & Password)
     let defaultUsers = [
-      { id: 1, name: "System Administrator", username: "rmvillasis_admin", password: "AdminSecure2026!", role: "Admin" },
-      { id: 2, name: "Juan Cashier", username: "rmvillasis_staff", password: "StaffPass2026!", role: "Staff" }
+      { id: 1, name: "System Administrator", username: "rmvillasis_admin", password: "AdminSecure2026!", email: "rmvillasis.admin@gmail.com", role: "Admin" },
+      { id: 2, name: "Juan Cashier", username: "rmvillasis_staff", password: "StaffPass2026!", email: "rmvillasis.staff@gmail.com", role: "Staff" }
     ];
 
     let users = JSON.parse(localStorage.getItem('rmv_users'));
@@ -1791,7 +1838,7 @@
       }
     }
 
-    // ================= AUTHENTICATION LOGIC =================
+    // ================= AUTHENTICATION & FORGOT PASSWORD LOGIC =================
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const u = document.getElementById('loginUsername').value.trim();
@@ -1815,6 +1862,79 @@
       } else {
         document.getElementById('loginError').classList.remove('d-none');
       }
+    });
+
+    function showForgotPasswordView() {
+      document.getElementById('loginForm').classList.add('d-none');
+      document.getElementById('forgotPasswordForm').classList.remove('d-none');
+      document.getElementById('loginSubtitle').innerText = "Pag-recover ng Password gamit ang Gmail";
+      document.getElementById('forgotMsg').classList.add('d-none');
+      document.getElementById('recoveryStepsContainer').classList.add('d-none');
+      document.getElementById('sendCodeBtn').style.display = 'block';
+    }
+
+    function showLoginView() {
+      document.getElementById('forgotPasswordForm').classList.add('d-none');
+      document.getElementById('loginForm').classList.remove('d-none');
+      document.getElementById('loginSubtitle').innerText = "Mangyaring mag-log in upang magpatuloy";
+    }
+
+    let generatedRecoveryCode = "";
+    let targetRecoveryUser = null;
+
+    function sendRecoveryCode() {
+      const uVal = document.getElementById('forgotUsername').value.trim();
+      const emailVal = document.getElementById('forgotEmail').value.trim();
+      const msgBox = document.getElementById('forgotMsg');
+
+      targetRecoveryUser = users.find(u => u.username === uVal);
+
+      if (!targetRecoveryUser) {
+        msgBox.className = "alert alert-danger p-2 small";
+        msgBox.innerText = "Walang nakitang ganitong Username!";
+        msgBox.classList.remove('d-none');
+        return;
+      }
+
+      // Generate 6 digit random code
+      generatedRecoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Simulate sending email notification
+      msgBox.className = "alert alert-success p-2 small";
+      msgBox.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Naipadala na ang 6-digit code sa Gmail: <b>${emailVal}</b>.<br><small class="text-dark"><b>(Demo Code: ${generatedRecoveryCode})</b></small>`;
+      msgBox.classList.remove('d-none');
+
+      document.getElementById('sendCodeBtn').style.display = 'none';
+      document.getElementById('recoveryStepsContainer').classList.remove('d-none');
+    }
+
+    document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const enteredCode = document.getElementById('recoveryCodeInput').value.trim();
+      const newPass = document.getElementById('newResetPassword').value.trim();
+      const msgBox = document.getElementById('forgotMsg');
+
+      if (enteredCode !== generatedRecoveryCode) {
+        msgBox.className = "alert alert-danger p-2 small";
+        msgBox.innerText = "Mali ang 6-digit code na inilagay mo!";
+        msgBox.classList.remove('d-none');
+        return;
+      }
+
+      if (!newPass || newPass.length < 5) {
+        msgBox.className = "alert alert-danger p-2 small";
+        msgBox.innerText = "Masyadong maikli ang bagong password (dapat at least 5 characters).";
+        msgBox.classList.remove('d-none');
+        return;
+      }
+
+      // Update password
+      targetRecoveryUser.password = newPass;
+      saveData();
+
+      alert('Tagumpay na nabago ang iyong password! Maaari ka na ngayong mag-log in gamit ang bago mong password.');
+      showLoginView();
+      this.reset();
     });
 
     function logout() {
@@ -3731,7 +3851,7 @@
 
         transactions[tIndex].date = document.getElementById('editTxDate').value;
         transactions[tIndex].customer = document.getElementById('editCustomerName').value;
-        transactions[tIndex].location = document.getElementById('editLocation').value;
+        transactions[tIndex].location = document.getElementById('editLocation5'] || document.getElementById('editLocation').value;
         transactions[tIndex].product = document.getElementById('editProduct').value;
         transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;
         transactions[tIndex].totalCost = newCost;

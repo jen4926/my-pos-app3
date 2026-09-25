@@ -68,7 +68,7 @@
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label fw-semibold">Username:</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. admin" required>
+          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. rmvillasis_admin" required>
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold">Password:</label>
@@ -79,7 +79,7 @@
         </div>
         <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
         <div class="text-center">
-          <button type="button" class="btn btn-link btn-sm text-decoration-none text-muted" onclick="showForgotPasswordView()">
+          <button type="button" class="btn btn-link btn-sm text-decoration-none text-muted" id="btnShowForgot">
             <i class="fa-solid fa-key me-1"></i> Forgot Password?
           </button>
         </div>
@@ -98,7 +98,7 @@
         <div id="forgotMsg" class="alert p-2 small d-none"></div>
         
         <!-- Step 1 Send Code Button -->
-        <button type="button" id="sendCodeBtn" class="btn btn-warning w-100 fw-bold py-2 mb-2 text-dark" onclick="sendRecoveryCode()">
+        <button type="button" id="sendCodeBtn" class="btn btn-warning w-100 fw-bold py-2 mb-2 text-dark">
           <i class="fa-solid fa-paper-plane me-2"></i>Magpadala ng Code sa Gmail
         </button>
 
@@ -118,7 +118,7 @@
         </div>
 
         <div class="text-center mt-2">
-          <button type="button" class="btn btn-link btn-sm text-decoration-none" onclick="showLoginView()">
+          <button type="button" class="btn btn-link btn-sm text-decoration-none" id="btnBackToLogin">
             <i class="fa-solid fa-arrow-left me-1"></i> Bumalik sa Log In
           </button>
         </div>
@@ -1864,25 +1864,29 @@
       }
     });
 
-    function showForgotPasswordView() {
+    // Event listeners para sa Forgot Password toggles para sigurado na maki-click
+    document.getElementById('btnShowForgot').addEventListener('click', function(e) {
+      e.preventDefault();
       document.getElementById('loginForm').classList.add('d-none');
       document.getElementById('forgotPasswordForm').classList.remove('d-none');
       document.getElementById('loginSubtitle').innerText = "Pag-recover ng Password gamit ang Gmail";
       document.getElementById('forgotMsg').classList.add('d-none');
       document.getElementById('recoveryStepsContainer').classList.add('d-none');
       document.getElementById('sendCodeBtn').style.display = 'block';
-    }
+    });
 
-    function showLoginView() {
+    document.getElementById('btnBackToLogin').addEventListener('click', function(e) {
+      e.preventDefault();
       document.getElementById('forgotPasswordForm').classList.add('d-none');
       document.getElementById('loginForm').classList.remove('d-none');
       document.getElementById('loginSubtitle').innerText = "Mangyaring mag-log in upang magpatuloy";
-    }
+    });
 
     let generatedRecoveryCode = "";
     let targetRecoveryUser = null;
 
-    function sendRecoveryCode() {
+    document.getElementById('sendCodeBtn').addEventListener('click', function(e) {
+      e.preventDefault();
       const uVal = document.getElementById('forgotUsername').value.trim();
       const emailVal = document.getElementById('forgotEmail').value.trim();
       const msgBox = document.getElementById('forgotMsg');
@@ -1896,17 +1900,15 @@
         return;
       }
 
-      // Generate 6 digit random code
       generatedRecoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
       
-      // Simulate sending email notification
       msgBox.className = "alert alert-success p-2 small";
       msgBox.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Naipadala na ang 6-digit code sa Gmail: <b>${emailVal}</b>.<br><small class="text-dark"><b>(Demo Code: ${generatedRecoveryCode})</b></small>`;
       msgBox.classList.remove('d-none');
 
       document.getElementById('sendCodeBtn').style.display = 'none';
       document.getElementById('recoveryStepsContainer').classList.remove('d-none');
-    }
+    });
 
     document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -1928,12 +1930,13 @@
         return;
       }
 
-      // Update password
       targetRecoveryUser.password = newPass;
       saveData();
 
-      alert('Tagumpay na nabago ang iyong password! Maaari ka na ngayong mag-log in gamit ang bago mong password.');
-      showLoginView();
+      alert('Tagumpay na nabago ang iyong password! Maaari ka na ngayong mag-log in.');
+      document.getElementById('forgotPasswordForm').classList.add('d-none');
+      document.getElementById('loginForm').classList.remove('d-none');
+      document.getElementById('loginSubtitle').innerText = "Mangyaring mag-log in upang magpatuloy";
       this.reset();
     });
 
@@ -2718,7 +2721,7 @@
         monthlyExpensesData[targetMonthKey] = [];
       }
       monthlyExpensesData[targetMonthKey].push({
-        date: targetDate, // Auto date batay sa napiling petsa o ngayon
+        date: targetDate, 
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -2753,7 +2756,6 @@
       expensesList.forEach((item, index) => {
         const itemDate = item.date || (targetMonthKey + '-01');
         
-        // Kapag naka-day view, ipapakita lamang ang mga nakatala sa eksaktong araw na iyon
         if (mode === 'day' && itemDate !== targetDateKey) {
           return;
         }
@@ -2794,7 +2796,7 @@
       });
 
       if (!hasVisibleRow) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakitang salary o expenses para sa araw na ito. Pindutin ang "Add Expense / Salary Line" para magdagdag ng bagong talaan para sa araw na ito.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Wala pang nakitang salary o expenses para sa araw na ito. Pindutin ang "Add Expense / Salary Line" para magdagdag.</td></tr>`;
       }
 
       let combinedTotal = totalSalarySum + totalExpenseSum;
@@ -2964,7 +2966,6 @@
             dayByaheGrossProfit += netProf;
           }
 
-          // Kunin ang natitirang balance/utang para sa transaksyong ginawa sa araw na ito
           dayTotalCreditBalance += (parseFloat(t.balance) || 0);
         }
        
@@ -3016,7 +3017,6 @@
         `;
       });
 
-      // Isama rin ang mga nakatalang standalone manual payments para sa napiling petsa sa koleksyon at breakdown
       if (standalonePayments) {
         standalonePayments.forEach(p => {
           if (p.date === selectedDate) {
@@ -3053,7 +3053,6 @@
       
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
       
-      // Target Cash in Drawer = Cash Sales - Utang/Balance + Payment sa lumang utang - Expenses
       currentTargetCashInDrawer = Math.max(0, cashSalesToday - dayTotalCreditBalance + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
@@ -3379,7 +3378,7 @@
         monthlyExpensesData[auditMonth] = [];
       }
       monthlyExpensesData[auditMonth].push({
-        date: todayFormatted, // Auto date sa kasalukuyang araw
+        date: todayFormatted,
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -3486,7 +3485,7 @@
     }
 
     function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
+      const selectedMonth = document.getElementById('auditMonth').value; 
       if (!selectedMonth) return;
 
       let totalSales = 0;
@@ -3543,7 +3542,7 @@
       bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
           let rowText = `${b.date} ${b.type} ${b.amount} ${b.notes}`.toLowerCase();
-          if (searchBossQuery && !rowText.includes(searchQuery)) return;
+          if (searchBossQuery && !rowText.includes(searchBossQuery)) return;
 
           if (!bossByDate[b.date]) {
             bossByDate[b.date] = [];
@@ -3835,7 +3834,7 @@
       const total = parseFloat(document.getElementById('editTotal').value) || 0;
       const paid = parseFloat(document.getElementById('editPaid').value) || 0;
       const balance = Math.max(0, total - paid);
-      document.getElementById('balance').value = balance.toFixed(2);
+      document.getElementById('editBalance').value = balance.toFixed(2);
     }
 
     document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
@@ -3851,7 +3850,7 @@
 
         transactions[tIndex].date = document.getElementById('editTxDate').value;
         transactions[tIndex].customer = document.getElementById('editCustomerName').value;
-        transactions[tIndex].location = document.getElementById('editLocation5'] || document.getElementById('editLocation').value;
+        transactions[tIndex].location = document.getElementById('editLocation').value;
         transactions[tIndex].product = document.getElementById('editProduct').value;
         transactions[tIndex].containerInfo = document.getElementById('editContainerInfo').value;
         transactions[tIndex].totalCost = newCost;

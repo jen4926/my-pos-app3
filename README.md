@@ -19,11 +19,11 @@
     .inventory-input { width: 95px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
    
-    /* Login Backdrop overlay */
+    /* Login Backdrop overlay - Naka-display: none na para direktang makapasok */
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(13, 71, 161, 0.85); z-index: 9999;
-      display: flex; justify-content: center; align-items: center;
+      display: none; justify-content: center; align-items: center;
     }
 
     /* PRINT STYLES */
@@ -1710,7 +1710,10 @@
       localStorage.setItem('rmv_users', JSON.stringify(users));
     }
 
-    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
+    // DIRETSONG NAKA-LOG IN AGAD SA ADMIN ACCOUNT (Walang mawawalang encode)
+    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || {
+      id: 1, name: "System Administrator", username: "rmvillasis_admin", password: "AdminSecure2026!", email: "rmvillasis.admin@gmail.com", role: "Admin"
+    };
 
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory'));
@@ -1864,7 +1867,6 @@
       }
     });
 
-    // Event listeners para sa Forgot Password toggles para sigurado na maki-click
     document.getElementById('btnShowForgot').addEventListener('click', function(e) {
       e.preventDefault();
       document.getElementById('loginForm').classList.add('d-none');

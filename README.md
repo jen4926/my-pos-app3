@@ -2928,7 +2928,7 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      // ANG TARGET CASH IN DRAWER AY KASAMANG IBINABABA (KINA-CALCULATE) ANG DAY DEBT PAYMENTS (KASAMA ANG MANUAL PAYMENTS)
+      // Tandaan: Dito ay kinukuha lamang ang Aktuwal na Nakolektang Bayad (dayDebtPayments) at Cash Sales minus expenses. HINDI na isinasama o ibinabawas ang natirang utang (Remaining Balance).
       currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
@@ -3732,7 +3732,7 @@
         transactions[tIndex].netProfit = newTotal - newCost;
         transactions[tIndex].total = newTotal;
         transactions[tIndex].paid = newPaid;
-        transactions[tInput = newBalance];
+        transactions[tIndex].balance = newBalance;
         transactions[tIndex].status = newBalance === 0 ? 'PAID' : (newPaid > 0 ? 'PARTIAL' : 'UNPAID');
 
         if (transactions[tIndex].payments && transactions[tIndex].payments.length > 0) {

@@ -13,7 +13,7 @@
     .nav-pills .nav-link.active { background-color: #1976d2; }
     .nav-pills .nav-link { color: #fff; margin-right: 5px; }
     .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
-    .credit-fields, .container-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
+    .credit-fields, .container-fields, .multi-payment-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
    
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
     .inventory-input { width: 95px; text-align: center; }
@@ -260,13 +260,38 @@
 
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Payment Method:</label>
-                <select id="paymentMethod" class="form-select">
+                <select id="paymentMethod" class="form-select" onchange="togglePaymentMethodFields()">
                   <option value="Cash">Cash</option>
                   <option value="Byahe Cash">Byahe Cash</option>
                   <option value="GCash">GCash</option>
                   <option value="Bank Transfer">Bank Transfer (BT)</option>
                   <option value="Cheque">Cheque</option>
+                  <option value="Multi-Payment">Multi-Payment (Cash + GCash/Iba pa)</option>
                 </select>
+              </div>
+            </div>
+
+            <!-- MULTI-PAYMENT BREAKDOWN SECTION -->
+            <div id="multiPaymentFields" class="multi-payment-fields">
+              <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-wallet me-2"></i>Hati ng Bayad (Multi-Payment Breakdown)</h6>
+              <p class="text-muted small mb-2">Ilagay kung magkano ang napunta sa bawat uri ng bayad. Ang Cash portion lamang ang awtomatikong isasama sa Drawer Cash Target.</p>
+              <div class="row g-2">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Cash Amount (₱):</label>
+                  <input type="number" step="0.01" id="multiCashAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">GCash Amount (₱):</label>
+                  <input type="number" step="0.01" id="multiGcashAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Bank Transfer / BT (₱):</label>
+                  <input type="number" step="0.01" id="multiBTAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Byahe Cash / Iba pa (₱):</label>
+                  <input type="number" step="0.01" id="multiOtherAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
+                </div>
               </div>
             </div>
 
@@ -1896,12 +1921,14 @@
       const containerBox = document.getElementById('containerSectionBox');
       const financialBox = document.getElementById('financialSectionBox');
       const creditSection = document.getElementById('creditFieldsSection');
+      const multiBox = document.getElementById('multiPaymentFields');
       const locationSelect = document.getElementById('transactionLocation');
 
       priceCols.forEach(col => col.style.display = isInventoryOnly ? 'none' : '');
       containerBox.style.display = isInventoryOnly ? 'none' : 'block';
       financialBox.style.display = isInventoryOnly ? 'none' : 'flex';
       creditSection.style.display = 'none';
+      multiBox.style.display = 'none';
 
       if(isInventoryOnly) {
         locationSelect.value = 'Inventory Only';
@@ -1920,6 +1947,16 @@
         priceInput.style.display = isInventoryOnly ? 'none' : '';
         subtotalInput.style.display = isInventoryOnly ? 'none' : '';
       });
+    }
+
+    function togglePaymentMethodFields() {
+      const method = document.getElementById('paymentMethod').value;
+      const multiBox = document.getElementById('multiPaymentFields');
+      if (method === 'Multi-Payment') {
+        multiBox.style.display = 'block';
+      } else {
+        multiBox.style.display = 'none';
+      }
     }
 
     function addPosRow() {
@@ -2047,6 +2084,7 @@
       let balance = 0;
       let status = "PAID";
       let method = "Inventory Update";
+      let paymentHistory = [];
 
       if (!isInventoryOnly) {
         total = parseFloat(document.getElementById('totalAmount').value) || 0;
@@ -2060,6 +2098,26 @@
         balance = total - paid;
         if (balance > 0 && paid > 0) status = "PARTIAL";
         if (balance > 0 && paid === 0) status = "UNPAID";
+
+        // Multi-Payment Breakdown Handling
+        if (method === 'Multi-Payment' && paid > 0) {
+          const mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
+          const mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
+          const mBt = parseFloat(document.getElementById('multiBTAmt').value) || 0;
+          const mOther = parseFloat(document.getElementById('multiOtherAmt').value) || 0;
+
+          if (mCash > 0) paymentHistory.push({ amount: mCash, method: 'Cash', date: saleDate });
+          if (mGcash > 0) paymentHistory.push({ amount: mGcash, method: 'GCash', date: saleDate });
+          if (mBt > 0) paymentHistory.push({ amount: mBt, method: 'Bank Transfer', date: saleDate });
+          if (mOther > 0) paymentHistory.push({ amount: mOther, method: 'Byahe Cash', date: saleDate });
+         
+          // Fallback if split sum doesn't match paid amount
+          if (paymentHistory.length === 0) {
+            paymentHistory.push({ amount: paid, method: 'Cash', date: saleDate });
+          }
+        } else if (paid > 0) {
+          paymentHistory.push({ amount: paid, method: method, date: saleDate });
+        }
       }
 
       const itemRows = document.querySelectorAll('#posItemsBody tr');
@@ -2137,11 +2195,6 @@
         }
       }
 
-      const paymentHistory = [];
-      if (paid > 0) {
-        paymentHistory.push({ amount: paid, method: method, date: saleDate });
-      }
-
       transactions.push({
         id: Date.now(),
         date: saleDate,
@@ -2165,6 +2218,7 @@
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
       document.getElementById('inventoryOnlyMode').checked = false;
+      document.getElementById('multiPaymentFields').style.display = 'none';
       toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
@@ -2598,7 +2652,7 @@
         monthlyExpensesData[targetMonthKey] = [];
       }
       monthlyExpensesData[targetMonthKey].push({
-        date: targetDate, // Auto date batay sa napiling petsa o ngayon
+        date: targetDate,
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -2853,6 +2907,7 @@
                 dayDebtPayments += p.amount;
               }
 
+              // Awtomatikong pag-uri ng bayad (kasama ang multi-payment parts)
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
               else if (p.method === 'GCash') totalGCash += p.amount;
               else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
@@ -2863,7 +2918,7 @@
        
         count++;
 
-        const lastMethod = (t.payments && t.payments.length > 0) ? t.payments[t.payments.length - 1].method : 'N/A';
+        const lastMethod = (t.payments && t.payments.length > 0) ? t.payments.map(p => `${p.method}: ₱${p.amount.toFixed(2)}`).join(', ') : 'N/A';
         let locBadge = '<span class="badge bg-primary">Hiway</span>';
         if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
         if (t.location === 'Inventory Only') locBadge = '<span class="badge bg-secondary">Inventory Only</span>';
@@ -2880,7 +2935,7 @@
             <td class="text-success">₱${t.paid.toFixed(2)}</td>
             <td class="text-danger">₱${t.balance.toFixed(2)}</td>
             <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
-            <td>${lastMethod}</td>
+            <td><small>${lastMethod}</small></td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-primary border-0 p-1" onclick="openEditTransactionModal(${t.id})" title="Edit Transaction & Cost">
                 <i class="fa-solid fa-pen-to-square"></i>
@@ -3260,7 +3315,7 @@
         monthlyExpensesData[auditMonth] = [];
       }
       monthlyExpensesData[auditMonth].push({
-        date: todayFormatted, // Auto date sa kasalukuyang araw
+        date: todayFormatted,
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -3424,7 +3479,7 @@
       bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
           let rowText = `${b.date} ${b.type} ${b.amount} ${b.notes}`.toLowerCase();
-          if (searchBossQuery && !rowText.includes(searchQuery)) return;
+          if (searchBossQuery && !rowText.includes(searchBossQuery)) return;
 
           if (!bossByDate[b.date]) {
             bossByDate[b.date] = [];
@@ -3716,7 +3771,7 @@
       const total = parseFloat(document.getElementById('editTotal').value) || 0;
       const paid = parseFloat(document.getElementById('editPaid').value) || 0;
       const balance = Math.max(0, total - paid);
-      document.getElementById('balance').value = balance.toFixed(2);
+      document.getElementById('editBalance').value = balance.toFixed(2);
     }
 
     document.getElementById('editTransactionForm').addEventListener('submit', function(e) {

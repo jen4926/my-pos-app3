@@ -12,8 +12,10 @@
     .card { border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .nav-pills .nav-link.active { background-color: #1976d2; }
     .nav-pills .nav-link { color: #fff; margin-right: 5px; }
+    .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
     .credit-fields, .container-fields, .multi-payment-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
+    .inventory-input { width: 95px; text-align: center; }
     .stat-card { border-left: 4px solid #1976d2; }
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -298,7 +300,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // AUTO-INJECT LOCAL STORAGE DATA (Kung wala pang laman sa browser)
+    // AUTO-INJECT LOCAL STORAGE DATA
     const initialData = {
       'rmv_bossAdjustments': [{"date":"2026-09-21","type":"ADD","amount":100,"notes":"KANIN KAHAPON"},{"date":"2026-09-21","type":"ADD","amount":1529,"notes":"PARCEL BOSS"},{"date":"2026-09-21","type":"ADD","amount":1000,"notes":"RAMIL"},{"date":"2026-09-22","type":"ADD","amount":34,"notes":"BOTE"},{"date":"2026-09-22","type":"ADD","amount":201,"notes":"BOTE"},{"date":"2026-09-22","type":"ADD","amount":13000,"notes":"CC BOSS"},{"date":"2026-09-24","type":"ADD","amount":100,"notes":"BOTE"},{"date":"2026-09-24","type":"ADD","amount":1848,"notes":"BOSS PARCEL"},{"date":"2026-09-24","type":"ADD","amount":352,"notes":"BOTE"},{"date":"2026-09-25","type":"ADD","amount":100,"notes":"BOTE"}],
       'rmv_cashBreakdownData': {"2026-09-21":{"fund":75,"counts":{"20":0,"50":2,"100":35,"200":0,"500":19,"1000":167},"coins":385},"2026-09-20":{"20":0,"50":0,"100":0,"200":1,"500":1,"1000":1,"coins":0},"2026-09-14":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-22":{"fund":285,"counts":{"20":2,"50":14,"100":29,"200":0,"500":73,"1000":91},"coins":2169},"2026-09-02":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-23":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":32},"coins":187},"2026-09-24":{"fund":236,"counts":{"20":0,"50":18,"100":54,"200":1,"500":30,"1000":134},"coins":1065},"2026-09-25":{"fund":84,"counts":{"20":0,"50":0,"100":5,"200":0,"500":98,"1000":169},"coins":1369},"2026-09-26":{"fund":69,"counts":{"20":0,"50":53,"100":50,"200":0,"500":13,"1000":80},"coins":309},"2026-09-28":{"fund":94,"counts":{"20":0,"50":14,"100":105,"200":0,"500":28,"1000":332},"coins":2964},"2026-09-05":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-01":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-09":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-12":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-29":{"fund":158,"counts":{"20":0,"50":0,"100":8,"200":0,"500":4,"1000":90},"coins":54},"2026-09-16":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-18":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-30":{"fund":39,"counts":{"20":0,"50":7,"100":9,"200":0,"500":28,"1000":71},"coins":35},"2026-09-03":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-04":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-07":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-10-01":{"fund":35,"counts":{"20":0,"50":57,"100":82,"200":0,"500":81,"1000":154},"coins":865},"2026-10-30":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-10-02":{"fund":21,"counts":{"20":0,"50":1,"100":39,"200":0,"500":80,"1000":176},"coins":831},"2026-10-07":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-08":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-09-10":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0},"2026-10-03":{"fund":0,"counts":{"20":0,"50":0,"100":0,"200":0,"500":0,"1000":0},"coins":0}},
@@ -318,7 +320,7 @@
       }
     }
 
-    let users = [{ id: 1, name: "Admin", username: "admin", password: "password", role: "Admin" }];
+    let users = JSON.parse(localStorage.getItem('rmv_users')) || [];
     let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];

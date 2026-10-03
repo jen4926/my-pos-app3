@@ -3036,10 +3036,13 @@
 
       document.getElementById('totalCollectionAll').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('breakdownDebtPayment').innerText = `+₱${dayDebtPayments.toFixed(2)}`;
+      
+      // ALIS NA ANG - SIGN SA HTML RENDER NG MULTI-PAYMENT & NON-CASH DEDUCTIONS
       document.getElementById('lessByaheCash').innerText = `₱${totalByaheCash.toFixed(2)}`;
       document.getElementById('lessGCash').innerText = `₱${totalGCash.toFixed(2)}`;
       document.getElementById('lessBT').innerText = `₱${totalBT.toFixed(2)}`;
       document.getElementById('lessCheque').innerText = `₱${totalCheque.toFixed(2)}`;
+
       document.getElementById('lessExpenses').innerText = `-₱${dayExpensesTotal.toFixed(2)}`;
       document.getElementById('lessRemainingBalance').innerText = `-₱${dayRemainingBalance.toFixed(2)}`;
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;

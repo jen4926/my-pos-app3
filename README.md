@@ -463,9 +463,9 @@
                     <span class="fw-bold text-success" id="breakdownDebtPayment">+₱0.00</span>
                   </div>
 
-                  <!-- MULTI-PAYMENT & NON-CASH BAGO SA KASUNOD NA MGA BAWAS (TANGGAL NA ANG - SIGN) -->
+                  <!-- NON-CASH & MULTI-PAYMENT DEDUCTIONS (WALA NA ANG NEGATIVE SIGN SA UI NGUNIT BINABAWAS PA RIN SA TARGET CASH) -->
                   <div class="bg-light p-2 rounded my-2 border">
-                    <span class="d-block fw-bold text-secondary small mb-1"><i class="fa-solid fa-layer-group me-1"></i> Multi-Payment & Non-Cash Deductions:</span>
+                    <span class="d-block fw-bold text-secondary small mb-1"><i class="fa-solid fa-layer-group me-1"></i> Non-Cash & Multi-Payment Deductions:</span>
                     <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
                       <span class="text-muted small">• Byahe Cash</span>
                       <span class="text-danger small fw-semibold" id="lessByaheCash">₱0.00</span>
@@ -2132,7 +2132,6 @@
           let mByahe = parseFloat(document.getElementById('multiByaheAmt').value) || 0;
           let mCheque = parseFloat(document.getElementById('multiChequeAmt').value) || 0;
 
-          // Hatiin/I-less ang partial payment proportionate sa multi-payment breakdown para hindi madoble ang pasok ng pera
           let sumMulti = mCash + mGcash + mBt + mByahe + mCheque;
           if (sumMulti > 0 && Math.abs(sumMulti - paid) > 0.01) {
             let ratio = paid / sumMulti;
@@ -2944,7 +2943,7 @@
           }
         }
        
-        // SINI-SEPARATE AT BINABAWAS SA DRAWER TARGET ANG BAWAT PAYMENT NA NANGYARI SA ARAW NA ITO
+        // PAG-ACCUMULATE NG NON-CASH AT MULTI-PAYMENT DEDUCTIONS PARA MA-LESS SA TARGET CASH
         if (t.payments) {
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
@@ -3033,7 +3032,8 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal - dayRemainingBalance);
+      // DITO GINAGAMIT ANG BRAWL NG MGA NON-CASH AT MULTI-PAYMENT DEDUCTIONS PARA SA TARGET CASH IN DRAWER
+      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - totalNonCashToday - dayExpensesTotal - dayRemainingBalance);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -3047,8 +3047,7 @@
 
       document.getElementById('totalCollectionAll').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('breakdownDebtPayment').innerText = `+₱${dayDebtPayments.toFixed(2)}`;
-      
-      // ALIS NA ANG - SIGN SA HTML RENDER NG MULTI-PAYMENT & NON-CASH DEDUCTIONS
+     
       document.getElementById('lessByaheCash').innerText = `₱${totalByaheCash.toFixed(2)}`;
       document.getElementById('lessGCash').innerText = `₱${totalGCash.toFixed(2)}`;
       document.getElementById('lessBT').innerText = `₱${totalBT.toFixed(2)}`;
@@ -3303,7 +3302,6 @@
         document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
         document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
 
-        // RENDER LAST ORDER DETAILED ITEMS & LAST PRICE
         const lastItemsBody = document.getElementById('lastOrderItemsBody');
         lastItemsBody.innerHTML = '';
         if (last.itemsList && last.itemsList.length > 0) {

@@ -2126,11 +2126,22 @@
 
         // Multi-Payment Breakdown Handling (Eksaktong pag-save ng bawat hati para ma-less sa target cash)
         if (method === 'Multi-Payment' && paid > 0) {
-          const mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
-          const mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
-          const mBt = parseFloat(document.getElementById('multiBTAmt').value) || 0;
-          const mByahe = parseFloat(document.getElementById('multiByaheAmt').value) || 0;
-          const mCheque = parseFloat(document.getElementById('multiChequeAmt').value) || 0;
+          let mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
+          let mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
+          let mBt = parseFloat(document.getElementById('multiBTAmt').value) || 0;
+          let mByahe = parseFloat(document.getElementById('multiByaheAmt').value) || 0;
+          let mCheque = parseFloat(document.getElementById('multiChequeAmt').value) || 0;
+
+          // Hatiin/I-less ang partial payment proportionate sa multi-payment breakdown para hindi madoble ang pasok ng pera
+          let sumMulti = mCash + mGcash + mBt + mByahe + mCheque;
+          if (sumMulti > 0 && Math.abs(sumMulti - paid) > 0.01) {
+            let ratio = paid / sumMulti;
+            mCash *= ratio;
+            mGcash *= ratio;
+            mBt *= ratio;
+            mByahe *= ratio;
+            mCheque *= ratio;
+          }
 
           if (mCash > 0) paymentHistory.push({ amount: mCash, method: 'Cash', date: saleDate });
           if (mGcash > 0) paymentHistory.push({ amount: mGcash, method: 'GCash', date: saleDate });

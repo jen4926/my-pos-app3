@@ -534,37 +534,12 @@
       <div class="tab-pane fade" id="expenses-content">
         <div class="card p-4">
           <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger (Per Day)</h4>
-          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo. May hiwalay na column para sa Salary at Expenses para mas madaling ma-subtotal.</p>
+          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo. Ang mga bagong encode ay awtomatikong nai-save at nakalista sa ibaba.</p>
           
           <!-- Successful Warning Alert Container -->
           <div id="expenseAlertContainer"></div>
 
-          <div class="row g-3 mb-3">
-            <div class="col-md-2">
-              <label class="form-label fw-semibold">Petsa:</label>
-              <input type="date" id="expenseDate" class="form-control">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Uri (Type):</label>
-              <select id="expenseType" class="form-select">
-                <option value="Salary">Salary (Sweldo)</option>
-                <option value="Expense">Expense (Gastos)</option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">Paglalarawan / Title:</label>
-              <input type="text" id="expenseTitle" class="form-control" placeholder="Hal. Sweldo ni Juan / Kuryente">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Halaga (₱):</label>
-              <input type="number" step="0.01" id="expenseAmount" class="form-control" placeholder="0.00">
-            </div>
-          </div>
-          <div class="text-end mb-4">
-            <button class="btn btn-primary px-4 fw-bold" onclick="addExpenseItem()"><i class="fa-solid fa-plus me-1"></i> Idagdag sa Talaan</button>
-          </div>
-
-          <div class="table-responsive">
+          <div class="table-responsive mb-4">
             <table class="table table-bordered align-middle">
               <thead class="table-dark">
                 <tr>
@@ -588,6 +563,36 @@
               </tfoot>
             </table>
           </div>
+
+          <!-- Input Form nalagay na ngayon sa baba -->
+          <div class="card bg-light p-3 border">
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-plus-circle me-1"></i> Magdagdag ng Bagong Salary o Expense</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-2">
+                <label class="form-label fw-semibold">Petsa:</label>
+                <input type="date" id="expenseDate" class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Uri (Type):</label>
+                <select id="expenseType" class="form-select">
+                  <option value="Salary">Salary (Sweldo)</option>
+                  <option value="Expense">Expense (Gastos)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Paglalarawan / Title:</label>
+                <input type="text" id="expenseTitle" class="form-control" placeholder="Hal. Sweldo ni Juan / Kuryente">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Halaga (₱):</label>
+                <input type="number" step="0.01" id="expenseAmount" class="form-control" placeholder="0.00">
+              </div>
+            </div>
+            <div class="text-end">
+              <button class="btn btn-primary px-4 fw-bold" onclick="addExpenseItem()"><i class="fa-solid fa-plus me-1"></i> Idagdag sa Talaan</button>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -1577,7 +1582,6 @@
         return;
       }
 
-      // Hanapin at alisin sa luma
       let exItem = null;
       if (monthlyExpensesData[oldDate]) {
         const index = monthlyExpensesData[oldDate].findIndex(item => item.id === id);
@@ -1674,7 +1678,7 @@
     // DAILY & MONTHLY AUDIT REVIEW PER DAY & MONTH
     function generateDailyMonthlyAudit() {
       const selectedDate = document.getElementById('auditDateInput').value;
-      const selectedMonthPrefix = selectedDate ? selectedDate.substring(0, 7) : ''; // YYYY-MM
+      const selectedMonthPrefix = selectedDate ? selectedDate.substring(0, 7) : ''; 
 
       const tbody = document.getElementById('auditDailyDetailBody');
       tbody.innerHTML = '';

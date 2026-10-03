@@ -2118,7 +2118,7 @@
         if (balance > 0 && paid > 0) status = "PARTIAL";
         if (balance > 0 && paid === 0) status = "UNPAID";
 
-        // Multi-Payment Breakdown Handling (Cash - GCash - BT - Byahe Cash - Cheque)
+        // Multi-Payment Breakdown Handling (Eksaktong pag-save ng bawat hati para ma-less sa target cash)
         if (method === 'Multi-Payment' && paid > 0) {
           const mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
           const mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
@@ -2927,7 +2927,7 @@
           }
         }
        
-        // SINI-SEPARATE ANG BAWAT PAYMENT NA NANGYARI SA ARAW NA ITO
+        // SINI-SEPARATE AT BINABAWAS SA DRAWER TARGET ANG BAWAT PAYMENT NA NANGYARI SA ARAW NA ITO
         if (t.payments) {
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
@@ -2936,7 +2936,6 @@
                 dayDebtPayments += p.amount;
               }
 
-              // DIREKTANG BINABAWAS SA DRAWER TARGET ANG MGA HINDI CASH
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
               else if (p.method === 'GCash') totalGCash += p.amount;
               else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;

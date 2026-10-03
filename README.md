@@ -266,35 +266,31 @@
                   <option value="GCash">GCash</option>
                   <option value="Bank Transfer">Bank Transfer (BT)</option>
                   <option value="Cheque">Cheque</option>
-                  <option value="Multi-Payment">Multi-Payment (Cash - GCash - BT - Byahe Cash - Cheque)</option>
+                  <option value="Multi-Payment">Multi-Payment (Cash + GCash/Iba pa)</option>
                 </select>
               </div>
             </div>
 
             <!-- MULTI-PAYMENT BREAKDOWN SECTION -->
             <div id="multiPaymentFields" class="multi-payment-fields">
-              <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-wallet me-2"></i>Hati ng Bayad (Multi-Payment Breakdown: Cash - GCash - BT - Byahe Cash - Cheque)</h6>
+              <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-wallet me-2"></i>Hati ng Bayad (Multi-Payment Breakdown)</h6>
               <p class="text-muted small mb-2">Ilagay kung magkano ang napunta sa bawat uri ng bayad. Ang Cash portion lamang ang awtomatikong isasama sa Drawer Cash Target.</p>
               <div class="row g-2">
-                <div class="col">
-                  <label class="form-label small fw-semibold">Cash (₱):</label>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Cash Amount (₱):</label>
                   <input type="number" step="0.01" id="multiCashAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
                 </div>
-                <div class="col">
-                  <label class="form-label small fw-semibold">GCash (₱):</label>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">GCash Amount (₱):</label>
                   <input type="number" step="0.01" id="multiGcashAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
                 </div>
-                <div class="col">
-                  <label class="form-label small fw-semibold">BT (₱):</label>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Bank Transfer / BT (₱):</label>
                   <input type="number" step="0.01" id="multiBTAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
                 </div>
-                <div class="col">
-                  <label class="form-label small fw-semibold">Byahe Cash (₱):</label>
-                  <input type="number" step="0.01" id="multiByaheAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
-                </div>
-                <div class="col">
-                  <label class="form-label small fw-semibold">Cheque (₱):</label>
-                  <input type="number" step="0.01" id="multiChequeAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Byahe Cash / Iba pa (₱):</label>
+                  <input type="number" step="0.01" id="multiOtherAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00">
                 </div>
               </div>
             </div>
@@ -462,28 +458,22 @@
                     <span class="text-muted small fw-semibold text-success">(+) Payment sa Utang (Collected):</span>
                     <span class="fw-bold text-success" id="breakdownDebtPayment">+₱0.00</span>
                   </div>
-
-                  <!-- NON-CASH & MULTI-PAYMENT DEDUCTIONS -->
-                  <div class="bg-light p-2 rounded my-2 border">
-                    <span class="d-block fw-bold text-secondary small mb-1"><i class="fa-solid fa-layer-group me-1"></i> Non-Cash & Multi-Payment Deductions:</span>
-                    <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• Byahe Cash</span>
-                      <span class="text-danger small fw-semibold" id="lessByaheCash">₱0.00</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• GCash</span>
-                      <span class="text-danger small fw-semibold" id="lessGCash">₱0.00</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• Bank Transfer (BT)</span>
-                      <span class="text-danger small fw-semibold" id="lessBT">₱0.00</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• Cheque</span>
-                      <span class="text-danger small fw-semibold" id="lessCheque">₱0.00</span>
-                    </div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Less: Byahe Cash</span>
+                    <span class="text-danger small" id="lessByaheCash">-₱0.00</span>
                   </div>
-
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Less: GCash</span>
+                    <span class="text-danger small" id="lessGCash">-₱0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Less: Bank Transfer (BT)</span>
+                    <span class="text-danger small" id="lessBT">-₱0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small">Less: Cheque</span>
+                    <span class="text-danger small" id="lessCheque">-₱0.00</span>
+                  </div>
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="text-muted small text-danger">Less: Salary & Expenses (Cash Out):</span>
                     <span class="text-danger small" id="lessExpenses">-₱0.00</span>
@@ -2124,28 +2114,17 @@
         if (balance > 0 && paid > 0) status = "PARTIAL";
         if (balance > 0 && paid === 0) status = "UNPAID";
 
+        // Multi-Payment Breakdown Handling
         if (method === 'Multi-Payment' && paid > 0) {
-          let mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
-          let mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
-          let mBt = parseFloat(document.getElementById('multiBTAmt').value) || 0;
-          let mByahe = parseFloat(document.getElementById('multiByaheAmt').value) || 0;
-          let mCheque = parseFloat(document.getElementById('multiChequeAmt').value) || 0;
-
-          let sumMulti = mCash + mGcash + mBt + mByahe + mCheque;
-          if (sumMulti > 0 && Math.abs(sumMulti - paid) > 0.01) {
-            let ratio = paid / sumMulti;
-            mCash *= ratio;
-            mGcash *= ratio;
-            mBt *= ratio;
-            mByahe *= ratio;
-            mCheque *= ratio;
-          }
+          const mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
+          const mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
+          const mBt = parseFloat(document.getElementById('multiBTAmt').value) || 0;
+          const mOther = parseFloat(document.getElementById('multiOtherAmt').value) || 0;
 
           if (mCash > 0) paymentHistory.push({ amount: mCash, method: 'Cash', date: saleDate });
           if (mGcash > 0) paymentHistory.push({ amount: mGcash, method: 'GCash', date: saleDate });
           if (mBt > 0) paymentHistory.push({ amount: mBt, method: 'Bank Transfer', date: saleDate });
-          if (mByahe > 0) paymentHistory.push({ amount: mByahe, method: 'Byahe Cash', date: saleDate });
-          if (mCheque > 0) paymentHistory.push({ amount: mCheque, method: 'Cheque', date: saleDate });
+          if (mOther > 0) paymentHistory.push({ amount: mOther, method: 'Byahe Cash', date: saleDate });
          
           if (paymentHistory.length === 0) {
             paymentHistory.push({ amount: paid, method: 'Cash', date: saleDate });
@@ -2942,6 +2921,7 @@
           }
         }
        
+        // SINI-SEPARATE ANG BAWAT PAYMENT NA NANGYARI SA ARAW NA ITO (PATI SA MULTI-PAYMENT O SINGLE)
         if (t.payments) {
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
@@ -2950,6 +2930,7 @@
                 dayDebtPayments += p.amount;
               }
 
+              // DIREKTANG BINABAWAS SA DRAWER TARGET ANG MGA HINDI CASH
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
               else if (p.method === 'GCash') totalGCash += p.amount;
               else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
@@ -3025,12 +3006,13 @@
       let daySubtotalNet = dayHiwayNet + dayByaheNet;
       let dayNetProfit = daySubtotalNet - dayExpensesTotal;
 
+      // KINUKYUT ANG PURONG CASH: Lahat ng Benta + Koleksyon minus Lahat ng Non-Cash (GCash, BT, Byahe Cash, Cheque) at Expenses
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
       let cashSalesToday = daySales - totalNonCashToday;
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - totalNonCashToday - dayExpensesTotal - dayRemainingBalance);
+      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal - dayRemainingBalance);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -3044,12 +3026,10 @@
 
       document.getElementById('totalCollectionAll').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('breakdownDebtPayment').innerText = `+₱${dayDebtPayments.toFixed(2)}`;
-     
-      document.getElementById('lessByaheCash').innerText = `₱${totalByaheCash.toFixed(2)}`;
-      document.getElementById('lessGCash').innerText = `₱${totalGCash.toFixed(2)}`;
-      document.getElementById('lessBT').innerText = `₱${totalBT.toFixed(2)}`;
-      document.getElementById('lessCheque').innerText = `₱${totalCheque.toFixed(2)}`;
-
+      document.getElementById('lessByaheCash').innerText = `-₱${totalByaheCash.toFixed(2)}`;
+      document.getElementById('lessGCash').innerText = `-₱${totalGCash.toFixed(2)}`;
+      document.getElementById('lessBT').innerText = `-₱${totalBT.toFixed(2)}`;
+      document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
       document.getElementById('lessExpenses').innerText = `-₱${dayExpensesTotal.toFixed(2)}`;
       document.getElementById('lessRemainingBalance').innerText = `-₱${dayRemainingBalance.toFixed(2)}`;
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;
@@ -3299,6 +3279,7 @@
         document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
         document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
 
+        // RENDER LAST ORDER DETAILED ITEMS & LAST PRICE
         const lastItemsBody = document.getElementById('lastOrderItemsBody');
         lastItemsBody.innerHTML = '';
         if (last.itemsList && last.itemsList.length > 0) {

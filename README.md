@@ -1037,15 +1037,20 @@
 
       transactions.push({ id: Date.now(), date, customer: cust, location: loc, product: productSummary.join(', '), itemsList, total, totalCost, paid, balance, status, payments });
       saveData();
-      alert('Transaction saved successfully & items added to inventory!');
+      
+      // Auto-trigger updates across all tabs instantly
+      generateDailyReport();
+      renderCreditTable();
+      renderInventoryTables();
+      generateDailyMonthlyAudit();
+
+      alert('Transaction saved successfully & synced to all ledgers!');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
       document.getElementById('inventoryOnlyMode').checked = false;
       toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
-      generateDailyReport();
-      renderInventoryTables();
     });
 
     document.getElementById('manualPaymentForm').addEventListener('submit', function(e) {
@@ -1072,10 +1077,12 @@
       });
 
       saveData();
-      alert('Tagumpay na naidagdag ang Manual Payment / Past Entry!');
+      generateDailyReport();
+      generateDailyMonthlyAudit();
+
+      alert('Tagumpay na naidagdag ang Manual Payment / Past Entry at nai-reflect sa ledger!');
       this.reset();
       document.getElementById('manualDate').value = getTodayDateString();
-      generateDailyReport();
     });
 
     function generateDailyReport() {
@@ -1212,16 +1219,13 @@
       document.getElementById('dailyHiwayProfit').innerText = `₱${totalHiwayProfit.toFixed(2)}`;
       document.getElementById('dailyByaheSales').innerText = `₱${totalByaheSales.toFixed(2)}`;
       document.getElementById('dailyByaheProfit').innerText = `₱${totalByaheProfit.toFixed(2)}`;
-      document.getElementById('dailyTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${totalCollected.toFixed(2)}`;
       
-      // Net Profit Less Salary & Expenses
       const netProfitLessExpSal = totalNet - (daySalarySum + dayExpensesSum);
       document.getElementById('dailyNetLessExpSal').innerText = `₱${netProfitLessExpSal.toFixed(2)}`;
 
       const finalNetWithBoss = totalNet + dayBossSum;
       document.getElementById('dailyTotalNetProfit').innerText = `₱${finalNetWithBoss.toFixed(2)}`;
-      document.getElementById('dailyTxCount').innerText = count;
 
       window.currentDayNonCash = { byaheCash: nonCashByaheCash, gcash: nonCashGCash, bt: nonCashBT, cheque: nonCashCheque, remainingBalance: dayRemainingBalance, totalCollected, salarySum: daySalarySum, expensesSum: dayExpensesSum };
       loadMoneyBreakdown();
@@ -1373,6 +1377,7 @@
         saveData();
         renderCreditTable();
         generateDailyReport();
+        generateDailyMonthlyAudit();
 
         const modalEl = document.getElementById('editCreditModal');
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
@@ -1381,7 +1386,6 @@
       }
     }
 
-    // --- MASTER PRODUCT LIST & DAILY INVENTORY MANAGEMENT ---
     function addMasterProduct() {
       const name = document.getElementById('masterProductName').value.trim();
       const description = document.getElementById('masterDescription').value.trim();
@@ -1420,10 +1424,7 @@
 
       if (!inventoryDailyLogs[date]) inventoryDailyLogs[date] = {};
       
-      inventoryDailyLogs[date][prodName] = {
-        qtyIn,
-        returnQty
-      };
+      inventoryDailyLogs[date][prodName] = { qtyIn, returnQty };
 
       saveData();
       renderInventoryTables();
@@ -1523,9 +1524,7 @@
           <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       `;
-      setTimeout(() => {
-        container.innerHTML = '';
-      }, 4000);
+      setTimeout(() => { container.innerHTML = ''; }, 4000);
     }
 
     function addExpenseItem() {
@@ -1544,6 +1543,9 @@
 
       saveData();
       renderStandaloneExpensesLedger();
+      generateDailyMonthlyAudit();
+      generateDailyReport();
+
       document.getElementById('expenseTitle').value = '';
       document.getElementById('expenseAmount').value = '';
       showExpenseAlert('Tagumpay na naidagdag ang Salary o Expense record!', 'success');
@@ -1639,6 +1641,8 @@
 
         saveData();
         renderStandaloneExpensesLedger();
+        generateDailyReport();
+        generateDailyMonthlyAudit();
 
         const modalEl = document.getElementById('editExpenseModal');
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
@@ -1653,6 +1657,8 @@
         if (monthlyExpensesData[date].length === 0) delete monthlyExpensesData[date];
         saveData();
         renderStandaloneExpensesLedger();
+        generateDailyReport();
+        generateDailyMonthlyAudit();
         showExpenseAlert('Matagumpay na nabura ang record.', 'warning');
       }
     }
@@ -1672,6 +1678,9 @@
 
       saveData();
       renderStandaloneBossLedger();
+      generateDailyReport();
+      generateDailyMonthlyAudit();
+
       document.getElementById('bossTitle').value = '';
       document.getElementById('bossAmount').value = '';
       alert('Matagumpay na nai-record kay Boss!');
@@ -1714,6 +1723,8 @@
         if (bossLedgerData[date].length === 0) delete bossLedgerData[date];
         saveData();
         renderStandaloneBossLedger();
+        generateDailyReport();
+        generateDailyMonthlyAudit();
       }
     }
 
@@ -1974,6 +1985,7 @@
         generateDailyReport();
         renderCreditTable();
         renderInventoryTables();
+        generateDailyMonthlyAudit();
       }
     }
   </script>

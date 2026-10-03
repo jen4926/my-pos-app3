@@ -184,7 +184,6 @@
               </div>
             </div>
 
-            <!-- MULTI-PAYMENT BREAKDOWN -->
             <div id="multiPaymentFields" class="multi-payment-fields">
               <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-wallet me-2"></i>Multi-Payment Breakdown</h6>
               <div class="row g-2">

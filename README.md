@@ -1,11 +1,52 @@
 <!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>my-pos-app3</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="my-pos-app3" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="https://jen4926.github.io/my-pos-app3/" />
+<meta property="og:url" content="https://jen4926.github.io/my-pos-app3/" />
+<meta property="og:site_name" content="my-pos-app3" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="my-pos-app3" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","headline":"my-pos-app3","name":"my-pos-app3","url":"https://jen4926.github.io/my-pos-app3/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/my-pos-app3/assets/css/style.css?v=f616dfe8687bfe47f2729e6c3d6ca143b91f44b4">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/my-pos-app3/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      <h1><a href="https://jen4926.github.io/my-pos-app3/">my-pos-app3</a></h1>
+      
+
+      <p>&lt;!DOCTYPE html&gt;</p>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RMVillasis Enterprises POS, Daily Report & Audit</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RMVillasis Enterprises POS, Daily Report &amp; Audit</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .navbar { background-color: #0d47a1; }
@@ -13,7 +54,7 @@
     .nav-pills .nav-link.active { background-color: #1976d2; }
     .nav-pills .nav-link { color: #fff; margin-right: 5px; }
     .nav-pills .nav-link:hover { background-color: rgba(255,255,255,0.2); }
-    .credit-fields, .container-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
+    .credit-fields, .container-fields, .multi-payment-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
    
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
     .inventory-input { width: 95px; text-align: center; }
@@ -66,11 +107,11 @@
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label fw-semibold">Username:</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. admin" required>
+          <input type="text" id="loginUsername" class="form-control" placeholder="e.g. admin" required="" />
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold">Password:</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required="" />
         </div>
         <div id="loginError" class="alert alert-danger p-2 small d-none">
           Mali ang username o password!
@@ -99,12 +140,12 @@
         </li>
         <li class="nav-item">
           <button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable(); renderStandalonePayments();">
-            <i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments
+            <i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang &amp; Payments
           </button>
         </li>
         <li class="nav-item">
           <button class="nav-link" id="search-tab" data-bs-toggle="pill" data-bs-target="#search-content" type="button">
-            <i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup &amp; Last Price
           </button>
         </li>
         <li class="nav-item">
@@ -114,7 +155,7 @@
         </li>
         <li class="nav-item">
           <button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button" onclick="renderStandaloneExpensesLedger()">
-            <i class="fa-solid fa-receipt me-1"></i> Salary & Expenses
+            <i class="fa-solid fa-receipt me-1"></i> Salary &amp; Expenses
           </button>
         </li>
         <li class="nav-item">
@@ -143,8 +184,8 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-end text-small shadow">
             <li><a class="dropdown-item" href="#" onclick="openChangeProfileModal()"><i class="fa-solid fa-key me-2"></i>Change Name / Password</a></li>
-            <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users & Admins</a></li>
-            <li><hr class="dropdown-divider"></li>
+            <li class="admin-only"><a class="dropdown-item" href="#" onclick="openUserManagementModal()"><i class="fa-solid fa-users-gear me-2"></i>Manage Users &amp; Admins</a></li>
+            <li><hr class="dropdown-divider" /></li>
             <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2">Tag Out</i></a></li>
           </ul>
         </div>
@@ -171,7 +212,7 @@
               <i class="fa-solid fa-info-circle me-1"></i> <strong>Mode:</strong> Pwede kang magpasok ng item para sa Inventory Lang (Walang halaga/presyo) para sa nakaraang petsa.
             </div>
             <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="inventoryOnlyMode" onchange="toggleInventoryOnlyMode()">
+              <input class="form-check-input" type="checkbox" id="inventoryOnlyMode" onchange="toggleInventoryOnlyMode()" />
               <label class="form-check-label fw-semibold" for="inventoryOnlyMode">Inventory Only Mode (No Price/Cost)</label>
             </div>
           </div>
@@ -180,16 +221,16 @@
             <div class="row g-3 mb-3">
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Date of Sale / Log:</label>
-                <input type="date" id="saleDate" class="form-control" required>
+                <input type="date" id="saleDate" class="form-control" required="" />
                 <small class="text-muted">Palitan ang petsa kung ito ay para sa nakaraang araw.</small>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Customer / Reference Name:</label>
-                <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz o Stock In" required>
+                <input type="text" id="customerName" class="form-control" placeholder="e.g., Juan Dela Cruz o Stock In" required="" />
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Transaction Location / Uri:</label>
-                <select id="transactionLocation" class="form-select" required>
+                <select id="transactionLocation" class="form-select" required="">
                   <option value="Hiway">Hiway</option>
                   <option value="Byahe">Byahe</option>
                   <option value="Inventory Only">Inventory Only / Stock Update</option>
@@ -234,11 +275,11 @@
                 </div>
                 <div class="col-md-4 container-qty-group" style="display: none;">
                   <label class="form-label fw-semibold">Ilang Container / Lalagyan:</label>
-                  <input type="number" step="any" min="0.5" id="containerQty" class="form-control" value="1" placeholder="Hal. 2">
+                  <input type="number" step="any" min="0.5" id="containerQty" class="form-control" value="1" placeholder="Hal. 2" />
                 </div>
                 <div class="col-md-4 container-deposit-group" style="display: none;">
                   <label class="form-label fw-semibold">Halaga ng Deposito bawat Isa (₱):</label>
-                  <input type="number" step="0.01" min="0" id="containerDepositRate" class="form-control" placeholder="0.00" oninput="calculateTotal()">
+                  <input type="number" step="0.01" min="0" id="containerDepositRate" class="form-control" placeholder="0.00" oninput="calculateTotal()" />
                 </div>
               </div>
             </div>
@@ -246,7 +287,7 @@
             <div class="row g-3 mt-2" id="financialSectionBox">
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Total Amount (₱) <small class="text-muted">(Inc. Deposit)</small>:</label>
-                <input type="number" step="0.01" id="totalAmount" class="form-control bg-light fs-5 fw-bold text-primary" readonly placeholder="0.00">
+                <input type="number" step="0.01" id="totalAmount" class="form-control bg-light fs-5 fw-bold text-primary" readonly="" placeholder="0.00" />
               </div>
 
               <div class="col-md-4">
@@ -260,13 +301,38 @@
 
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Payment Method:</label>
-                <select id="paymentMethod" class="form-select">
+                <select id="paymentMethod" class="form-select" onchange="togglePaymentMethodFields()">
                   <option value="Cash">Cash</option>
                   <option value="Byahe Cash">Byahe Cash</option>
                   <option value="GCash">GCash</option>
                   <option value="Bank Transfer">Bank Transfer (BT)</option>
                   <option value="Cheque">Cheque</option>
+                  <option value="Multi-Payment">Multi-Payment (Cash + GCash/Iba pa)</option>
                 </select>
+              </div>
+            </div>
+
+            <!-- MULTI-PAYMENT BREAKDOWN SECTION -->
+            <div id="multiPaymentFields" class="multi-payment-fields">
+              <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-wallet me-2"></i>Hati ng Bayad (Multi-Payment Breakdown)</h6>
+              <p class="text-muted small mb-2">Ilagay kung magkano ang napunta sa bawat uri ng bayad. Ang Cash portion lamang ang awtomatikong isasama sa Drawer Cash Target.</p>
+              <div class="row g-2">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Cash Amount (₱):</label>
+                  <input type="number" step="0.01" id="multiCashAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">GCash Amount (₱):</label>
+                  <input type="number" step="0.01" id="multiGcashAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Bank Transfer / BT (₱):</label>
+                  <input type="number" step="0.01" id="multiBTAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Byahe Cash / Iba pa (₱):</label>
+                  <input type="number" step="0.01" id="multiOtherAmt" class="form-control form-control-sm" placeholder="0.00" value="0.00" />
+                </div>
               </div>
             </div>
 
@@ -275,15 +341,15 @@
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label fw-semibold">Amount Paid Now (₱):</label>
-                  <input type="number" step="0.01" id="amountPaidNow" class="form-control" value="0.00" oninput="calculateBalance()">
+                  <input type="number" step="0.01" id="amountPaidNow" class="form-control" value="0.00" oninput="calculateBalance()" />
                 </div>
                 <div class="col-md-4">
                   <label class="form-label fw-semibold">Remaining Balance (₱):</label>
-                  <input type="number" step="0.01" id="remainingBalance" class="form-control bg-light" readonly value="0.00">
+                  <input type="number" step="0.01" id="remainingBalance" class="form-control bg-light" readonly="" value="0.00" />
                 </div>
                 <div class="col-md-4">
                   <label class="form-label fw-semibold">Due Date:</label>
-                  <input type="date" id="dueDate" class="form-control">
+                  <input type="date" id="dueDate" class="form-control" />
                 </div>
               </div>
             </div>
@@ -299,10 +365,10 @@
       <div class="tab-pane fade" id="daily-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales & Encoded Logs</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales &amp; Encoded Logs</h4>
             <div class="d-flex gap-2 align-items-center">
               <label class="fw-bold me-1">Select Date:</label>
-              <input type="date" id="dailyReportDate" class="form-control" onchange="generateDailyReport()">
+              <input type="date" id="dailyReportDate" class="form-control" onchange="generateDailyReport()" />
               <button class="btn btn-outline-primary ms-2" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Report
               </button>
@@ -314,7 +380,7 @@
               <div class="card p-3 stat-card bg-light">
                 <span class="text-muted small fw-bold">HIWAY SALES / PROFIT</span>
                 <div class="mt-1">
-                  <span class="text-primary fw-bold" id="dailyHiwaySales">₱0.00</span> <small class="text-muted">(Sales)</small><br>
+                  <span class="text-primary fw-bold" id="dailyHiwaySales">₱0.00</span> <small class="text-muted">(Sales)</small><br />
                   <span class="text-success small fw-bold" id="dailyHiwayProfit">₱0.00</span> <small class="text-muted">(Net)</small>
                 </div>
               </div>
@@ -323,25 +389,25 @@
               <div class="card p-3 stat-card bg-light" style="border-left-color: #00897b;">
                 <span class="text-muted small fw-bold">BYAHE SALES / PROFIT</span>
                 <div class="mt-1">
-                  <span class="text-primary fw-bold" id="dailyByaheSales">₱0.00</span> <small class="text-muted">(Sales)</small><br>
+                  <span class="text-primary fw-bold" id="dailyByaheSales">₱0.00</span> <small class="text-muted">(Sales)</small><br />
                   <span class="text-success small fw-bold" id="dailyByaheProfit">₱0.00</span> <small class="text-muted">(Net)</small>
                 </div>
               </div>
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">TOTAL COLLECTION & NET</span>
+                <span class="text-muted small fw-bold">TOTAL COLLECTION &amp; NET</span>
                 <div class="mt-1">
-                  <span class="text-success fw-bold" id="dailyTotalCollected">₱0.00</span> <small class="text-muted">(Coll)</small><br>
+                  <span class="text-success fw-bold" id="dailyTotalCollected">₱0.00</span> <small class="text-muted">(Coll)</small><br />
                   <span class="text-success fw-bold" id="dailyTotalNetProfit">₱0.00</span> <small class="text-muted">(Net)</small>
                 </div>
               </div>
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;">
-                <span class="text-muted small fw-bold">TOTAL SALES & TX</span>
+                <span class="text-muted small fw-bold">TOTAL SALES &amp; TX</span>
                 <div class="mt-1">
-                  <span class="text-primary fw-bold" id="dailyTotalSales">₱0.00</span> <small class="text-muted">(Total)</small><br>
+                  <span class="text-primary fw-bold" id="dailyTotalSales">₱0.00</span> <small class="text-muted">(Total)</small><br />
                   <span class="text-warning fw-bold" id="dailyTxCount">0</span> <small class="text-muted">(Count)</small>
                 </div>
               </div>
@@ -370,38 +436,38 @@
                     <tbody>
                       <tr>
                         <td class="fw-semibold text-primary">₱1,000</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="1000" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
-                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="1000" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)" /></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly="" value="0.00" /></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱500</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="500" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
-                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="500" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)" /></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly="" value="0.00" /></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱200</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="200" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
-                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="200" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)" /></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly="" value="0.00" /></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱100</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="100" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
-                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="100" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)" /></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly="" value="0.00" /></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱50</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="50" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
-                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="50" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)" /></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly="" value="0.00" /></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">₱20</td>
-                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="20" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
-                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly value="0.00"></td>
+                        <td><input type="number" min="0" class="form-control form-control-sm text-center denom-count" data-denom="20" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)" /></td>
+                        <td><input type="text" class="form-control form-control-sm bg-light denom-subtotal" readonly="" value="0.00" /></td>
                       </tr>
                       <tr>
                         <td class="fw-semibold text-primary">Coins / Barya</td>
                         <td><span class="text-muted small">Kabuuang Barya</span></td>
-                        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)"></td>
+                        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm denom-coins" placeholder="0.00" oninput="calculateMoneyBreakdown()" onkeydown="handleEnterNext(event, this)" /></td>
                       </tr>
                     </tbody>
                     <tfoot class="table-secondary fw-bold">
@@ -418,11 +484,11 @@
               <!-- CASH VERIFICATION / DISCREPANCY COMPARISON -->
               <div class="col-md-5 d-flex flex-column justify-content-between">
                 <div class="card p-3 bg-white h-100 border">
-                  <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fa-solid fa-scale-balanced me-2"></i>Cash Audit & Deductions</h6>
+                  <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fa-solid fa-scale-balanced me-2"></i>Cash Audit &amp; Deductions</h6>
                  
                   <div class="mb-3 bg-warning-subtle p-2 rounded border border-warning">
                     <label class="form-label fw-bold text-dark small mb-1"><i class="fa-solid fa-wallet me-1"></i> Pondo / Change Fund (Idaragdag):</label>
-                    <input type="number" step="0.01" min="0" class="form-control form-control-sm fw-bold denom-fund bg-white" id="cashFundInput" placeholder="0.00" oninput="calculateMoneyBreakdown()">
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm fw-bold denom-fund bg-white" id="cashFundInput" placeholder="0.00" oninput="calculateMoneyBreakdown()" />
                   </div>
 
                   <div class="d-flex justify-content-between align-items-center mb-1">
@@ -450,7 +516,7 @@
                     <span class="text-danger small" id="lessCheque">-₱0.00</span>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="text-muted small text-danger">Less: Salary & Expenses (Cash Out):</span>
+                    <span class="text-muted small text-danger">Less: Salary &amp; Expenses (Cash Out):</span>
                     <span class="text-danger small" id="lessExpenses">-₱0.00</span>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mb-1">
@@ -458,7 +524,7 @@
                     <span class="text-danger small" id="lessRemainingBalance">-₱0.00</span>
                   </div>
 
-                  <hr class="my-1">
+                  <hr class="my-1" />
 
                   <div class="d-flex justify-content-between align-items-center my-2 bg-light p-2 rounded">
                     <span class="fw-bold text-dark">Target Cash in Drawer (Sales + Payment):</span>
@@ -519,7 +585,7 @@
       <div class="tab-pane fade" id="credit-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit & Utang Ledger</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-users-viewfinder me-2"></i>Customer Credit &amp; Utang Ledger</h4>
             <div class="d-flex gap-2 align-items-center">
               <button class="btn btn-outline-secondary" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Utang List
@@ -532,10 +598,10 @@
 
           <!-- STANDALONE MANUAL PAYMENT / COLLECTION LEDGER TABLE -->
           <div class="card p-3 bg-light border mb-4">
-            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-receipt me-2"></i>Standalone Manual Payments & Collections History (Araw-arawang Bayad sa Lumang Utang)</h6>
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-receipt me-2"></i>Standalone Manual Payments &amp; Collections History (Araw-arawang Bayad sa Lumang Utang)</h6>
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="searchStandalonePaymentInput" class="form-control" placeholder="I-search ang pangalan ng customer o petsa..." oninput="renderStandalonePayments()">
+              <input type="text" id="searchStandalonePaymentInput" class="form-control" placeholder="I-search ang pangalan ng customer o petsa..." oninput="renderStandalonePayments()" />
             </div>
             <div class="table-responsive">
               <table class="table table-bordered align-middle bg-white">
@@ -603,11 +669,11 @@
         </div>
       </div>
 
-      <!-- ================= 3.5 CUSTOMER ORDER LOOKUP TAB ================= -->
+      <!-- ================= 3.5 CUSTOMER ORDER LOOKUP & LAST PRICE TAB ================= -->
       <div class="tab-pane fade" id="search-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-magnifying-glass me-2"></i>Track Customer Last Order & History</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-magnifying-glass me-2"></i>Track Customer Last Order &amp; Last Price Review</h4>
             <button class="btn btn-outline-secondary" onclick="window.print()">
               <i class="fa-solid fa-print me-1"></i> Print Customer Record
             </button>
@@ -615,11 +681,11 @@
          
           <div class="row g-2 mb-4">
             <div class="col-md-9">
-              <input type="text" id="searchCustomerInput" class="form-control form-control-lg" placeholder="I-type ang pangalan ng Customer (e.g. Juan Dela Cruz)">
+              <input type="text" id="searchCustomerInput" class="form-control form-control-lg" placeholder="I-type ang pangalan ng Customer (e.g. Juan Dela Cruz)" />
             </div>
             <div class="col-md-3">
               <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="searchCustomerOrder()">
-                <i class="fa-solid fa-search me-2"></i>Search Order
+                <i class="fa-solid fa-search me-2"></i>Search Order &amp; Price
               </button>
             </div>
           </div>
@@ -627,7 +693,7 @@
           <div id="searchResultContainer" style="display: none;">
             <div class="card bg-light border-primary mb-4">
               <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-                <span><i class="fa-solid fa-receipt me-2"></i>Huling Order (Last Order Details)</span>
+                <span><i class="fa-solid fa-receipt me-2"></i>Huling Order at Huling Presyo (Last Order &amp; Last Price Review)</span>
                 <span id="lastOrderBadge" class="badge bg-warning text-dark fs-6">Status</span>
               </div>
               <div class="card-body">
@@ -645,10 +711,25 @@
                     <h5 class="fw-bold text-dark" id="lastOrderContainer">-</h5>
                   </div>
                   <div class="col-md-12">
-                    <p class="mb-1 text-muted small fw-bold">ITEMS / PRODUCTS BOUGHT:</p>
-                    <p class="fs-5 text-dark fw-semibold mb-0" id="lastOrderProducts">-</p>
+                    <p class="mb-1 text-muted small fw-bold">DETALYADONG LISTAHAN NG HULING BINILI (Items, Qty &amp; Last Price):</p>
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered bg-white align-middle" id="lastOrderItemsTable">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Product Name</th>
+                            <th>Description</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Last Price / Unit (₱)</th>
+                            <th class="text-end">Subtotal (₱)</th>
+                          </tr>
+                        </thead>
+                        <tbody id="lastOrderItemsBody">
+                          <!-- Dynamic Last Order Items -->
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <hr class="my-2">
+                  <hr class="my-2" />
                   <div class="col-md-4">
                     <p class="mb-1 text-muted small fw-bold">TOTAL AMOUNT:</p>
                     <h4 class="fw-bold text-primary" id="lastOrderTotal">₱0.00</h4>
@@ -665,14 +746,14 @@
               </div>
             </div>
 
-            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lahat ng Naging Transaksyon ni Customer (Complete History)</h6>
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lahat ng Naging Transaksyon at Na-encode na Detalye ni Customer (Complete History)</h6>
             <div class="table-responsive">
               <table class="table table-bordered table-hover align-middle bg-white">
                 <thead class="table-dark">
                   <tr>
                     <th>Date</th>
                     <th>Location</th>
-                    <th>Products</th>
+                    <th>Products &amp; Price Details</th>
                     <th>Container</th>
                     <th>Total (₱)</th>
                     <th>Paid (₱)</th>
@@ -699,7 +780,7 @@
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management & Product Cost</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Management &amp; Product Cost</h4>
             <div class="d-flex gap-2">
               <button class="btn btn-outline-secondary" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Inventory
@@ -716,15 +797,15 @@
           <!-- PER-DAY INVENTORY SHEET VIEW -->
           <div class="card p-3 bg-light border mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Per-Day Inventory Sheet (Beginning, Out/Sold & Ending)</h5>
+              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Per-Day Inventory Sheet (Beginning, Out/Sold &amp; Ending)</h5>
               <div class="d-flex align-items-center gap-2">
                 <label class="fw-bold small">Piliin ang Araw (Date):</label>
-                <input type="date" id="inventorySheetDate" class="form-control form-control-sm" onchange="renderDailyInventorySheet()">
+                <input type="date" id="inventorySheetDate" class="form-control form-control-sm" onchange="renderDailyInventorySheet()" />
               </div>
             </div>
            
             <!-- Per-Day Table 1: Palm & Coco -->
-            <h6 class="fw-bold text-primary mb-2">Palm & Coco Inventory Sheet</h6>
+            <h6 class="fw-bold text-primary mb-2">Palm &amp; Coco Inventory Sheet</h6>
             <div class="table-responsive mb-4">
               <table class="table table-bordered table-hover align-middle bg-white">
                 <thead class="table-dark text-center">
@@ -765,7 +846,7 @@
           </div>
 
           <!-- Master Inventory Table 1: Palm & Coco -->
-          <h5 class="fw-bold text-primary mb-2">Palm & Coco Inventory Master List</h5>
+          <h5 class="fw-bold text-primary mb-2">Palm &amp; Coco Inventory Master List</h5>
           <div class="table-responsive mb-4">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark text-center">
@@ -813,11 +894,11 @@
 
           <div class="card p-3 bg-light border mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Talaan kung kelan nagdadagdag ng Produkto (Stock-In History & Supplier)</h5>
+              <h5 class="fw-bold text-secondary m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Talaan kung kelan nagdadagdag ng Produkto (Stock-In History &amp; Supplier)</h5>
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="searchStockInInput" class="form-control" placeholder="I-search ang pangalan ng produkto, supplier o petsa..." oninput="renderStockInHistory()">
+              <input type="text" id="searchStockInInput" class="form-control" placeholder="I-search ang pangalan ng produkto, supplier o petsa..." oninput="renderStockInHistory()" />
             </div>
             <div class="table-responsive">
               <table class="table table-bordered table-hover align-middle bg-white">
@@ -865,7 +946,7 @@
       <div class="tab-pane fade" id="expenses-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger (Araw-arawang Nagastos)</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-receipt me-2"></i>Salary &amp; Expenses Ledger (Araw-arawang Nagastos)</h4>
             <div class="d-flex gap-2 align-items-center">
               <button class="btn btn-outline-secondary" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Expenses Ledger
@@ -879,10 +960,10 @@
                 <label class="fw-bold small text-nowrap">View:</label>
                 <select id="expenseViewMode" class="form-select form-select-sm" onchange="toggleExpenseViewMode()">
                   <option value="month">Buwanan (Month)</option>
-                  <option value="day" selected>Pangkalahatang Araw (Per Day)</option>
+                  <option value="day" selected="">Pangkalahatang Araw (Per Day)</option>
                 </select>
-                <input type="month" id="standaloneExpenseMonth" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneExpensesLedger()">
-                <input type="date" id="standaloneExpenseDate" class="form-control form-control-sm" onchange="renderStandaloneExpensesLedger()">
+                <input type="month" id="standaloneExpenseMonth" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneExpensesLedger()" />
+                <input type="date" id="standaloneExpenseDate" class="form-control form-control-sm" onchange="renderStandaloneExpensesLedger()" />
               </div>
             </div>
           </div>
@@ -911,7 +992,7 @@
 
           <div class="input-group mb-3">
             <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-            <input type="text" id="searchStandaloneExpenseInput" class="form-control" placeholder="I-search ang petsa, pangalan ng sahod o expenses..." oninput="renderStandaloneExpensesLedger()">
+            <input type="text" id="searchStandaloneExpenseInput" class="form-control" placeholder="I-search ang petsa, pangalan ng sahod o expenses..." oninput="renderStandaloneExpensesLedger()" />
           </div>
 
           <div class="table-responsive">
@@ -941,7 +1022,7 @@
       <div class="tab-pane fade" id="boss-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Ledger (Capital & Withdrawals)</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Ledger (Capital &amp; Withdrawals)</h4>
             <div class="d-flex gap-2 align-items-center">
               <button class="btn btn-outline-secondary" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Boss Ledger
@@ -957,8 +1038,8 @@
                   <option value="month">Buwanan (Month)</option>
                   <option value="day">Pangkalahatang Araw (Per Day)</option>
                 </select>
-                <input type="month" id="standaloneBossMonth" class="form-control form-control-sm" onchange="renderStandaloneBossLedger()">
-                <input type="date" id="standaloneBossDate" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneBossLedger()">
+                <input type="month" id="standaloneBossMonth" class="form-control form-control-sm" onchange="renderStandaloneBossLedger()" />
+                <input type="date" id="standaloneBossDate" class="form-control form-control-sm" style="display: none;" onchange="renderStandaloneBossLedger()" />
               </div>
             </div>
           </div>
@@ -987,7 +1068,7 @@
 
           <div class="input-group mb-3">
             <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-            <input type="text" id="searchStandaloneBossInput" class="form-control" placeholder="I-search ang petsa, uri o notes sa D/Eco Boss ledger..." oninput="renderStandaloneBossLedger()">
+            <input type="text" id="searchStandaloneBossInput" class="form-control" placeholder="I-search ang petsa, uri o notes sa D/Eco Boss ledger..." oninput="renderStandaloneBossLedger()" />
           </div>
 
           <div class="table-responsive">
@@ -1015,7 +1096,7 @@
       <div class="tab-pane fade" id="audit-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Net Profit Computation</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit &amp; Net Profit Computation</h4>
             <div class="d-flex gap-2 align-items-center">
               <button class="btn btn-outline-secondary" onclick="window.print()">
                 <i class="fa-solid fa-print me-1"></i> Print Audit Report
@@ -1024,16 +1105,16 @@
                 <i class="fa-solid fa-user-tie me-1"></i> Add D/Eco Boss Adjustment
               </button>
               <label class="fw-bold me-1">Filter Month:</label>
-              <input type="month" id="auditMonth" class="form-control" onchange="generateMonthlyAudit()">
+              <input type="month" id="auditMonth" class="form-control" onchange="generateMonthlyAudit()" />
             </div>
           </div>
 
           <!-- GLOBAL SEARCH LAHAT NG TRANSAKSIYON -->
           <div class="card p-3 bg-white border mb-4 shadow-sm">
-            <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-magnifying-glass me-2"></i>Search All Transactions & Logs (POS, Daily, Utang, Inventory)</h6>
+            <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-magnifying-glass me-2"></i>Search All Transactions &amp; Logs (POS, Daily, Utang, Inventory)</h6>
             <div class="row g-2">
               <div class="col-md-9">
-                <input type="text" id="globalSearchInput" class="form-control" placeholder="I-type ang pangalan ng customer, produkto, o petsa (e.g. 2026-06-06 o Juan)..." oninput="renderGlobalSearchResults()">
+                <input type="text" id="globalSearchInput" class="form-control" placeholder="I-type ang pangalan ng customer, produkto, o petsa (e.g. 2026-06-06 o Juan)..." oninput="renderGlobalSearchResults()" />
               </div>
               <div class="col-md-3">
                 <button class="btn btn-outline-primary w-100 fw-semibold" onclick="clearGlobalSearch()"><i class="fa-solid fa-rotate-right me-1"></i> Reset Search</button>
@@ -1164,7 +1245,7 @@
           <!-- SALARY & EXPENSES BREAKDOWN -->
           <div class="card p-3 bg-light mb-4 border">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-receipt me-2"></i>Itemized Salary & Expenses Breakdown</h6>
+              <h6 class="fw-bold text-secondary m-0"><i class="fa-solid fa-receipt me-2"></i>Itemized Salary &amp; Expenses Breakdown</h6>
               <button class="btn btn-sm btn-outline-danger" onclick="addExpenseRow()">
                 <i class="fa-solid fa-plus me-1"></i> Add Expense Line
               </button>
@@ -1172,7 +1253,7 @@
            
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="searchExpenseInput" class="form-control" placeholder="I-search ang pangalan ng Salary o Expense o petsa..." oninput="renderExpensesTable()">
+              <input type="text" id="searchExpenseInput" class="form-control" placeholder="I-search ang pangalan ng Salary o Expense o petsa..." oninput="renderExpensesTable()" />
             </div>
 
             <div class="table-responsive">
@@ -1208,7 +1289,7 @@
            
             <div class="input-group mb-3">
               <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <input type="text" id="searchBossInput" class="form-control" placeholder="I-search ang petsa, uri o notes sa D/Eco Boss log..." oninput="generateMonthlyAudit()">
+              <input type="text" id="searchBossInput" class="form-control" placeholder="I-search ang petsa, uri o notes sa D/Eco Boss log..." oninput="generateMonthlyAudit()" />
             </div>
 
             <div class="table-responsive">
@@ -1249,19 +1330,19 @@
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label fw-semibold">Date (Petsa ng Bayad):</label>
-              <input type="date" id="stdPayDate" class="form-control" required>
+              <input type="date" id="stdPayDate" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Customer Name:</label>
-              <input type="text" id="stdPayCustomer" class="form-control" placeholder="e.g. Juan Dela Cruz" required>
+              <input type="text" id="stdPayCustomer" class="form-control" placeholder="e.g. Juan Dela Cruz" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Amount Paid (₱):</label>
-              <input type="number" step="0.01" min="0.01" id="stdPayAmount" class="form-control" placeholder="0.00" required>
+              <input type="number" step="0.01" min="0.01" id="stdPayAmount" class="form-control" placeholder="0.00" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Payment Method:</label>
-              <select id="stdPayMethod" class="form-select" required>
+              <select id="stdPayMethod" class="form-select" required="">
                 <option value="Cash">Cash</option>
                 <option value="Byahe Cash">Byahe Cash</option>
                 <option value="GCash">GCash</option>
@@ -1271,7 +1352,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Notes / Remarks (Optional):</label>
-              <input type="text" id="stdPayNotes" class="form-control" placeholder="e.g., Bayad sa lumang utang na hindi naka-encode">
+              <input type="text" id="stdPayNotes" class="form-control" placeholder="e.g., Bayad sa lumang utang na hindi naka-encode" />
             </div>
           </div>
           <div class="modal-footer">
@@ -1293,28 +1374,28 @@
         </div>
         <form id="paymentForm">
           <div class="modal-body">
-            <input type="hidden" id="payTxId">
+            <input type="hidden" id="payTxId" />
             <div class="mb-3">
               <label class="form-label fw-semibold">Customer Name:</label>
-              <input type="text" id="payCustomerName" class="form-control bg-light" readonly>
+              <input type="text" id="payCustomerName" class="form-control bg-light" readonly="" />
             </div>
             <div class="row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Total Amount (₱):</label>
-                <input type="text" id="payTotalAmount" class="form-control bg-light" readonly>
+                <input type="text" id="payTotalAmount" class="form-control bg-light" readonly="" />
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Remaining Balance (₱):</label>
-                <input type="text" id="payRemainingBalance" class="form-control bg-light text-danger fw-bold" readonly>
+                <input type="text" id="payRemainingBalance" class="form-control bg-light text-danger fw-bold" readonly="" />
               </div>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Amount to Pay Now (₱):</label>
-              <input type="number" step="0.01" min="0.01" id="payAmountNow" class="form-control" required placeholder="0.00">
+              <input type="number" step="0.01" min="0.01" id="payAmountNow" class="form-control" required="" placeholder="0.00" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Payment Method:</label>
-              <select id="payMethod" class="form-select" required>
+              <select id="payMethod" class="form-select" required="">
                 <option value="Cash">Cash</option>
                 <option value="Byahe Cash">Byahe Cash</option>
                 <option value="GCash">GCash</option>
@@ -1324,7 +1405,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Date of Payment:</label>
-              <input type="date" id="payDate" class="form-control" required>
+              <input type="date" id="payDate" class="form-control" required="" />
             </div>
           </div>
           <div class="modal-footer">
@@ -1341,23 +1422,23 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Transaction & Cost</h5>
+          <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Transaction &amp; Cost</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <form id="editTransactionForm">
           <div class="modal-body">
-            <input type="hidden" id="editTxId">
+            <input type="hidden" id="editTxId" />
             <div class="mb-3">
               <label class="form-label fw-semibold">Date (Petsa):</label>
-              <input type="date" id="editTxDate" class="form-control" required>
+              <input type="date" id="editTxDate" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Customer Name:</label>
-              <input type="text" id="editCustomerName" class="form-control" required>
+              <input type="text" id="editCustomerName" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Location / Uri:</label>
-              <select id="editLocation" class="form-select" required>
+              <select id="editLocation" class="form-select" required="">
                 <option value="Hiway">Hiway</option>
                 <option value="Byahe">Byahe</option>
                 <option value="Inventory Only">Inventory Only</option>
@@ -1365,30 +1446,30 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Products Bought:</label>
-              <input type="text" id="editProduct" class="form-control" required>
+              <input type="text" id="editProduct" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Container Status:</label>
-              <input type="text" id="editContainerInfo" class="form-control">
+              <input type="text" id="editContainerInfo" class="form-control" />
             </div>
             <div class="row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Total Cost / Puhunan (₱):</label>
-                <input type="number" step="0.01" id="editTotalCost" class="form-control" required>
+                <input type="number" step="0.01" id="editTotalCost" class="form-control" required="" />
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Total Amount (₱):</label>
-                <input type="number" step="0.01" id="editTotal" class="form-control" required oninput="calculateEditBalance()">
+                <input type="number" step="0.01" id="editTotal" class="form-control" required="" oninput="calculateEditBalance()" />
               </div>
             </div>
             <div class="row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Paid Amount (₱):</label>
-                <input type="number" step="0.01" id="editPaid" class="form-control" required oninput="calculateEditBalance()">
+                <input type="number" step="0.01" id="editPaid" class="form-control" required="" oninput="calculateEditBalance()" />
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Remaining Balance (₱):</label>
-                <input type="number" step="0.01" id="editBalance" class="form-control bg-light" readonly>
+                <input type="number" step="0.01" id="editBalance" class="form-control bg-light" readonly="" />
               </div>
             </div>
           </div>
@@ -1413,11 +1494,11 @@
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label fw-semibold">Display Name:</label>
-              <input type="text" id="profDisplayName" class="form-control" required>
+              <input type="text" id="profDisplayName" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">New Password:</label>
-              <input type="password" id="profPassword" class="form-control" placeholder="Iwanang blangko kung ayaw palitan">
+              <input type="password" id="profPassword" class="form-control" placeholder="Iwanang blangko kung ayaw palitan" />
             </div>
           </div>
           <div class="modal-footer">
@@ -1434,20 +1515,20 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title"><i class="fa-solid fa-users-gear me-2"></i>User & Admin Accounts Management</h5>
+          <h5 class="modal-title"><i class="fa-solid fa-users-gear me-2"></i>User &amp; Admin Accounts Management</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <h6 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-plus me-1"></i>Add New System User / Admin</h6>
           <form id="newUserForm" class="row g-2 mb-4 bg-light p-3 border rounded">
             <div class="col-md-3">
-              <input type="text" id="newAccName" class="form-control form-control-sm" placeholder="Full Name" required>
+              <input type="text" id="newAccName" class="form-control form-control-sm" placeholder="Full Name" required="" />
             </div>
             <div class="col-md-3">
-              <input type="text" id="newAccUser" class="form-control form-control-sm" placeholder="Username" required>
+              <input type="text" id="newAccUser" class="form-control form-control-sm" placeholder="Username" required="" />
             </div>
             <div class="col-md-3">
-              <input type="password" id="newAccPass" class="form-control form-control-sm" placeholder="Password" required>
+              <input type="password" id="newAccPass" class="form-control form-control-sm" placeholder="Password" required="" />
             </div>
             <div class="col-md-2">
               <select id="newAccRole" class="form-select form-select-sm">
@@ -1493,7 +1574,7 @@
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label fw-semibold">Date:</label>
-              <input type="date" id="bossDate" class="form-control" required>
+              <input type="date" id="bossDate" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Adjustment Type:</label>
@@ -1504,11 +1585,11 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Amount (₱):</label>
-              <input type="number" step="0.01" id="bossAmount" class="form-control" placeholder="0.00" required>
+              <input type="number" step="0.01" id="bossAmount" class="form-control" placeholder="0.00" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Notes / Description:</label>
-              <input type="text" id="bossNotes" class="form-control" placeholder="e.g., Personal Withdrawal, Additional Capital">
+              <input type="text" id="bossNotes" class="form-control" placeholder="e.g., Personal Withdrawal, Additional Capital" />
             </div>
           </div>
           <div class="modal-footer">
@@ -1530,10 +1611,10 @@
         </div>
         <form id="editBossForm">
           <div class="modal-body">
-            <input type="hidden" id="editBossIndex">
+            <input type="hidden" id="editBossIndex" />
             <div class="mb-3">
               <label class="form-label fw-semibold">Date:</label>
-              <input type="date" id="editBossDate" class="form-control" required>
+              <input type="date" id="editBossDate" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Adjustment Type:</label>
@@ -1544,11 +1625,11 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Amount (₱):</label>
-              <input type="number" step="0.01" id="editBossAmount" class="form-control" placeholder="0.00" required>
+              <input type="number" step="0.01" id="editBossAmount" class="form-control" placeholder="0.00" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Notes / Description:</label>
-              <input type="text" id="editBossNotes" class="form-control" placeholder="e.g., Personal Withdrawal, Additional Capital">
+              <input type="text" id="editBossNotes" class="form-control" placeholder="e.g., Personal Withdrawal, Additional Capital" />
             </div>
           </div>
           <div class="modal-footer">
@@ -1572,29 +1653,29 @@
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label fw-semibold">Date (Petsa ng Stock-In):</label>
-              <input type="date" id="newProdDate" class="form-control" required>
+              <input type="date" id="newProdDate" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Product Name:</label>
-              <input type="text" id="newProdName" class="form-control" placeholder="e.g., Semento" required>
+              <input type="text" id="newProdName" class="form-control" placeholder="e.g., Semento" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Supplier / Galing Kay:</label>
-              <input type="text" id="newProdSupplier" class="form-control" placeholder="e.g. Supplier A, ABC Trading" required>
+              <input type="text" id="newProdSupplier" class="form-control" placeholder="e.g. Supplier A, ABC Trading" required="" />
             </div>
             <div class="row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Cost / Unit (₱):</label>
-                <input type="number" step="0.01" id="newProdCost" class="form-control" placeholder="0.00" value="0.00" required>
+                <input type="number" step="0.01" id="newProdCost" class="form-control" placeholder="0.00" value="0.00" required="" />
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Price / Unit (₱):</label>
-                <input type="number" step="0.01" id="newProdPrice" class="form-control" placeholder="0.00" value="0.00" required>
+                <input type="number" step="0.01" id="newProdPrice" class="form-control" placeholder="0.00" value="0.00" required="" />
               </div>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Quantity (Dami):</label>
-              <input type="number" step="any" id="newProdStock" class="form-control" value="1" min="0.5" required>
+              <input type="number" step="any" id="newProdStock" class="form-control" value="1" min="0.5" required="" />
             </div>
           </div>
           <div class="modal-footer">
@@ -1618,15 +1699,15 @@
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label fw-semibold">Date (Petsa ng Return):</label>
-              <input type="date" id="returnDate" class="form-control" required>
+              <input type="date" id="returnDate" class="form-control" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Product Name (Pangalan ng Item):</label>
-              <input type="text" id="returnProductName" class="form-control" placeholder="e.g. Semento" required>
+              <input type="text" id="returnProductName" class="form-control" placeholder="e.g. Semento" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Quantity na Isinauli (Qty):</label>
-              <input type="number" step="any" id="returnQty" class="form-control" value="1" min="0.5" required>
+              <input type="number" step="any" id="returnQty" class="form-control" value="1" min="0.5" required="" />
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Uri ng Return / Dahilan:</label>
@@ -1637,7 +1718,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Notes / Customer Name:</label>
-              <input type="text" id="returnNotes" class="form-control" placeholder="e.g., Sobrang kuha ni Juan">
+              <input type="text" id="returnNotes" class="form-control" placeholder="e.g., Sobrang kuha ni Juan" />
             </div>
           </div>
           <div class="modal-footer">
@@ -1896,12 +1977,14 @@
       const containerBox = document.getElementById('containerSectionBox');
       const financialBox = document.getElementById('financialSectionBox');
       const creditSection = document.getElementById('creditFieldsSection');
+      const multiBox = document.getElementById('multiPaymentFields');
       const locationSelect = document.getElementById('transactionLocation');
 
       priceCols.forEach(col => col.style.display = isInventoryOnly ? 'none' : '');
       containerBox.style.display = isInventoryOnly ? 'none' : 'block';
       financialBox.style.display = isInventoryOnly ? 'none' : 'flex';
       creditSection.style.display = 'none';
+      multiBox.style.display = 'none';
 
       if(isInventoryOnly) {
         locationSelect.value = 'Inventory Only';
@@ -1920,6 +2003,16 @@
         priceInput.style.display = isInventoryOnly ? 'none' : '';
         subtotalInput.style.display = isInventoryOnly ? 'none' : '';
       });
+    }
+
+    function togglePaymentMethodFields() {
+      const method = document.getElementById('paymentMethod').value;
+      const multiBox = document.getElementById('multiPaymentFields');
+      if (method === 'Multi-Payment') {
+        multiBox.style.display = 'block';
+      } else {
+        multiBox.style.display = 'none';
+      }
     }
 
     function addPosRow() {
@@ -2039,7 +2132,7 @@
       const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
 
       const saleDate = document.getElementById('saleDate').value;
-      const custName = document.getElementById('customerName').value;
+      const custName = document.getElementById('customerName').value.trim();
       const location = document.getElementById('transactionLocation').value;
 
       let total = 0;
@@ -2047,6 +2140,7 @@
       let balance = 0;
       let status = "PAID";
       let method = "Inventory Update";
+      let paymentHistory = [];
 
       if (!isInventoryOnly) {
         total = parseFloat(document.getElementById('totalAmount').value) || 0;
@@ -2060,6 +2154,33 @@
         balance = total - paid;
         if (balance > 0 && paid > 0) status = "PARTIAL";
         if (balance > 0 && paid === 0) status = "UNPAID";
+
+        // Multi-Payment Breakdown Handling
+        if (method === 'Multi-Payment' && paid > 0) {
+          const mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
+          const mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
+          const mBt = parseFloat(document.getElementById('multiBTAmt').value) || 0;
+          const mOther = parseFloat(document.getElementById('multiOtherAmt').value) || 0;
+
+          if (mCash > 0) paymentHistory.push({ amount: mCash, method: 'Cash', date: saleDate });
+          if (mGcash > 0) paymentHistory.push({ amount: mGcash, method: 'GCash', date: saleDate });
+          if (mBt > 0) paymentHistory.push({ amount: mBt, method: 'Bank Transfer', date: saleDate });
+          if (mOther > 0) paymentHistory.push({ amount: mOther, method: 'Byahe Cash', date: saleDate });
+         
+          if (paymentHistory.length === 0) {
+            paymentHistory.push({ amount: paid, method: 'Cash', date: saleDate });
+          }
+        } else if (method === 'GCash' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'GCash', date: saleDate });
+        } else if (method === 'Bank Transfer' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'Bank Transfer', date: saleDate });
+        } else if (method === 'Byahe Cash' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'Byahe Cash', date: saleDate });
+        } else if (method === 'Cheque' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'Cheque', date: saleDate });
+        } else if (paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'Cash', date: saleDate });
+        }
       }
 
       const itemRows = document.querySelectorAll('#posItemsBody tr');
@@ -2076,7 +2197,7 @@
 
         totalCostOfGoods += (qty * cost);
         if(name) {
-          let itemString = desc ? `${name} (${desc}) (x${qty})` : `${name} (x${qty})`;
+          let itemString = desc ? `${name} (${desc}) (x${qty}) - ₱${price.toFixed(2)}` : `${name} (x${qty}) - ₱${price.toFixed(2)}`;
           productSummary.push(itemString);
           itemsPurchasedList.push({
             name: name,
@@ -2137,11 +2258,6 @@
         }
       }
 
-      const paymentHistory = [];
-      if (paid > 0) {
-        paymentHistory.push({ amount: paid, method: method, date: saleDate });
-      }
-
       transactions.push({
         id: Date.now(),
         date: saleDate,
@@ -2165,6 +2281,7 @@
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
       document.getElementById('inventoryOnlyMode').checked = false;
+      document.getElementById('multiPaymentFields').style.display = 'none';
       toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
@@ -2412,7 +2529,7 @@
             <td>${log.product}</td>
             <td class="text-center">${log.qty}</td>
             <td class="text-end">₱${log.cost.toFixed(2)}</td>
-            <td class="text-end">₱${log.price.toFixed(2)}</td>
+            <td class="text-end text-primary fw-semibold">₱${log.price.toFixed(2)}</td>
             <td class="text-end fw-bold text-success">₱${log.total.toFixed(2)}</td>
           </tr>
         `;
@@ -2598,7 +2715,7 @@
         monthlyExpensesData[targetMonthKey] = [];
       }
       monthlyExpensesData[targetMonthKey].push({
-        date: targetDate, // Auto date batay sa napiling petsa o ngayon
+        date: targetDate,
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -2863,7 +2980,7 @@
        
         count++;
 
-        const lastMethod = (t.payments && t.payments.length > 0) ? t.payments[t.payments.length - 1].method : 'N/A';
+        const lastMethod = (t.payments && t.payments.length > 0) ? t.payments.map(p => `${p.method}: ₱${p.amount.toFixed(2)}`).join(', ') : 'N/A';
         let locBadge = '<span class="badge bg-primary">Hiway</span>';
         if (t.location === 'Byahe') locBadge = '<span class="badge bg-info text-dark">Byahe</span>';
         if (t.location === 'Inventory Only') locBadge = '<span class="badge bg-secondary">Inventory Only</span>';
@@ -2880,7 +2997,7 @@
             <td class="text-success">₱${t.paid.toFixed(2)}</td>
             <td class="text-danger">₱${t.balance.toFixed(2)}</td>
             <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
-            <td>${lastMethod}</td>
+            <td><small>${lastMethod}</small></td>
             <td class="text-center no-print">
               <button class="btn btn-sm btn-outline-primary border-0 p-1" onclick="openEditTransactionModal(${t.id})" title="Edit Transaction & Cost">
                 <i class="fa-solid fa-pen-to-square"></i>
@@ -2893,7 +3010,6 @@
         `;
       });
 
-      // ISAMA SA COLLECTION AT DEBT PAYMENTS ANG MGA STANDALONE MANUAL PAYMENTS SA NAPILING PETSA
       if (standalonePayments) {
         standalonePayments.forEach(p => {
           if (p.date === selectedDate) {
@@ -2934,7 +3050,6 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      // I-less o ibabawas ang Remaining Balance (utang) sa cash target para hindi ito masama sa bibilanging cash sa drawer
       currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal - dayRemainingBalance);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
@@ -3176,7 +3291,7 @@
       alert('Tagumpay na naitala ang pagbabayad!');
     });
 
-    // ================= CUSTOMER ORDER LOOKUP =================
+    // ================= CUSTOMER ORDER LOOKUP & LAST PRICE AUDIT =================
     function searchCustomerOrder() {
       const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
       const container = document.getElementById('searchResultContainer');
@@ -3198,10 +3313,28 @@
         document.getElementById('lastOrderCustomer').innerText = last.customer;
         document.getElementById('lastOrderDate').innerText = last.date;
         document.getElementById('lastOrderContainer').innerText = last.containerInfo || 'Wala';
-        document.getElementById('lastOrderProducts').innerText = last.product;
         document.getElementById('lastOrderTotal').innerText = `₱${last.total.toFixed(2)}`;
         document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
         document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
+
+        // RENDER LAST ORDER DETAILED ITEMS & LAST PRICE
+        const lastItemsBody = document.getElementById('lastOrderItemsBody');
+        lastItemsBody.innerHTML = '';
+        if (last.itemsList && last.itemsList.length > 0) {
+          last.itemsList.forEach(li => {
+            lastItemsBody.innerHTML += `
+              <tr>
+                <td class="fw-bold">${li.name}</td>
+                <td>${li.desc || 'N/A'}</td>
+                <td class="text-center">${li.qty}</td>
+                <td class="text-end text-primary fw-bold">₱${li.price.toFixed(2)}</td>
+                <td class="text-end text-success fw-bold">₱${li.subtotal.toFixed(2)}</td>
+              </tr>
+            `;
+          });
+        } else {
+          lastItemsBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Na-encode ang summary: ${last.product}</td></tr>`;
+        }
 
         const badge = document.getElementById('lastOrderBadge');
         if (last.balance === 0) {
@@ -3222,11 +3355,16 @@
           if (item.balance > 0 && item.paid > 0) sBadge = '<span class="badge bg-warning text-dark">PARTIAL</span>';
           else if (item.balance > 0) sBadge = '<span class="badge bg-danger">UNPAID</span>';
 
+          let detailedItemsHtml = item.product;
+          if (item.itemsList && item.itemsList.length > 0) {
+            detailedItemsHtml = item.itemsList.map(i => `${i.name} (x${i.qty}) - ₱${i.price.toFixed(2)}/unit`).join('<br>');
+          }
+
           historyBody.innerHTML += `
             <tr>
               <td>${item.date}</td>
               <td><span class="badge bg-secondary">${item.location}</span></td>
-              <td>${item.product}</td>
+              <td><small>${detailedItemsHtml}</small></td>
               <td>${item.containerInfo || 'Wala'}</td>
               <td>₱${item.total.toFixed(2)}</td>
               <td class="text-success">₱${item.paid.toFixed(2)}</td>
@@ -3260,7 +3398,7 @@
         monthlyExpensesData[auditMonth] = [];
       }
       monthlyExpensesData[auditMonth].push({
-        date: todayFormatted, // Auto date sa kasalukuyang araw
+        date: todayFormatted,
         salaryName: '',
         salaryAmount: 0,
         expenseName: '',
@@ -3424,7 +3562,7 @@
       bossAdjustments.forEach((b, originalIndex) => {
         if (b.date.startsWith(selectedMonth)) {
           let rowText = `${b.date} ${b.type} ${b.amount} ${b.notes}`.toLowerCase();
-          if (searchBossQuery && !rowText.includes(searchQuery)) return;
+          if (searchBossQuery && !rowText.includes(searchBossQuery)) return;
 
           if (!bossByDate[b.date]) {
             bossByDate[b.date] = [];
@@ -3716,7 +3854,7 @@
       const total = parseFloat(document.getElementById('editTotal').value) || 0;
       const paid = parseFloat(document.getElementById('editPaid').value) || 0;
       const balance = Math.max(0, total - paid);
-      document.getElementById('balance').value = balance.toFixed(2);
+      document.getElementById('editBalance').value = balance.toFixed(2);
     }
 
     document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
@@ -3770,4 +3908,12 @@
     }
   </script>
 </body>
+</html>
+
+
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
 </html>

@@ -463,7 +463,7 @@
                     <span class="fw-bold text-success" id="breakdownDebtPayment">+₱0.00</span>
                   </div>
 
-                  <!-- NON-CASH & MULTI-PAYMENT DEDUCTIONS (WALA NA ANG NEGATIVE SIGN SA UI NGUNIT BINABAWAS PA RIN SA TARGET CASH) -->
+                  <!-- NON-CASH & MULTI-PAYMENT DEDUCTIONS -->
                   <div class="bg-light p-2 rounded my-2 border">
                     <span class="d-block fw-bold text-secondary small mb-1"><i class="fa-solid fa-layer-group me-1"></i> Non-Cash & Multi-Payment Deductions:</span>
                     <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
@@ -2124,7 +2124,6 @@
         if (balance > 0 && paid > 0) status = "PARTIAL";
         if (balance > 0 && paid === 0) status = "UNPAID";
 
-        // Multi-Payment Breakdown Handling (Eksaktong pag-save ng bawat hati para ma-less sa target cash)
         if (method === 'Multi-Payment' && paid > 0) {
           let mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
           let mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
@@ -2943,7 +2942,6 @@
           }
         }
        
-        // PAG-ACCUMULATE NG NON-CASH AT MULTI-PAYMENT DEDUCTIONS PARA MA-LESS SA TARGET CASH
         if (t.payments) {
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
@@ -3032,7 +3030,6 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      // DITO GINAGAMIT ANG BRAWL NG MGA NON-CASH AT MULTI-PAYMENT DEDUCTIONS PARA SA TARGET CASH IN DRAWER
       currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - totalNonCashToday - dayExpensesTotal - dayRemainingBalance);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;

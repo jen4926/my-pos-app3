@@ -104,7 +104,7 @@
         </li>
         <li class="nav-item">
           <button class="nav-link" id="search-tab" data-bs-toggle="pill" data-bs-target="#search-content" type="button">
-            <i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup & Last Price
           </button>
         </li>
         <li class="nav-item">
@@ -628,11 +628,11 @@
         </div>
       </div>
 
-      <!-- ================= 3.5 CUSTOMER ORDER LOOKUP TAB ================= -->
+      <!-- ================= 3.5 CUSTOMER ORDER LOOKUP & LAST PRICE TAB ================= -->
       <div class="tab-pane fade" id="search-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-magnifying-glass me-2"></i>Track Customer Last Order & History</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-magnifying-glass me-2"></i>Track Customer Last Order & Last Price Review</h4>
             <button class="btn btn-outline-secondary" onclick="window.print()">
               <i class="fa-solid fa-print me-1"></i> Print Customer Record
             </button>
@@ -644,7 +644,7 @@
             </div>
             <div class="col-md-3">
               <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="searchCustomerOrder()">
-                <i class="fa-solid fa-search me-2"></i>Search Order
+                <i class="fa-solid fa-search me-2"></i>Search Order & Price
               </button>
             </div>
           </div>
@@ -652,7 +652,7 @@
           <div id="searchResultContainer" style="display: none;">
             <div class="card bg-light border-primary mb-4">
               <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-                <span><i class="fa-solid fa-receipt me-2"></i>Huling Order (Last Order Details)</span>
+                <span><i class="fa-solid fa-receipt me-2"></i>Huling Order at Huling Presyo (Last Order & Last Price Review)</span>
                 <span id="lastOrderBadge" class="badge bg-warning text-dark fs-6">Status</span>
               </div>
               <div class="card-body">
@@ -670,8 +670,23 @@
                     <h5 class="fw-bold text-dark" id="lastOrderContainer">-</h5>
                   </div>
                   <div class="col-md-12">
-                    <p class="mb-1 text-muted small fw-bold">ITEMS / PRODUCTS BOUGHT:</p>
-                    <p class="fs-5 text-dark fw-semibold mb-0" id="lastOrderProducts">-</p>
+                    <p class="mb-1 text-muted small fw-bold">DETALYADONG LISTAHAN NG HULING BINILI (Items, Qty & Last Price):</p>
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered bg-white align-middle" id="lastOrderItemsTable">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Product Name</th>
+                            <th>Description</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Last Price / Unit (₱)</th>
+                            <th class="text-end">Subtotal (₱)</th>
+                          </tr>
+                        </thead>
+                        <tbody id="lastOrderItemsBody">
+                          <!-- Dynamic Last Order Items -->
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                   <hr class="my-2">
                   <div class="col-md-4">
@@ -690,14 +705,14 @@
               </div>
             </div>
 
-            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lahat ng Naging Transaksyon ni Customer (Complete History)</h6>
+            <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lahat ng Naging Transaksyon at Na-encode na Detalye ni Customer (Complete History)</h6>
             <div class="table-responsive">
               <table class="table table-bordered table-hover align-middle bg-white">
                 <thead class="table-dark">
                   <tr>
                     <th>Date</th>
                     <th>Location</th>
-                    <th>Products</th>
+                    <th>Products & Price Details</th>
                     <th>Container</th>
                     <th>Total (₱)</th>
                     <th>Paid (₱)</th>
@@ -2076,7 +2091,7 @@
       const isInventoryOnly = document.getElementById('inventoryOnlyMode').checked;
 
       const saleDate = document.getElementById('saleDate').value;
-      const custName = document.getElementById('customerName').value;
+      const custName = document.getElementById('customerName').value.trim();
       const location = document.getElementById('transactionLocation').value;
 
       let total = 0;
@@ -2111,7 +2126,6 @@
           if (mBt > 0) paymentHistory.push({ amount: mBt, method: 'Bank Transfer', date: saleDate });
           if (mOther > 0) paymentHistory.push({ amount: mOther, method: 'Byahe Cash', date: saleDate });
          
-          // Fallback if split sum doesn't match paid amount
           if (paymentHistory.length === 0) {
             paymentHistory.push({ amount: paid, method: 'Cash', date: saleDate });
           }
@@ -2134,7 +2148,7 @@
 
         totalCostOfGoods += (qty * cost);
         if(name) {
-          let itemString = desc ? `${name} (${desc}) (x${qty})` : `${name} (x${qty})`;
+          let itemString = desc ? `${name} (${desc}) (x${qty}) - ₱${price.toFixed(2)}` : `${name} (x${qty}) - ₱${price.toFixed(2)}`;
           productSummary.push(itemString);
           itemsPurchasedList.push({
             name: name,
@@ -2466,7 +2480,7 @@
             <td>${log.product}</td>
             <td class="text-center">${log.qty}</td>
             <td class="text-end">₱${log.cost.toFixed(2)}</td>
-            <td class="text-end">₱${log.price.toFixed(2)}</td>
+            <td class="text-end text-primary fw-semibold">₱${log.price.toFixed(2)}</td>
             <td class="text-end fw-bold text-success">₱${log.total.toFixed(2)}</td>
           </tr>
         `;
@@ -2907,7 +2921,6 @@
                 dayDebtPayments += p.amount;
               }
 
-              // Awtomatikong pag-uri ng bayad (kasama ang multi-payment parts)
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
               else if (p.method === 'GCash') totalGCash += p.amount;
               else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
@@ -2948,7 +2961,6 @@
         `;
       });
 
-      // ISAMA SA COLLECTION AT DEBT PAYMENTS ANG MGA STANDALONE MANUAL PAYMENTS SA NAPILING PETSA
       if (standalonePayments) {
         standalonePayments.forEach(p => {
           if (p.date === selectedDate) {
@@ -2989,7 +3001,6 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      // I-less o ibabawas ang Remaining Balance (utang) sa cash target para hindi ito masama sa bibilanging cash sa drawer
       currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal - dayRemainingBalance);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
@@ -3231,7 +3242,7 @@
       alert('Tagumpay na naitala ang pagbabayad!');
     });
 
-    // ================= CUSTOMER ORDER LOOKUP =================
+    // ================= CUSTOMER ORDER LOOKUP & LAST PRICE AUDIT =================
     function searchCustomerOrder() {
       const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
       const container = document.getElementById('searchResultContainer');
@@ -3253,10 +3264,28 @@
         document.getElementById('lastOrderCustomer').innerText = last.customer;
         document.getElementById('lastOrderDate').innerText = last.date;
         document.getElementById('lastOrderContainer').innerText = last.containerInfo || 'Wala';
-        document.getElementById('lastOrderProducts').innerText = last.product;
         document.getElementById('lastOrderTotal').innerText = `₱${last.total.toFixed(2)}`;
         document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
         document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
+
+        // RENDER LAST ORDER DETAILED ITEMS & LAST PRICE
+        const lastItemsBody = document.getElementById('lastOrderItemsBody');
+        lastItemsBody.innerHTML = '';
+        if (last.itemsList && last.itemsList.length > 0) {
+          last.itemsList.forEach(li => {
+            lastItemsBody.innerHTML += `
+              <tr>
+                <td class="fw-bold">${li.name}</td>
+                <td>${li.desc || 'N/A'}</td>
+                <td class="text-center">${li.qty}</td>
+                <td class="text-end text-primary fw-bold">₱${li.price.toFixed(2)}</td>
+                <td class="text-end text-success fw-bold">₱${li.subtotal.toFixed(2)}</td>
+              </tr>
+            `;
+          });
+        } else {
+          lastItemsBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Na-encode ang summary: ${last.product}</td></tr>`;
+        }
 
         const badge = document.getElementById('lastOrderBadge');
         if (last.balance === 0) {
@@ -3277,11 +3306,16 @@
           if (item.balance > 0 && item.paid > 0) sBadge = '<span class="badge bg-warning text-dark">PARTIAL</span>';
           else if (item.balance > 0) sBadge = '<span class="badge bg-danger">UNPAID</span>';
 
+          let detailedItemsHtml = item.product;
+          if (item.itemsList && item.itemsList.length > 0) {
+            detailedItemsHtml = item.itemsList.map(i => `${i.name} (x${i.qty}) - ₱${i.price.toFixed(2)}/unit`).join('<br>');
+          }
+
           historyBody.innerHTML += `
             <tr>
               <td>${item.date}</td>
               <td><span class="badge bg-secondary">${item.location}</span></td>
-              <td>${item.product}</td>
+              <td><small>${detailedItemsHtml}</small></td>
               <td>${item.containerInfo || 'Wala'}</td>
               <td>₱${item.total.toFixed(2)}</td>
               <td class="text-success">₱${item.paid.toFixed(2)}</td>

@@ -61,6 +61,8 @@
       <a class="navbar-brand fw-bold fs-4" href="#"><i class="fa-solid fa-store me-2"></i>RMVillasis Enterprises</a>
       <ul class="nav nav-pills me-auto" id="mainTabs" role="tablist">
         <li class="nav-item"><button class="nav-link active" id="pos-tab" data-bs-toggle="pill" data-bs-target="#pos-content" type="button"><i class="fa-solid fa-cart-shopping me-1"></i> POS Entry</button></li>
+        <li class="nav-item"><button class="nav-link" id="manual-payment-tab" data-bs-toggle="pill" data-bs-target="#manual-payment-content" type="button"><i class="fa-solid fa-pen-to-square me-1"></i> Manual Payment</button></li>
+        <li class="nav-item"><button class="nav-link" id="backup-tab" data-bs-toggle="pill" data-bs-target="#backup-content" type="button"><i class="fa-solid fa-shield-halved me-1"></i> Data Backup & Safety</button></li>
         <li class="nav-item"><button class="nav-link" id="daily-tab" data-bs-toggle="pill" data-bs-target="#daily-content" type="button" onclick="generateDailyReport()"><i class="fa-solid fa-calendar-day me-1"></i> Daily Report</button></li>
         <li class="nav-item"><button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable(); renderStandalonePayments();"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments</button></li>
         <li class="nav-item"><button class="nav-link" id="search-tab" data-bs-toggle="pill" data-bs-target="#search-content" type="button"><i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup & Last Price</button></li>
@@ -206,6 +208,81 @@
               <button type="submit" class="btn btn-success btn-lg px-4"><i class="fa-solid fa-check me-2"></i>Save Transaction</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- MANUAL PAYMENT TAB -->
+      <div class="tab-pane fade" id="manual-payment-content">
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-2"><i class="fa-solid fa-pen-to-square me-2"></i>Manual Payment & Past Record Entry</h4>
+          <p class="text-muted small mb-4">Gamitin ito para i-record ang mga benta noong nakaraang araw na hindi na-encode o para sa karagdagang pondo.</p>
+          
+          <form id="manualPaymentForm">
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Petsa ng Transaksyon / Entry:</label>
+                <input type="date" id="manualDate" class="form-control" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Customer / Pinanggalingan:</label>
+                <input type="text" id="manualCustomer" class="form-control" placeholder="Hal. Past Sale / Boss" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Uri ng Entry (Type):</label>
+                <select id="manualType" class="form-select">
+                  <option value="Past Sale (Benta Noon)">Hindi na-encode na Benta (Past Sale)</option>
+                  <option value="Dagdag Pera / Capital">Dagdag Pera / Starting Cash / Capital</option>
+                  <option value="Manual Adjustment">Manual Adjustment / Iba pa</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Halaga (Amount ₱):</label>
+                <input type="number" step="0.01" id="manualAmount" class="form-control fw-bold text-success fs-5" placeholder="0.00" required>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label fw-semibold">Paliwanag / Remarks:</label>
+                <input type="text" id="manualNotes" class="form-control" placeholder="Hal. Nakalimutang i-encode noong Lunes...">
+              </div>
+            </div>
+
+            <div class="mt-4 text-end">
+              <button type="submit" class="btn btn-success btn-lg px-4"><i class="fa-solid fa-floppy-disk me-2"></i>I-save ang Manual Entry</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- DATA BACKUP & SAFETY TAB (BAGONG PROTEKSYON LABAN SA PAGKAWALA) -->
+      <div class="tab-pane fade" id="backup-content">
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-shield-halved me-2"></i>Proteksyon sa Data (Backup & Recovery)</h4>
+          <p class="text-muted">Para matiyak na hinding-hindi mawawala ang iyong mga transaksyon kahit umabot pa ng sampung taon o mag-palit/masira ang iyong computer, i-download ang backup file buwan-buwan.</p>
+          
+          <div class="row g-4 mt-2">
+            <div class="col-md-6">
+              <div class="card bg-light border p-3 h-100">
+                <h5 class="fw-bold text-dark mb-2"><i class="fa-solid fa-download text-success me-2"></i>1. I-download ang Backup (Export)</h5>
+                <p class="small text-muted">Kumuha ng kopya ng lahat ng iyong data (Transactions, Inventory, Cash Records) at i-save sa USB o computer.</p>
+                <button class="btn btn-success mt-auto fw-bold" onclick="exportDataBackup()"><i class="fa-solid fa-file-arrow-down me-2"></i> I-download ang Buong Backup File (.JSON)</button>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card bg-light border p-3 h-100">
+                <h5 class="fw-bold text-dark mb-2"><i class="fa-solid fa-upload text-primary me-2"></i>2. Ibalik ang Data (Restore / Import)</h5>
+                <p class="small text-muted">Gamitin ito para ibalik ang mga nakaraang data kung lumipat ka ng ibang computer o na-clear ang browser.</p>
+                <input type="file" id="backupFileInput" class="form-control mb-2" accept=".json">
+                <button class="btn btn-primary fw-bold" onclick="importDataBackup()"><i class="fa-solid fa-file-arrow-up me-2"></i> I-load / I-restore ang Backup File</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-warning mt-4 mb-0 small">
+            <i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>Paalala:</strong> Ang system na ito ay gumagamit ng lokal na memorya ng browser. Ang pag-export ng backup file (.json) kada katapusan ng buwan ang pinakaligtas na paraan upang mapanatili ang iyong mga rekord sa loob ng maraming taon.
+          </div>
         </div>
       </div>
 
@@ -391,6 +468,7 @@
     let todayFormatted = getTodayDateString();
     document.getElementById('saleDate').value = todayFormatted;
     document.getElementById('dailyReportDate').value = todayFormatted;
+    document.getElementById('manualDate').value = todayFormatted;
 
     window.onload = function() {
       addPosRow();
@@ -407,12 +485,67 @@
       localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
       localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
+      localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
     }
 
     function manualSaveData() {
       saveData();
       alert('Data saved successfully!');
     }
+
+    // --- MGA FUNCTIONS PARA SA DATA BACKUP AT RESTORE (PROTEKSYON SA PAGKAWALA) ---
+    function exportDataBackup() {
+      const backupData = {
+        version: "1.0",
+        exportDate: new Date().toISOString(),
+        transactions: transactions,
+        inventory: inventory,
+        cashBreakdownData: cashBreakdownData,
+        monthlyExpensesData: monthlyExpensesData,
+        users: users
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `RMVillasis_POS_Backup_${getTodayDateString()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      alert('Tagumpay na na-download ang iyong backup file! Itabi ito sa ligtas na folder o USB.');
+    }
+
+    function importDataBackup() {
+      const fileInput = document.getElementById('backupFileInput');
+      if (fileInput.files.length === 0) {
+        alert('Mangyaring pumili muna ng backup (.json) file na i-a-upload.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (confirm('Sigurado ka bang gusto mong i-restore ang data na ito? Mapapalitan nito ang mga kasalukuyang nakalagay sa system.')) {
+            if (imported.transactions) transactions = imported.transactions;
+            if (imported.inventory) inventory = imported.inventory;
+            if (imported.cashBreakdownData) cashBreakdownData = imported.cashBreakdownData;
+            if (imported.monthlyExpensesData) monthlyExpensesData = imported.monthlyExpensesData;
+            if (imported.users) users = imported.users;
+
+            saveData();
+            alert('Tagumpay na nai-restore ang lahat ng data!');
+            location.reload();
+          }
+        } catch (error) {
+          alert('May error sa file na iyong binuksan. Siguraduhing tama at wastong JSON backup file ito.');
+        }
+      };
+      reader.readAsText(file);
+    }
+    // --------------------------------------------------------------------------
 
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -549,6 +682,36 @@
       toggleInventoryOnlyMode();
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
+      generateDailyReport();
+    });
+
+    document.getElementById('manualPaymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const date = document.getElementById('manualDate').value;
+      const cust = document.getElementById('manualCustomer').value.trim();
+      const type = document.getElementById('manualType').value;
+      const amount = parseFloat(document.getElementById('manualAmount').value) || 0;
+      const notes = document.getElementById('manualNotes').value.trim();
+
+      transactions.push({
+        id: Date.now(),
+        date: date,
+        customer: cust,
+        location: 'Hiway',
+        product: `[${type}]${notes}`,
+        itemsList: [],
+        total: amount,
+        totalCost: 0,
+        paid: amount,
+        balance: 0,
+        status: 'PAID',
+        payments: [{ amount: amount, method: 'Cash', date: date }]
+      });
+
+      saveData();
+      alert('Tagumpay na naidagdag ang Manual Payment / Past Entry!');
+      this.reset();
+      document.getElementById('manualDate').value = getTodayDateString();
       generateDailyReport();
     });
 
@@ -708,12 +871,11 @@
       tbody.innerHTML = '';
       transactions.forEach(t => {
         if (t.balance > 0.01) {
-          tbody.innerHTML += `<tr><td>${t.customer}</td><td>${t.location}</td><td>${t.product}</td><td>₱${(t.totalCost||0).toFixed(2)}</td><td>₱${t.paid.toFixed(2)}</td><td>₱${t.balance.toFixed(2)}</td><td>${t.dueDate||'N/A'}</td><td>${t.status}</td><td></td></tr>`;
+          tbody.innerHTML += `<tr><td>${t.customer}</td><td>${t.location}</td><td>${t.product}</td><td>₱${(t.totalCost||0).toFixed(2)}</td><td>₱${t.paid.toFixed(2)}</td><td>₱${t.balance.toFixed(2)}</td><td>${t.dueDate\vert{}\vert{}'N/A'}</td><td>${t.status}</td><td></td></tr>`;
         }
       });
     }
 
-    // CUSTOMER ORDER LOOKUP & LAST PRICE REVIEW
     function searchCustomerOrder() {
       const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
       const container = document.getElementById('searchResultContainer');
@@ -731,7 +893,6 @@
         notFound.classList.add('d-none');
         container.style.display = 'block';
 
-        // Kunin ang huling order (pinakabagong transaksyon)
         const lastOrder = matched[matched.length - 1];
         document.getElementById('lastOrderCustomer').innerText = lastOrder.customer;
         document.getElementById('lastOrderDate').innerText = lastOrder.date;
@@ -744,14 +905,13 @@
         badge.innerText = lastOrder.status;
         badge.className = lastOrder.status === 'PAID' ? 'badge bg-success fs-6' : 'badge bg-warning text-dark fs-6';
 
-        // I-render ang mga items at prices ng huling order
         const itemsBody = document.getElementById('lastOrderItemsBody');
         itemsBody.innerHTML = '';
         if (lastOrder.itemsList && lastOrder.itemsList.length > 0) {
           lastOrder.itemsList.forEach(item => {
             itemsBody.innerHTML += `
               <tr>
-                <td>${item.name} ${item.desc ? `(${item.desc})` : ''}</td>
+                <td>${item.name}${item.desc ? `(${item.desc})` : ''}</td>
                 <td>${item.qty}</td>
                 <td>₱${(item.price || 0).toFixed(2)}</td>
                 <td>₱${(item.subtotal || (item.qty * item.price)).toFixed(2)}</td>
@@ -762,9 +922,8 @@
           itemsBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">(${lastOrder.product})</td></tr>`;
         }
 
-        // I-render ang buong history ni customer
         const historyBody = document.getElementById('customerHistoryBody');
-        historyBody.innerHTML = '';
+        historyBody.innerHTML = ``;
         matched.forEach(t => {
           historyBody.innerHTML += `
             <tr>

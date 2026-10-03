@@ -2129,8 +2129,16 @@
           if (paymentHistory.length === 0) {
             paymentHistory.push({ amount: paid, method: 'Cash', date: saleDate });
           }
+        } else if (method === 'GCash' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'GCash', date: saleDate });
+        } else if (method === 'Bank Transfer' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'Bank Transfer', date: saleDate });
+        } else if (method === 'Byahe Cash' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'Byahe Cash', date: saleDate });
+        } else if (method === 'Cheque' && paid > 0) {
+          paymentHistory.push({ amount: paid, method: 'Cheque', date: saleDate });
         } else if (paid > 0) {
-          paymentHistory.push({ amount: paid, method: method, date: saleDate });
+          paymentHistory.push({ amount: paid, method: 'Cash', date: saleDate });
         }
       }
 

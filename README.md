@@ -258,9 +258,9 @@
       <div class="tab-pane fade" id="daily-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales & Encoded Logs</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-calendar-day me-2"></i>Daily Sales & Encoded Logs (Sheet bawat Araw)</h4>
             <div class="d-flex gap-2 align-items-center">
-              <label class="fw-bold me-1">Select Date:</label>
+              <label class="fw-bold me-1">Piliin ang Araw (Date Sheet):</label>
               <input type="date" id="dailyReportDate" class="form-control" onchange="generateDailyReport()">
               <button class="btn btn-outline-primary ms-2" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Print</button>
             </div>
@@ -450,13 +450,13 @@
       <!-- 4. INVENTORY TAB -->
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>Advanced Inventory Management</h4>
-          <p class="text-muted small">I-setup minsan ang mga produkto sa <strong>Master Product List</strong>. Pagkatapos, maaari ka nang mag-log ng Araw-araw na Pumasok, Return, at mag-review per day.</p>
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>Advanced Inventory Management (Per-Day Sheet)</h4>
+          <p class="text-muted small">Pumili ng petsa sa ibaba para makita ang hiwalay na inventory sheet o galaw ng mga produkto sa araw na iyon.</p>
 
           <!-- Select Date for Inventory View -->
           <div class="row g-3 align-items-center mb-4 bg-light p-3 rounded border">
             <div class="col-md-4">
-              <label class="form-label fw-bold mb-0">Piliin ang Petsa ng Inventory (Date):</label>
+              <label class="form-label fw-bold mb-0">Piliin ang Araw (Inventory Date Sheet):</label>
             </div>
             <div class="col-md-4">
               <input type="date" id="inventoryViewDate" class="form-control" onchange="renderInventoryTables()">
@@ -504,7 +504,7 @@
             </div>
           </div>
 
-          <h5 class="fw-bold text-secondary mt-3">1. PALM & COCO INVENTORY (Per Day / Ending & Beginning)</h5>
+          <h5 class="fw-bold text-secondary mt-3">1. PALM & COCO INVENTORY (Per Day Sheet)</h5>
           <div class="table-responsive mb-4">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
@@ -516,7 +516,7 @@
             </table>
           </div>
 
-          <h5 class="fw-bold text-secondary mt-3">2. IBA PANG ITEMS INVENTORY (Per Day / Ending & Beginning)</h5>
+          <h5 class="fw-bold text-secondary mt-3">2. IBA PANG ITEMS INVENTORY (Per Day Sheet)</h5>
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
@@ -533,8 +533,16 @@
       <!-- 5. EXPENSES TAB -->
       <div class="tab-pane fade" id="expenses-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger (Per Day)</h4>
-          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo. Ang mga bagong encode ay awtomatikong nai-save at nakalista sa ibaba.</p>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h4 class="card-title text-primary mb-1"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger (Per-Day Sheet)</h4>
+              <p class="text-muted small mb-0">Pumili ng araw sa ibaba para sa hiwalay na sheet ng gastos o sweldo sa araw na iyon.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <label class="fw-bold small mb-0">Piliin ang Araw:</label>
+              <input type="date" id="expensesFilterDate" class="form-control form-control-sm" onchange="renderStandaloneExpensesLedger()">
+            </div>
+          </div>
           
           <!-- Successful Warning Alert Container -->
           <div id="expenseAlertContainer"></div>
@@ -555,7 +563,7 @@
               </tbody>
               <tfoot class="table-secondary fw-bold">
                 <tr>
-                  <td colspan="2" class="text-end">SUBTOTAL / KABUUAN:</td>
+                  <td colspan="2" class="text-end">SUBTOTAL / KABUUAN (Para sa Araw na Ito):</td>
                   <td id="totalSalarySum" class="text-primary">₱0.00</td>
                   <td id="totalExpensesSum" class="text-danger">₱0.00</td>
                   <td></td>
@@ -599,8 +607,17 @@
       <!-- 6. BOSS TAB -->
       <div class="tab-pane fade" id="boss-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Ledger</h4>
-          <p class="text-muted small">Talaan ng mga transaksyon, bigayan, o hulugan para kay Boss.</p>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h4 class="card-title text-primary mb-1"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Ledger (Per-Day Sheet)</h4>
+              <p class="text-muted small mb-0">Talaan ng mga transaksyon para kay Boss ayon sa napiling araw.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <label class="fw-bold small mb-0">Piliin ang Araw:</label>
+              <input type="date" id="bossFilterDate" class="form-control form-control-sm" onchange="renderStandaloneBossLedger()">
+            </div>
+          </div>
+
           <div class="row g-3 mb-3">
             <div class="col-md-3">
               <label class="form-label fw-semibold">Petsa:</label>
@@ -624,6 +641,13 @@
               <tbody id="bossTableBody">
                 <tr><td colspan="4" class="text-center text-muted">Walang record para kay Boss.</td></tr>
               </tbody>
+              <tfoot class="table-secondary fw-bold">
+                <tr>
+                  <td colspan="2" class="text-end">SUBTOTAL PARA SA ARAW NA ITO:</td>
+                  <td id="bossDaySubtotal" class="text-success">₱0.00</td>
+                  <td></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -812,7 +836,9 @@
     document.getElementById('dailyReportDate').value = todayFormatted;
     document.getElementById('manualDate').value = todayFormatted;
     document.getElementById('expenseDate').value = todayFormatted;
+    document.getElementById('expensesFilterDate').value = todayFormatted;
     document.getElementById('bossDate').value = todayFormatted;
+    document.getElementById('bossFilterDate').value = todayFormatted;
     document.getElementById('inventoryViewDate').value = todayFormatted;
     document.getElementById('auditDateInput').value = todayFormatted;
 
@@ -1518,6 +1544,7 @@
     }
 
     function renderStandaloneExpensesLedger() {
+      const filterDate = document.getElementById('expensesFilterDate').value;
       const tbody = document.getElementById('expensesTableBody');
       tbody.innerHTML = '';
       let count = 0;
@@ -1525,6 +1552,7 @@
       let totalExpenses = 0;
 
       Object.keys(monthlyExpensesData).sort().forEach(date => {
+        if (filterDate && date !== filterDate) return; // I-filter para sa napiling araw lang kung may naka-set
         monthlyExpensesData[date].forEach(ex => {
           count++;
           let isSalary = (ex.type === 'Salary' || (!ex.type && ex.title.toLowerCase().includes('sweldo')));
@@ -1550,7 +1578,7 @@
       });
 
       if (count === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Walang record na naitala.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Walang record para sa araw na ito.</td></tr>`;
       }
       document.getElementById('totalSalarySum').innerText = `₱${totalSalary.toFixed(2)}`;
       document.getElementById('totalExpensesSum').innerText = `₱${totalExpenses.toFixed(2)}`;
@@ -1645,13 +1673,17 @@
     }
 
     function renderStandaloneBossLedger() {
+      const filterDate = document.getElementById('bossFilterDate').value;
       const tbody = document.getElementById('bossTableBody');
       tbody.innerHTML = '';
       let count = 0;
+      let dayBossTotal = 0;
 
       Object.keys(bossLedgerData).sort().forEach(date => {
+        if (filterDate && date !== filterDate) return;
         bossLedgerData[date].forEach(b => {
           count++;
+          dayBossTotal += (b.amount || 0);
           tbody.innerHTML += `
             <tr>
               <td>${date}</td>
@@ -1666,8 +1698,9 @@
       });
 
       if (count === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang record para kay Boss.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang record para kay Boss sa araw na ito.</td></tr>`;
       }
+      document.getElementById('bossDaySubtotal').innerText = `₱${dayBossTotal.toFixed(2)}`;
     }
 
     function deleteBossItem(date, id) {

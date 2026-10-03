@@ -38,9 +38,9 @@
         <li class="nav-item"><button class="nav-link" id="daily-tab" data-bs-toggle="pill" data-bs-target="#daily-content" type="button" onclick="generateDailyReport()"><i class="fa-solid fa-calendar-day me-1"></i> Daily Report</button></li>
         <li class="nav-item"><button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable();"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments</button></li>
         <li class="nav-item"><button class="nav-link" id="search-tab" data-bs-toggle="pill" data-bs-target="#search-content" type="button"><i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup & Last Price</button></li>
-        <li class="nav-item"><button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button"><i class="fa-solid fa-boxes-stacked me-1"></i> Inventory</button></li>
-        <li class="nav-item"><button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button"><i class="fa-solid fa-receipt me-1"></i> Salary & Expenses</button></li>
-        <li class="nav-item"><button class="nav-link" id="boss-tab" data-bs-toggle="pill" data-bs-target="#boss-content" type="button"><i class="fa-solid fa-user-tie me-1"></i> D/Eco Boss</button></li>
+        <li class="nav-item"><button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTables()"><i class="fa-solid fa-boxes-stacked me-1"></i> Inventory</button></li>
+        <li class="nav-item"><button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button" onclick="renderStandaloneExpensesLedger()"><i class="fa-solid fa-receipt me-1"></i> Salary & Expenses</button></li>
+        <li class="nav-item"><button class="nav-link" id="boss-tab" data-bs-toggle="pill" data-bs-target="#boss-content" type="button" onclick="renderStandaloneBossLedger()"><i class="fa-solid fa-user-tie me-1"></i> D/Eco Boss</button></li>
         <li class="nav-item"><button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()"><i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit</button></li>
       </ul>
       <div class="d-flex align-items-center gap-2">
@@ -396,24 +396,111 @@
       <!-- 4. INVENTORY TAB -->
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory</h4>
-          <div class="table-responsive"><table class="table table-bordered"><tbody id="inventoryTableBody"></tbody></table></div>
+          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Stock Management</h4>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-dark">
+                <tr><th>Product Name</th><th>Total Quantity In</th><th>Total Quantity Sold</th><th>Current Stock Balance</th></tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <tr><td colspan="4" class="text-center text-muted py-3">Wala pang inventory data.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- 5. EXPENSES TAB -->
       <div class="tab-pane fade" id="expenses-content">
-        <div class="card p-4"><h4 class="card-title text-primary mb-4"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses</h4></div>
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger</h4>
+          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo para maibawas sa Cash Drawer target.</p>
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Petsa:</label>
+              <input type="date" id="expenseDate" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Pangalan ng Gastos / Sweldo:</label>
+              <input type="text" id="expenseTitle" class="form-control" placeholder="Hal. Kuryente / Sweldo ni Juan">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Halaga (₱):</label>
+              <input type="number" step="0.01" id="expenseAmount" class="form-control" placeholder="0.00">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100 fw-bold" onclick="addExpenseItem()">Magdagdag</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-dark"><tr><th>Petsa</th><th>Paglalarawan / Expense Title</th><th>Halaga (₱)</th><th class="no-print">Aksyon</th></tr></thead>
+              <tbody id="expensesTableBody">
+                <tr><td colspan="4" class="text-center text-muted">Walang expenses na naitala.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- 6. BOSS TAB -->
       <div class="tab-pane fade" id="boss-content">
-        <div class="card p-4"><h4 class="card-title text-primary mb-4"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Ledger</h4></div>
+        <div class="card p-4">
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss Ledger</h4>
+          <p class="text-muted small">Talaan ng mga transaksyon, bigayan, o hulugan para kay Boss.</p>
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Petsa:</label>
+              <input type="date" id="bossDate" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Detalye / Remarks:</label>
+              <input type="text" id="bossTitle" class="form-control" placeholder="Hal. Bigay kay Boss / Remittance">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Halaga (₱):</label>
+              <input type="number" step="0.01" id="bossAmount" class="form-control" placeholder="0.00">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-success w-100 fw-bold" onclick="addBossItem()">I-record</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-dark"><tr><th>Petsa</th><th>Detalye</th><th>Halaga (₱)</th><th class="no-print">Aksyon</th></tr></thead>
+              <tbody id="bossTableBody">
+                <tr><td colspan="4" class="text-center text-muted">Walang record para kay Boss.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- 7. AUDIT TAB -->
       <div class="tab-pane fade" id="audit-content">
-        <div class="card p-4"><h4 class="card-title text-primary mb-4"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit</h4></div>
+        <div class="card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Summary</h4>
+            <div class="d-flex gap-2 align-items-center">
+              <label class="fw-bold me-1">Piliin ang Buwan:</label>
+              <input type="month" id="auditMonthInput" class="form-control" onchange="generateMonthlyAudit()">
+            </div>
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="card p-3 stat-card bg-light"><span class="text-muted small fw-bold">BUWANANG BENTA (TOTAL SALES)</span><h3 class="text-primary fw-bold mt-1" id="auditTotalSales">₱0.00</h3></div></div>
+            <div class="col-md-4"><div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;"><span class="text-muted small fw-bold">BUWANANG NET PROFIT</span><h3 class="text-success fw-bold mt-1" id="auditTotalProfit">₱0.00</h3></div></div>
+            <div class="col-md-4"><div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;"><span class="text-muted small fw-bold">KABUUANG GASTOS (EXPENSES)</span><h3 class="text-danger fw-bold mt-1" id="auditTotalExpenses">₱0.00</h3></div></div>
+          </div>
+          <h5 class="fw-bold text-secondary mb-3">Buod ng mga Transaksyon sa Buwang Ito</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-dark"><tr><th>Petsa</th><th>Customer</th><th>Location</th><th>Total (₱)</th><th>Net Profit (₱)</th><th>Status</th></tr></thead>
+              <tbody id="auditTableBody">
+                <tr><td colspan="6" class="text-center text-muted">Walang record sa buwang ito.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -425,6 +512,7 @@
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
+    let bossLedgerData = JSON.parse(localStorage.getItem('rmv_bossLedgerData')) || {};
 
     function getTodayDateString() {
       const now = new Date();
@@ -435,12 +523,18 @@
     document.getElementById('saleDate').value = todayFormatted;
     document.getElementById('dailyReportDate').value = todayFormatted;
     document.getElementById('manualDate').value = todayFormatted;
+    document.getElementById('expenseDate').value = todayFormatted;
+    document.getElementById('bossDate').value = todayFormatted;
+    document.getElementById('auditMonthInput').value = todayFormatted.substring(0, 7);
 
     window.onload = function() {
       addPosRow();
       loadMoneyBreakdown();
       generateDailyReport();
       renderCreditTable();
+      renderInventoryTables();
+      renderStandaloneExpensesLedger();
+      renderStandaloneBossLedger();
     };
 
     function saveData() {
@@ -448,6 +542,7 @@
       localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
+      localStorage.setItem('rmv_bossLedgerData', JSON.stringify(bossLedgerData));
     }
 
     function manualSaveData() {
@@ -459,12 +554,8 @@
       const backupData = {
         version: "1.0",
         exportDate: new Date().toISOString(),
-        transactions: transactions,
-        inventory: inventory,
-        cashBreakdownData: cashBreakdownData,
-        monthlyExpensesData: monthlyExpensesData
+        transactions, inventory, cashBreakdownData, monthlyExpensesData, bossLedgerData
       };
-
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
@@ -472,34 +563,32 @@
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      alert('Tagumpay na na-download ang iyong backup file! Itabi ito sa ligtas na folder o USB.');
+      alert('Tagumpay na na-download ang iyong backup file!');
     }
 
     function importDataBackup() {
       const fileInput = document.getElementById('backupFileInput');
       if (fileInput.files.length === 0) {
-        alert('Mangyaring pumili muna ng backup (.json) file na i-a-upload.');
+        alert('Mangyaring pumili muna ng backup (.json) file.');
         return;
       }
-
       const file = fileInput.files[0];
       const reader = new FileReader();
-
       reader.onload = function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (confirm('Sigurado ka bang gusto mong i-restore ang data na ito? Mapapalitan nito ang mga kasalukuyang nakalagay sa system.')) {
+          if (confirm('Sigurado ka bang gusto mong i-restore ang data na ito? Mapapalitan nito ang kasalukuyang data.')) {
             if (imported.transactions) transactions = imported.transactions;
             if (imported.inventory) inventory = imported.inventory;
             if (imported.cashBreakdownData) cashBreakdownData = imported.cashBreakdownData;
             if (imported.monthlyExpensesData) monthlyExpensesData = imported.monthlyExpensesData;
-
+            if (imported.bossLedgerData) bossLedgerData = imported.bossLedgerData;
             saveData();
             alert('Tagumpay na nai-restore ang lahat ng data!');
             location.reload();
           }
         } catch (error) {
-          alert('May error sa file na iyong binuksan. Siguraduhing tama at wastong JSON backup file ito.');
+          alert('May error sa file na iyong binuksan.');
         }
       };
       reader.readAsText(file);
@@ -819,6 +908,201 @@
       });
     }
 
+    // INVENTORY TABLES RENDER
+    function renderInventoryTables() {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = '';
+      let prodMap = {};
+
+      transactions.forEach(t => {
+        if (t.itemsList) {
+          t.itemsList.forEach(item => {
+            if (!prodMap[item.name]) {
+              prodMap[item.name] = { totalIn: 0, totalSold: 0 };
+            }
+            prodMap[item.name].totalIn += item.qty;
+            prodMap[item.name].totalSold += item.qty;
+          });
+        }
+      });
+
+      const keys = Object.keys(prodMap);
+      if (keys.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakatalang produkto sa inventory.</td></tr>`;
+        return;
+      }
+
+      keys.forEach(name => {
+        const p = prodMap[name];
+        const balance = p.totalIn - p.totalSold;
+        tbody.innerHTML += `
+          <tr>
+            <td class="fw-bold">${name}</td>
+            <td>${p.totalIn}</td>
+            <td>${p.totalSold}</td>
+            <td class="fw-bold text-primary">${balance}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // EXPENSES LEDGER
+    function addExpenseItem() {
+      const date = document.getElementById('expenseDate').value;
+      const title = document.getElementById('expenseTitle').value.trim();
+      const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
+
+      if (!title || amount <= 0) {
+        alert('Mangyaring ilagay ang wastong pamagat at halaga ng gastos.');
+        return;
+      }
+
+      if (!monthlyExpensesData[date]) monthlyExpensesData[date] = [];
+      monthlyExpensesData[date].push({ id: Date.now(), title, amount });
+
+      saveData();
+      renderStandaloneExpensesLedger();
+      document.getElementById('expenseTitle').value = '';
+      document.getElementById('expenseAmount').value = '';
+      alert('Matagumpay na naidagdag ang expense!');
+    }
+
+    function renderStandaloneExpensesLedger() {
+      const tbody = document.getElementById('expensesTableBody');
+      tbody.innerHTML = '';
+      let count = 0;
+
+      Object.keys(monthlyExpensesData).forEach(date => {
+        monthlyExpensesData[date].forEach(ex => {
+          count++;
+          tbody.innerHTML += `
+            <tr>
+              <td>${date}</td>
+              <td class="fw-bold">${ex.title}</td>
+              <td class="text-danger">₱${ex.amount.toFixed(2)}</td>
+              <td class="no-print text-center">
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpense('${date}', ${ex.id})"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+      });
+
+      if (count === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang expenses na naitala.</td></tr>`;
+      }
+    }
+
+    function deleteExpense(date, id) {
+      if (confirm('Burahin ang expense na ito?')) {
+        monthlyExpensesData[date] = monthlyExpensesData[date].filter(ex => ex.id !== id);
+        if (monthlyExpensesData[date].length === 0) delete monthlyExpensesData[date];
+        saveData();
+        renderStandaloneExpensesLedger();
+      }
+    }
+
+    // D/ECO BOSS LEDGER
+    function addBossItem() {
+      const date = document.getElementById('bossDate').value;
+      const title = document.getElementById('bossTitle').value.trim();
+      const amount = parseFloat(document.getElementById('bossAmount').value) || 0;
+
+      if (!title || amount <= 0) {
+        alert('Ilagay ang detalye at halaga para kay Boss.');
+        return;
+      }
+
+      if (!bossLedgerData[date]) bossLedgerData[date] = [];
+      bossLedgerData[date].push({ id: Date.now(), title, amount });
+
+      saveData();
+      renderStandaloneBossLedger();
+      document.getElementById('bossTitle').value = '';
+      document.getElementById('bossAmount').value = '';
+      alert('Matagumpay na nai-record kay Boss!');
+    }
+
+    function renderStandaloneBossLedger() {
+      const tbody = document.getElementById('bossTableBody');
+      tbody.innerHTML = '';
+      let count = 0;
+
+      Object.keys(bossLedgerData).forEach(date => {
+        bossLedgerData[date].forEach(b => {
+          count++;
+          tbody.innerHTML += `
+            <tr>
+              <td>${date}</td>
+              <td class="fw-bold">${b.title}</td>
+              <td class="text-success">₱${b.amount.toFixed(2)}</td>
+              <td class="no-print text-center">
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteBossItem('${date}', ${b.id})"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+      });
+
+      if (count === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang record para kay Boss.</td></tr>`;
+      }
+    }
+
+    function deleteBossItem(date, id) {
+      if (confirm('Burahin ang record na ito?')) {
+        bossLedgerData[date] = bossLedgerData[date].filter(b => b.id !== id);
+        if (bossLedgerData[date].length === 0) delete bossLedgerData[date];
+        saveData();
+        renderStandaloneBossLedger();
+      }
+    }
+
+    // MONTHLY AUDIT
+    function generateMonthlyAudit() {
+      const monthStr = document.getElementById('auditMonthInput').value; // e.g. "2026-10"
+      const tbody = document.getElementById('auditTableBody');
+      tbody.innerHTML = '';
+      let totalSales = 0, totalProfit = 0, totalExp = 0, count = 0;
+
+      transactions.forEach(t => {
+        if (t.date && t.date.startsWith(monthStr)) {
+          const cost = t.totalCost || 0;
+          const profit = t.total - cost;
+          totalSales += t.total;
+          totalProfit += profit;
+          count++;
+
+          tbody.innerHTML += `
+            <tr>
+              <td>${t.date}</td>
+              <td class="fw-bold">${t.customer}</td>
+              <td><span class="badge bg-secondary">${t.location}</span></td>
+              <td>₱${t.total.toFixed(2)}</td>
+              <td class="text-success">₱${profit.toFixed(2)}</td>
+              <td><span class="badge ${t.status === 'PAID' ? 'bg-success' : 'bg-warning text-dark'}">${t.status}</span></td>
+            </tr>
+          `;
+        }
+      });
+
+      Object.keys(monthlyExpensesData).forEach(date => {
+        if (date.startsWith(monthStr)) {
+          monthlyExpensesData[date].forEach(ex => {
+            totalExp += (parseFloat(ex.amount) || 0);
+          });
+        }
+      });
+
+      if (count === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang transaksyon sa buwang ito.</td></tr>`;
+      }
+
+      document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
+      document.getElementById('auditTotalProfit').innerText = `₱${totalProfit.toFixed(2)}`;
+      document.getElementById('auditTotalExpenses').innerText = `₱${totalExp.toFixed(2)}`;
+    }
+
     function searchCustomerOrder() {
       const query = document.getElementById('searchCustomerInput').value.trim().toLowerCase();
       const container = document.getElementById('searchResultContainer');
@@ -893,6 +1177,7 @@
         saveData();
         generateDailyReport();
         renderCreditTable();
+        renderInventoryTables();
       }
     }
   </script>

@@ -463,7 +463,7 @@
                     <span class="fw-bold text-success" id="breakdownDebtPayment">+₱0.00</span>
                   </div>
 
-                  <!-- NON-CASH & MULTI-PAYMENT DEDUCTIONS (LAHAT NG GCash, BT, Byhahe Cash, Cheque - Single o Multi-Payment - AY NAKA-LESS SA TARGET CASH) -->
+                  <!-- NON-CASH & MULTI-PAYMENT DEDUCTIONS (WALA NA ANG NEGATIVE SIGN SA UI NGUNIT BINABAWAS PA RIN SA TARGET CASH) -->
                   <div class="bg-light p-2 rounded my-2 border">
                     <span class="d-block fw-bold text-secondary small mb-1"><i class="fa-solid fa-layer-group me-1"></i> Non-Cash & Multi-Payment Deductions:</span>
                     <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
@@ -2943,7 +2943,7 @@
           }
         }
        
-        // LAHAT NG PAYMENTS (GCash, BT, Byahe Cash, Cheque) NA NANGYARI SA ARAW NA ITO AY NAKA-ACCUMULATE PARA MA-LESS SA TARGET CASH
+        // PAG-ACCUMULATE NG NON-CASH AT MULTI-PAYMENT DEDUCTIONS PARA MA-LESS SA TARGET CASH
         if (t.payments) {
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
@@ -3032,7 +3032,7 @@
      
       const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
      
-      // EXAKTONG PAG-LESS NG LAHAT NG NON-CASH (GCash, BT, Byahe Cash, Cheque) SA TARGET CASH IN DRAWER
+      // DITO GINAGAMIT ANG BRAWL NG MGA NON-CASH AT MULTI-PAYMENT DEDUCTIONS PARA SA TARGET CASH IN DRAWER
       currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - totalNonCashToday - dayExpensesTotal - dayRemainingBalance);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
@@ -3861,7 +3861,6 @@
         transactions[tIndex].netProfit = newTotal - newCost;
         transactions[tIndex].total = newTotal;
         transactions[tIndex].paid = newPaid;
-        transactions[zIndex = newBalance];
         transactions[tIndex].balance = newBalance;
         transactions[tIndex].status = newBalance === 0 ? 'PAID' : (newPaid > 0 ? 'PARTIAL' : 'UNPAID');
 
@@ -3883,7 +3882,7 @@
 
     function deleteTransaction(txId) {
       if (confirm('Sigurado ka bang gusto mong tanggalin ang transaksyong ito?')) {
-        transactions = transactions.transactions ? transactions.filter(t => t.id !== txId) : [];
+        transactions = transactions.filter(t => t.id !== txId);
         saveData();
         generateDailyReport();
         renderCreditTable();

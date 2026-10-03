@@ -16,14 +16,9 @@
     .credit-fields, .container-fields, .multi-payment-fields { display: none; background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
     .col-action { width: 45px; text-align: center; vertical-align: middle; }
     .stat-card { border-left: 4px solid #1976d2; }
-    #loginOverlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(13, 71, 161, 0.85); z-index: 9999;
-      display: flex; justify-content: center; align-items: center;
-    }
     @media print {
       body { background-color: #fff !important; color: #000 !important; font-size: 12pt; }
-      .navbar, #loginOverlay, .btn, .nav, .modal, .no-print { display: none !important; }
+      .navbar, .btn, .nav, .modal, .no-print { display: none !important; }
       .card { border: none !important; box-shadow: none !important; padding: 0 !important; }
       .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
       .tab-pane { display: block !important; opacity: 1 !important; }
@@ -31,29 +26,6 @@
   </style>
 </head>
 <body>
-
-  <!-- LOGIN OVERLAY -->
-  <div id="loginOverlay">
-    <div class="card p-4 shadow-lg" style="width: 380px; border-top: 5px solid #1976d2;">
-      <div class="text-center mb-3">
-        <i class="fa-solid fa-store fa-3x text-primary mb-2"></i>
-        <h4 class="fw-bold">RMVillasis Enterprises</h4>
-        <p class="text-muted small">Mangyaring mag-log in upang magpatuloy</p>
-      </div>
-      <form id="loginForm">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Username:</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="admin" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Password:</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
-        </div>
-        <div id="loginError" class="alert alert-danger p-2 small d-none">Mali ang username o password!</div>
-        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In</button>
-      </form>
-    </div>
-  </div>
 
   <!-- Navbar -->
   <nav class="navbar navbar-dark expand-lg mb-4">
@@ -64,17 +36,17 @@
         <li class="nav-item"><button class="nav-link" id="manual-payment-tab" data-bs-toggle="pill" data-bs-target="#manual-payment-content" type="button"><i class="fa-solid fa-pen-to-square me-1"></i> Manual Payment</button></li>
         <li class="nav-item"><button class="nav-link" id="backup-tab" data-bs-toggle="pill" data-bs-target="#backup-content" type="button"><i class="fa-solid fa-shield-halved me-1"></i> Data Backup & Safety</button></li>
         <li class="nav-item"><button class="nav-link" id="daily-tab" data-bs-toggle="pill" data-bs-target="#daily-content" type="button" onclick="generateDailyReport()"><i class="fa-solid fa-calendar-day me-1"></i> Daily Report</button></li>
-        <li class="nav-item"><button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable(); renderStandalonePayments();"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments</button></li>
+        <li class="nav-item"><button class="nav-link" id="credit-tab" data-bs-toggle="pill" data-bs-target="#credit-content" type="button" onclick="renderCreditTable();"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Utang & Payments</button></li>
         <li class="nav-item"><button class="nav-link" id="search-tab" data-bs-toggle="pill" data-bs-target="#search-content" type="button"><i class="fa-solid fa-magnifying-glass me-1"></i> Order Lookup & Last Price</button></li>
-        <li class="nav-item"><button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTables();"><i class="fa-solid fa-boxes-stacked me-1"></i> Inventory</button></li>
-        <li class="nav-item"><button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button" onclick="renderStandaloneExpensesLedger()"><i class="fa-solid fa-receipt me-1"></i> Salary & Expenses</button></li>
-        <li class="nav-item"><button class="nav-link" id="boss-tab" data-bs-toggle="pill" data-bs-target="#boss-content" type="button" onclick="renderStandaloneBossLedger()"><i class="fa-solid fa-user-tie me-1"></i> D/Eco Boss</button></li>
-        <li class="nav-item admin-only"><button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()"><i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit</button></li>
+        <li class="nav-item"><button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button"><i class="fa-solid fa-boxes-stacked me-1"></i> Inventory</button></li>
+        <li class="nav-item"><button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button"><i class="fa-solid fa-receipt me-1"></i> Salary & Expenses</button></li>
+        <li class="nav-item"><button class="nav-link" id="boss-tab" data-bs-toggle="pill" data-bs-target="#boss-content" type="button"><i class="fa-solid fa-user-tie me-1"></i> D/Eco Boss</button></li>
+        <li class="nav-item"><button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()"><i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit</button></li>
       </ul>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Data</button>
         <button class="btn btn-outline-light btn-sm fw-semibold" onclick="location.reload()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
-        <span class="text-white fw-bold ms-2" id="currentUserName">User</span>
+        <span class="text-white fw-bold ms-2" id="currentUserName">Administrator</span>
       </div>
     </div>
   </nav>
@@ -255,7 +227,7 @@
         </div>
       </div>
 
-      <!-- DATA BACKUP & SAFETY TAB (BAGONG PROTEKSYON LABAN SA PAGKAWALA) -->
+      <!-- DATA BACKUP & SAFETY TAB -->
       <div class="tab-pane fade" id="backup-content">
         <div class="card p-4">
           <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-shield-halved me-2"></i>Proteksyon sa Data (Backup & Recovery)</h4>
@@ -278,10 +250,6 @@
                 <button class="btn btn-primary fw-bold" onclick="importDataBackup()"><i class="fa-solid fa-file-arrow-up me-2"></i> I-load / I-restore ang Backup File</button>
               </div>
             </div>
-          </div>
-
-          <div class="alert alert-warning mt-4 mb-0 small">
-            <i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>Paalala:</strong> Ang system na ito ay gumagamit ng lokal na memorya ng browser. Ang pag-export ng backup file (.json) kada katapusan ng buwan ang pinakaligtas na paraan upang mapanatili ang iyong mga rekord sa loob ng maraming taon.
           </div>
         </div>
       </div>
@@ -453,8 +421,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    let users = JSON.parse(localStorage.getItem('rmv_users')) || [];
-    let currentUser = JSON.parse(localStorage.getItem('rmv_current_user')) || null;
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
     let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
@@ -472,10 +438,6 @@
 
     window.onload = function() {
       addPosRow();
-      if (currentUser) {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
-      }
       loadMoneyBreakdown();
       generateDailyReport();
       renderCreditTable();
@@ -493,7 +455,6 @@
       alert('Data saved successfully!');
     }
 
-    // --- MGA FUNCTIONS PARA SA DATA BACKUP AT RESTORE (PROTEKSYON SA PAGKAWALA) ---
     function exportDataBackup() {
       const backupData = {
         version: "1.0",
@@ -501,8 +462,7 @@
         transactions: transactions,
         inventory: inventory,
         cashBreakdownData: cashBreakdownData,
-        monthlyExpensesData: monthlyExpensesData,
-        users: users
+        monthlyExpensesData: monthlyExpensesData
       };
 
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -533,7 +493,6 @@
             if (imported.inventory) inventory = imported.inventory;
             if (imported.cashBreakdownData) cashBreakdownData = imported.cashBreakdownData;
             if (imported.monthlyExpensesData) monthlyExpensesData = imported.monthlyExpensesData;
-            if (imported.users) users = imported.users;
 
             saveData();
             alert('Tagumpay na nai-restore ang lahat ng data!');
@@ -545,22 +504,6 @@
       };
       reader.readAsText(file);
     }
-    // --------------------------------------------------------------------------
-
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const u = document.getElementById('loginUsername').value.trim();
-      const p = document.getElementById('loginPassword').value.trim();
-      const found = users.find(user => user.username === u && user.password === p);
-      if (found) {
-        currentUser = found;
-        localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('currentUserName').innerText = `${currentUser.name} (${currentUser.role})`;
-      } else {
-        document.getElementById('loginError').classList.remove('d-none');
-      }
-    });
 
     function toggleInventoryOnlyMode() {
       const isInv = document.getElementById('inventoryOnlyMode').checked;
@@ -698,7 +641,7 @@
         date: date,
         customer: cust,
         location: 'Hiway',
-        product: `[${type}]${notes}`,
+        product: `[${type}] ${notes}`,
         itemsList: [],
         total: amount,
         totalCost: 0,
@@ -871,7 +814,7 @@
       tbody.innerHTML = '';
       transactions.forEach(t => {
         if (t.balance > 0.01) {
-          tbody.innerHTML += `<tr><td>${t.customer}</td><td>${t.location}</td><td>${t.product}</td><td>₱${(t.totalCost||0).toFixed(2)}</td><td>₱${t.paid.toFixed(2)}</td><td>₱${t.balance.toFixed(2)}</td><td>${t.dueDate\vert{}\vert{}'N/A'}</td><td>${t.status}</td><td></td></tr>`;
+          tbody.innerHTML += `<tr><td>${t.customer}</td><td>${t.location}</td><td>${t.product}</td><td>₱${(t.totalCost||0).toFixed(2)}</td><td>₱${t.paid.toFixed(2)}</td><td>₱${t.balance.toFixed(2)}</td><td>${t.dueDate||'N/A'}</td><td>${t.status}</td><td></td></tr>`;
         }
       });
     }
@@ -911,7 +854,7 @@
           lastOrder.itemsList.forEach(item => {
             itemsBody.innerHTML += `
               <tr>
-                <td>${item.name}${item.desc ? `(${item.desc})` : ''}</td>
+                <td>${item.name} ${item.desc ? `(${item.desc})` : ''}</td>
                 <td>${item.qty}</td>
                 <td>₱${(item.price || 0).toFixed(2)}</td>
                 <td>₱${(item.subtotal || (item.qty * item.price)).toFixed(2)}</td>
@@ -923,7 +866,7 @@
         }
 
         const historyBody = document.getElementById('customerHistoryBody');
-        historyBody.innerHTML = ``;
+        historyBody.innerHTML = '';
         matched.forEach(t => {
           historyBody.innerHTML += `
             <tr>

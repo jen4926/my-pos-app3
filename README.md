@@ -632,11 +632,22 @@
             </div>
           </div>
 
+          <!-- ARAW NA ITO (Daily Summary Cards) -->
+          <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-calendar-day me-2"></i>Pangkalahatan para sa Araw na Ito</h5>
           <div class="row g-3 mb-4">
             <div class="col-md-3"><div class="card p-3 stat-card bg-light"><span class="text-muted small fw-bold">BENTA SA ARAW NA ITO</span><h4 class="text-primary fw-bold mt-1" id="auditDaySales">₱0.00</h4></div></div>
             <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;"><span class="text-muted small fw-bold">NET PROFIT SA ARAW NA ITO</span><h4 class="text-success fw-bold mt-1" id="auditDayProfit">₱0.00</h4></div></div>
             <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;"><span class="text-muted small fw-bold">GASTOS & SWELDO SA ARAW</span><h4 class="text-danger fw-bold mt-1" id="auditDayExpenses">₱0.00</h4></div></div>
             <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #8e44ad;"><span class="text-muted small fw-bold">NET KITA (WITH BOSS)</span><h4 class="text-dark fw-bold mt-1" id="auditDayNetIncome">₱0.00</h4></div></div>
+          </div>
+
+          <!-- KABUUANG BUWAN (Monthly Summary Cards) -->
+          <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Kabuuang Buwan (Monthly Total Summary)</h5>
+          <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #0288d1;"><span class="text-muted small fw-bold">KABUUANG BENTA (BUWAN)</span><h4 class="text-primary fw-bold mt-1" id="auditMonthSales">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #388e3c;"><span class="text-muted small fw-bold">KABUUANG NET PROFIT (BUWAN)</span><h4 class="text-success fw-bold mt-1" id="auditMonthProfit">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #e65100;"><span class="text-muted small fw-bold">KABUUANG GASTOS & SWELDO (BUWAN)</span><h4 class="text-danger fw-bold mt-1" id="auditMonthExpenses">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #7b1fa2;"><span class="text-muted small fw-bold">KABUUANG NET KITA (WITH BOSS - BUWAN)</span><h4 class="text-dark fw-bold mt-1" id="auditMonthNetIncome">₱0.00</h4></div></div>
           </div>
 
           <h5 class="fw-bold text-secondary mb-3">Detalyadong Listahan ng Transaksyon at Expenses sa Napiling Araw</h5>
@@ -658,6 +669,38 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Detalyadong Listahan para sa Buong Buwan -->
+          <h5 class="fw-bold text-secondary mb-3">Kabuuang Listahan ng Buong Buwan (Monthly Consolidated List)</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-secondary">
+                <tr>
+                  <th>Petsa</th>
+                  <th>Uri</th>
+                  <th>Pangalan / Customer / Paglalarawan</th>
+                  <th>Location</th>
+                  <th style="width: 130px;">Salary (₱)</th>
+                  <th style="width: 130px;">Expenses (₱)</th>
+                  <th style="width: 130px;">D/Eco Boss (₱)</th>
+                  <th style="width: 130px;">Net Profit (₱)</th>
+                </tr>
+              </thead>
+              <tbody id="auditMonthlyDetailBody">
+                <tr><td colspan="8" class="text-center text-muted">Walang record sa buwang ito.</td></tr>
+              </tbody>
+              <tfoot class="table-dark fw-bold">
+                <tr>
+                  <td colspan="4" class="text-end">KABUUANG BUUAN (MONTHLY TOTAL):</td>
+                  <td id="auditMonthTotalSal">₱0.00</td>
+                  <td id="auditMonthTotalExp">₱0.00</td>
+                  <td id="auditMonthTotalBoss">₱0.00</td>
+                  <td id="auditMonthTotalProfit">₱0.00</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
         </div>
       </div>
 
@@ -753,7 +796,7 @@
 
     function exportDataBackup() {
       const backupData = {
-        version: "5.4",
+        version: "5.5",
         exportDate: new Date().toISOString(),
         transactions, inventoryMasterList, inventoryDailyLogs, cashBreakdownData, monthlyExpensesData, bossLedgerData
       };
@@ -1504,9 +1547,12 @@
       }
     }
 
-    // DAILY & MONTHLY AUDIT REVIEW PER DAY
+    // DAILY & MONTHLY AUDIT REVIEW PER DAY & MONTH
     function generateDailyMonthlyAudit() {
       const selectedDate = document.getElementById('auditDateInput').value;
+      const selectedMonthPrefix = selectedDate ? selectedDate.substring(0, 7) : ''; // YYYY-MM
+
+      // --- 1. ARAW NA ITO (DAILY SUMMARY) ---
       const tbody = document.getElementById('auditDailyDetailBody');
       tbody.innerHTML = '';
       let daySales = 0, dayProfit = 0, dayTotalExpAndSal = 0, dayBossSum = 0, count = 0;
@@ -1584,6 +1630,109 @@
       document.getElementById('auditDayProfit').innerText = `₱${dayProfit.toFixed(2)}`;
       document.getElementById('auditDayExpenses').innerText = `₱${dayTotalExpAndSal.toFixed(2)}`;
       document.getElementById('auditDayNetIncome').innerText = `₱${netIncome.toFixed(2)}`;
+
+
+      // --- 2. KABUUANG BUWAN (MONTHLY SUMMARY) ---
+      const monthTbody = document.getElementById('auditMonthlyDetailBody');
+      monthTbody.innerHTML = '';
+      let monthSales = 0, monthProfit = 0, monthSalSum = 0, monthExpSum = 0, monthBossSum = 0, monthItemCount = 0;
+
+      // Kolektahin at ayusin ang lahat ng petsa sa napiling buwan
+      let allDatesInMonth = new Set();
+      transactions.forEach(t => { if (t.date && t.date.startsWith(selectedMonthPrefix)) allDatesInMonth.add(t.date); });
+      Object.keys(monthlyExpensesData).forEach(d => { if (d.startsWith(selectedMonthPrefix)) allDatesInMonth.add(d); });
+      Object.keys(bossLedgerData).forEach(d => { if (d.startsWith(selectedMonthPrefix)) allDatesInMonth.add(d); });
+
+      let sortedDates = Array.from(allDatesInMonth).sort();
+
+      sortedDates.forEach(dt => {
+        // 1. Transactions sa petsang ito
+        transactions.forEach(t => {
+          if (t.date === dt) {
+            const cost = t.totalCost || 0;
+            const profit = t.total - cost;
+            monthSales += t.total;
+            monthProfit += profit;
+            monthItemCount++;
+
+            monthTbody.innerHTML += `
+              <tr>
+                <td>${dt}</td>
+                <td><span class="badge bg-primary">Benta</span></td>
+                <td class="fw-bold">${t.customer} (${t.product})</td>
+                <td>${t.location}</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="text-success">₱${profit.toFixed(2)}</td>
+              </tr>
+            `;
+          }
+        });
+
+        // 2. Expenses / Salary sa petsang ito
+        if (monthlyExpensesData[dt]) {
+          monthlyExpensesData[dt].forEach(ex => {
+            let isSalary = (ex.type === 'Salary' || (!ex.type && ex.title.toLowerCase().includes('sweldo')));
+            let salVal = isSalary ? ex.amount : 0;
+            let expVal = !isSalary ? ex.amount : 0;
+            monthSalSum += salVal;
+            monthExpSum += expVal;
+            monthItemCount++;
+
+            monthTbody.innerHTML += `
+              <tr>
+                <td>${dt}</td>
+                <td><span class="badge ${isSalary ? 'bg-info text-dark' : 'bg-danger'}">${ex.type || (isSalary ? 'Salary' : 'Expense')}</span></td>
+                <td class="fw-bold">${ex.title}</td>
+                <td>Salary / Expense</td>
+                <td class="text-primary">${salVal > 0 ? '-₱' + salVal.toFixed(2) : '-'}</td>
+                <td class="text-danger">${expVal > 0 ? '-₱' + expVal.toFixed(2) : '-'}</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+            `;
+          });
+        }
+
+        // 3. D/Eco Boss sa petsang ito
+        if (bossLedgerData[dt]) {
+          bossLedgerData[dt].forEach(b => {
+            monthBossSum += (b.amount || 0);
+            monthItemCount++;
+
+            monthTbody.innerHTML += `
+              <tr>
+                <td>${dt}</td>
+                <td><span class="badge bg-success">D/Eco Boss</span></td>
+                <td class="fw-bold">${b.title}</td>
+                <td>D/Eco Boss Ledger</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="text-success">+₱${b.amount.toFixed(2)}</td>
+                <td>-</td>
+              </tr>
+            `;
+          });
+        }
+      });
+
+      if (monthItemCount === 0) {
+        monthTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Walang record sa buwang ito (${selectedMonthPrefix}).</td></tr>`;
+      }
+
+      const totalMonthExpAndSal = monthSalSum + monthExpSum;
+      const monthNetIncome = (monthProfit - totalMonthExpAndSal) + monthBossSum;
+
+      document.getElementById('auditMonthSales').innerText = `₱${monthSales.toFixed(2)}`;
+      document.getElementById('auditMonthProfit').innerText = `₱${monthProfit.toFixed(2)}`;
+      document.getElementById('auditMonthExpenses').innerText = `₱${totalMonthExpAndSal.toFixed(2)}`;
+      document.getElementById('auditMonthNetIncome').innerText = `₱${monthNetIncome.toFixed(2)}`;
+
+      document.getElementById('auditMonthTotalSal').innerText = `₱${monthSalSum.toFixed(2)}`;
+      document.getElementById('auditMonthTotalExp').innerText = `₱${monthExpSum.toFixed(2)}`;
+      document.getElementById('auditMonthTotalBoss').innerText = `₱${monthBossSum.toFixed(2)}`;
+      document.getElementById('auditMonthTotalProfit').innerText = `₱${monthProfit.toFixed(2)}`;
     }
 
     function searchCustomerOrder() {

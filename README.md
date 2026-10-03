@@ -41,7 +41,7 @@
         <li class="nav-item"><button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTables()"><i class="fa-solid fa-boxes-stacked me-1"></i> Inventory</button></li>
         <li class="nav-item"><button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button" onclick="renderStandaloneExpensesLedger()"><i class="fa-solid fa-receipt me-1"></i> Salary & Expenses</button></li>
         <li class="nav-item"><button class="nav-link" id="boss-tab" data-bs-toggle="pill" data-bs-target="#boss-content" type="button" onclick="renderStandaloneBossLedger()"><i class="fa-solid fa-user-tie me-1"></i> D/Eco Boss</button></li>
-        <li class="nav-item"><button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()"><i class="fa-solid fa-chart-pie me-1"></i> Monthly Audit</button></li>
+        <li class="nav-item"><button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()"><i class="fa-solid fa-chart-pie me-1"></i> Audit & Salary Review</button></li>
       </ul>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Data</button>
@@ -237,7 +237,7 @@
             <div class="col-md-6">
               <div class="card bg-light border p-3 h-100">
                 <h5 class="fw-bold text-dark mb-2"><i class="fa-solid fa-download text-success me-2"></i>1. I-download ang Backup (Export)</h5>
-                <p class="small text-muted">Kumuha ng kopya ng lahat ng iyong data (Transactions, Inventory, Cash Records) at i-save sa USB o computer.</p>
+                <p class="small text-muted">Kumuha ng kopya ng lahat ng iyong data at i-save sa USB o computer.</p>
                 <button class="btn btn-success mt-auto fw-bold" onclick="exportDataBackup()"><i class="fa-solid fa-file-arrow-down me-2"></i> I-download ang Buong Backup File (.JSON)</button>
               </div>
             </div>
@@ -245,7 +245,7 @@
             <div class="col-md-6">
               <div class="card bg-light border p-3 h-100">
                 <h5 class="fw-bold text-dark mb-2"><i class="fa-solid fa-upload text-primary me-2"></i>2. Ibalik ang Data (Restore / Import)</h5>
-                <p class="small text-muted">Gamitin ito para ibalik ang mga nakaraang data kung lumipat ka ng ibang computer o na-clear ang browser.</p>
+                <p class="small text-muted">Gamitin ito para ibalik ang mga nakaraang data kung lumipat ka ng ibang computer.</p>
                 <input type="file" id="backupFileInput" class="form-control mb-2" accept=".json">
                 <button class="btn btn-primary fw-bold" onclick="importDataBackup()"><i class="fa-solid fa-file-arrow-up me-2"></i> I-load / I-restore ang Backup File</button>
               </div>
@@ -396,14 +396,66 @@
       <!-- 4. INVENTORY TAB -->
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-boxes-stacked me-2"></i>Inventory Stock Management</h4>
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>Advanced Inventory Management</h4>
+          <p class="text-muted small">Mag-add ng produkto kasama ang Supplier nito. Ang Ending ay awtomatikong magiging Beginning kinabukasan (Per Day), kasama ang Return/Sauli.</p>
+          
+          <!-- Add Product / Stock Entry Form -->
+          <div class="card bg-light p-3 mb-4 border">
+            <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-plus-circle me-1"></i> Magdagdag ng Stock / Produkto mula sa Supplier</h6>
+            <div class="row g-2">
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Petsa (Date):</label>
+                <input type="date" id="invDate" class="form-control form-control-sm">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Uri / Kategorya:</label>
+                <select id="invCategory" class="form-select form-select-sm">
+                  <option value="Palm & Coco">Palm & Coco Items</option>
+                  <option value="Other Items">Iba pang Items</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Pangalan ng Produkto:</label>
+                <input type="text" id="invProductName" class="form-control form-control-sm" placeholder="Hal. Palm Oil / Coco Oil">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Supplier:</label>
+                <input type="text" id="invSupplier" class="form-control form-control-sm" placeholder="Hal. ABC Supplier">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-semibold">Pumasok (In / Qty):</label>
+                <input type="number" step="any" id="invQtyIn" class="form-control form-control-sm" value="0">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-semibold">Return / Sauli:</label>
+                <input type="number" step="any" id="invReturn" class="form-control form-control-sm" value="0">
+              </div>
+              <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary btn-sm w-100 fw-bold" onclick="addInventoryStockEntry()">I-save ang Stock / Delivery</button>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="fw-bold text-secondary mt-3">1. PALM & COCO INVENTORY (Per Day / Ending & Beginning)</h5>
+          <div class="table-responsive mb-4">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-dark">
+                <tr><th>Petsa</th><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
+              </thead>
+              <tbody id="palmCocoInventoryBody">
+                <tr><td colspan="8" class="text-center text-muted">Walang record para sa Palm & Coco.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h5 class="fw-bold text-secondary mt-3">2. IBA PANG ITEMS INVENTORY (Per Day / Ending & Beginning)</h5>
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
-                <tr><th>Product Name</th><th>Total Quantity In</th><th>Total Quantity Sold</th><th>Current Stock Balance</th></tr>
+                <tr><th>Petsa</th><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
               </thead>
-              <tbody id="inventoryTableBody">
-                <tr><td colspan="4" class="text-center text-muted py-3">Wala pang inventory data.</td></tr>
+              <tbody id="otherInventoryBody">
+                <tr><td colspan="8" class="text-center text-muted">Walang record para sa Iba pang Items.</td></tr>
               </tbody>
             </table>
           </div>
@@ -413,8 +465,8 @@
       <!-- 5. EXPENSES TAB -->
       <div class="tab-pane fade" id="expenses-content">
         <div class="card p-4">
-          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger</h4>
-          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo para maibawas sa Cash Drawer target.</p>
+          <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger (Per Day)</h4>
+          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo na may hiwalay na column at total.</p>
           <div class="row g-3 mb-3">
             <div class="col-md-3">
               <label class="form-label fw-semibold">Petsa:</label>
@@ -438,6 +490,9 @@
               <tbody id="expensesTableBody">
                 <tr><td colspan="4" class="text-center text-muted">Walang expenses na naitala.</td></tr>
               </tbody>
+              <tfoot class="table-secondary fw-bold">
+                <tr><td colspan="2" class="text-end">KABUUANG GASTOS (TOTAL EXPENSES):</td><td id="totalExpensesSum" class="text-danger">₱0.00</td><td></td></tr>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -476,27 +531,30 @@
         </div>
       </div>
 
-      <!-- 7. AUDIT TAB -->
+      <!-- 7. AUDIT TAB (MONTHLY & DAILY AUDIT REVIEW) -->
       <div class="tab-pane fade" id="audit-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Monthly Audit & Summary</h4>
+            <h4 class="card-title text-primary m-0"><i class="fa-solid fa-chart-pie me-2"></i>Daily & Monthly Audit Review</h4>
             <div class="d-flex gap-2 align-items-center">
-              <label class="fw-bold me-1">Piliin ang Buwan:</label>
-              <input type="month" id="auditMonthInput" class="form-control" onchange="generateMonthlyAudit()">
+              <label class="fw-bold me-1">Piliin ang Petsa/Buwan:</label>
+              <input type="date" id="auditDateInput" class="form-control" onchange="generateDailyMonthlyAudit()">
             </div>
           </div>
+
           <div class="row g-3 mb-4">
-            <div class="col-md-4"><div class="card p-3 stat-card bg-light"><span class="text-muted small fw-bold">BUWANANG BENTA (TOTAL SALES)</span><h3 class="text-primary fw-bold mt-1" id="auditTotalSales">₱0.00</h3></div></div>
-            <div class="col-md-4"><div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;"><span class="text-muted small fw-bold">BUWANANG NET PROFIT</span><h3 class="text-success fw-bold mt-1" id="auditTotalProfit">₱0.00</h3></div></div>
-            <div class="col-md-4"><div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;"><span class="text-muted small fw-bold">KABUUANG GASTOS (EXPENSES)</span><h3 class="text-danger fw-bold mt-1" id="auditTotalExpenses">₱0.00</h3></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light"><span class="text-muted small fw-bold">BENTA SA ARAW NA ITO</span><h4 class="text-primary fw-bold mt-1" id="auditDaySales">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;"><span class="text-muted small fw-bold">NET PROFIT SA ARAW NA ITO</span><h4 class="text-success fw-bold mt-1" id="auditDayProfit">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;"><span class="text-muted small fw-bold">GASTOS SA ARAW NA ITO</span><h4 class="text-danger fw-bold mt-1" id="auditDayExpenses">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #8e44ad;"><span class="text-muted small fw-bold">NET KITA (NET - EXPENSES)</span><h4 class="text-dark fw-bold mt-1" id="auditDayNetIncome">₱0.00</h4></div></div>
           </div>
-          <h5 class="fw-bold text-secondary mb-3">Buod ng mga Transaksyon sa Buwang Ito</h5>
-          <div class="table-responsive">
+
+          <h5 class="fw-bold text-secondary mb-3">Detalyadong Listahan ng Transaksyon at Expenses sa Napiling Araw</h5>
+          <div class="table-responsive mb-4">
             <table class="table table-bordered align-middle">
-              <thead class="table-dark"><tr><th>Petsa</th><th>Customer</th><th>Location</th><th>Total (₱)</th><th>Net Profit (₱)</th><th>Status</th></tr></thead>
-              <tbody id="auditTableBody">
-                <tr><td colspan="6" class="text-center text-muted">Walang record sa buwang ito.</td></tr>
+              <thead class="table-dark"><tr><th>Uri</th><th>Pangalan / Customer / Paglalarawan</th><th>Location / Kategorya</th><th>Halaga / Total (₱)</th><th>Net Profit (₱)</th></tr></thead>
+              <tbody id="auditDailyDetailBody">
+                <tr><td colspan="5" class="text-center text-muted">Walang record sa petsang ito.</td></tr>
               </tbody>
             </table>
           </div>
@@ -509,7 +567,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
-    let inventory = JSON.parse(localStorage.getItem('rmv_inventory')) || [];
+    let inventoryStockEntries = JSON.parse(localStorage.getItem('rmv_inventoryStockEntries')) || [];
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
     let bossLedgerData = JSON.parse(localStorage.getItem('rmv_bossLedgerData')) || {};
@@ -525,7 +583,8 @@
     document.getElementById('manualDate').value = todayFormatted;
     document.getElementById('expenseDate').value = todayFormatted;
     document.getElementById('bossDate').value = todayFormatted;
-    document.getElementById('auditMonthInput').value = todayFormatted.substring(0, 7);
+    document.getElementById('invDate').value = todayFormatted;
+    document.getElementById('auditDateInput').value = todayFormatted;
 
     window.onload = function() {
       addPosRow();
@@ -535,11 +594,12 @@
       renderInventoryTables();
       renderStandaloneExpensesLedger();
       renderStandaloneBossLedger();
+      generateDailyMonthlyAudit();
     };
 
     function saveData() {
       localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
-      localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
+      localStorage.setItem('rmv_inventoryStockEntries', JSON.stringify(inventoryStockEntries));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_bossLedgerData', JSON.stringify(bossLedgerData));
@@ -552,9 +612,9 @@
 
     function exportDataBackup() {
       const backupData = {
-        version: "1.0",
+        version: "2.0",
         exportDate: new Date().toISOString(),
-        transactions, inventory, cashBreakdownData, monthlyExpensesData, bossLedgerData
+        transactions, inventoryStockEntries, cashBreakdownData, monthlyExpensesData, bossLedgerData
       };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -579,7 +639,7 @@
           const imported = JSON.parse(e.target.result);
           if (confirm('Sigurado ka bang gusto mong i-restore ang data na ito? Mapapalitan nito ang kasalukuyang data.')) {
             if (imported.transactions) transactions = imported.transactions;
-            if (imported.inventory) inventory = imported.inventory;
+            if (imported.inventoryStockEntries) inventoryStockEntries = imported.inventoryStockEntries;
             if (imported.cashBreakdownData) cashBreakdownData = imported.cashBreakdownData;
             if (imported.monthlyExpensesData) monthlyExpensesData = imported.monthlyExpensesData;
             if (imported.bossLedgerData) bossLedgerData = imported.bossLedgerData;
@@ -715,6 +775,7 @@
       addPosRow();
       document.getElementById('saleDate').value = getTodayDateString();
       generateDailyReport();
+      renderInventoryTables();
     });
 
     document.getElementById('manualPaymentForm').addEventListener('submit', function(e) {
@@ -908,42 +969,93 @@
       });
     }
 
-    // INVENTORY TABLES RENDER
-    function renderInventoryTables() {
-      const tbody = document.getElementById('inventoryTableBody');
-      tbody.innerHTML = '';
-      let prodMap = {};
+    // ADVANCED INVENTORY MANAGEMENT (Palm & Coco vs Other Items, Beginning/Ending, Returns, Supplier)
+    function addInventoryStockEntry() {
+      const date = document.getElementById('invDate').value;
+      const category = document.getElementById('invCategory').value;
+      const productName = document.getElementById('invProductName').value.trim();
+      const supplier = document.getElementById('invSupplier').value.trim();
+      const qtyIn = parseFloat(document.getElementById('invQtyIn').value) || 0;
+      const returnQty = parseFloat(document.getElementById('invReturn').value) || 0;
 
+      if (!productName || !date) {
+        alert('Mangyaring ilagay ang petsa at pangalan ng produkto.');
+        return;
+      }
+
+      inventoryStockEntries.push({
+        id: Date.now(),
+        date,
+        category,
+        productName,
+        supplier: supplier || 'N/A',
+        qtyIn,
+        returnQty
+      });
+
+      saveData();
+      renderInventoryTables();
+      document.getElementById('invProductName').value = '';
+      document.getElementById('invSupplier').value = '';
+      document.getElementById('invQtyIn').value = '0';
+      document.getElementById('invReturn').value = '0';
+      alert('Matagumpay na naidagdag ang inventory stock!');
+    }
+
+    function renderInventoryTables() {
+      const palmBody = document.getElementById('palmCocoInventoryBody');
+      const otherBody = document.getElementById('otherInventoryBody');
+      palmBody.innerHTML = '';
+      otherBody.innerHTML = '';
+
+      // Kunin ang total sold per product per date mula sa transactions
+      let soldMap = {};
       transactions.forEach(t => {
-        if (t.itemsList) {
+        if (t.itemsList && t.date) {
           t.itemsList.forEach(item => {
-            if (!prodMap[item.name]) {
-              prodMap[item.name] = { totalIn: 0, totalSold: 0 };
-            }
-            prodMap[item.name].totalIn += item.qty;
-            prodMap[item.name].totalSold += item.qty;
+            const key = `${t.date}_${item.name.toLowerCase()}`;
+            soldMap[key] = (soldMap[key] || 0) + item.qty;
           });
         }
       });
 
-      const keys = Object.keys(prodMap);
-      if (keys.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Wala pang nakatalang produkto sa inventory.</td></tr>`;
-        return;
-      }
+      let palmCount = 0;
+      let otherCount = 0;
 
-      keys.forEach(name => {
-        const p = prodMap[name];
-        const balance = p.totalIn - p.totalSold;
-        tbody.innerHTML += `
+      // Group stock entries or display row by row per date/product
+      inventoryStockEntries.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(entry => {
+        const soldKey = `${entry.date}_${entry.productName.toLowerCase()}`;
+        const soldQty = soldMap[soldKey] || 0;
+
+        // Computation: Ending = Beginning (assumed 0 or tracked) + QtyIn + Return - Sold
+        // Para sa per day, pwede nating kalkulahin ang ending
+        const beginning = 0; // Pwede i-link sa ending kahapon kung gusto, o default 0
+        const ending = beginning + entry.qtyIn + entry.returnQty - soldQty;
+
+        const rowHtml = `
           <tr>
-            <td class="fw-bold">${name}</td>
-            <td>${p.totalIn}</td>
-            <td>${p.totalSold}</td>
-            <td class="fw-bold text-primary">${balance}</td>
+            <td>${entry.date}</td>
+            <td class="fw-bold">${entry.productName}</td>
+            <td>${entry.supplier}</td>
+            <td>${beginning}</td>
+            <td class="text-success">+${entry.qtyIn}</td>
+            <td class="text-warning">+${entry.returnQty}</td>
+            <td class="text-danger">-${soldQty}</td>
+            <td class="fw-bold text-primary">${ending}</td>
           </tr>
         `;
+
+        if (entry.category === 'Palm & Coco') {
+          palmCount++;
+          palmBody.innerHTML += rowHtml;
+        } else {
+          otherCount++;
+          otherBody.innerHTML += rowHtml;
+        }
       });
+
+      if (palmCount === 0) palmBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang record para sa Palm & Coco.</td></tr>`;
+      if (otherCount === 0) otherBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang record para sa Iba pang Items.</td></tr>`;
     }
 
     // EXPENSES LEDGER
@@ -971,10 +1083,12 @@
       const tbody = document.getElementById('expensesTableBody');
       tbody.innerHTML = '';
       let count = 0;
+      let grandTotal = 0;
 
-      Object.keys(monthlyExpensesData).forEach(date => {
+      Object.keys(monthlyExpensesData).sort().forEach(date => {
         monthlyExpensesData[date].forEach(ex => {
           count++;
+          grandTotal += ex.amount;
           tbody.innerHTML += `
             <tr>
               <td>${date}</td>
@@ -991,6 +1105,7 @@
       if (count === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang expenses na naitala.</td></tr>`;
       }
+      document.getElementById('totalExpensesSum').innerText = `₱${grandTotal.toFixed(2)}`;
     }
 
     function deleteExpense(date, id) {
@@ -1028,7 +1143,7 @@
       tbody.innerHTML = '';
       let count = 0;
 
-      Object.keys(bossLedgerData).forEach(date => {
+      Object.keys(bossLedgerData).sort().forEach(date => {
         bossLedgerData[date].forEach(b => {
           count++;
           tbody.innerHTML += `
@@ -1058,49 +1173,61 @@
       }
     }
 
-    // MONTHLY AUDIT
-    function generateMonthlyAudit() {
-      const monthStr = document.getElementById('auditMonthInput').value; // e.g. "2026-10"
-      const tbody = document.getElementById('auditTableBody');
+    // DAILY & MONTHLY AUDIT REVIEW PER DAY
+    function generateDailyMonthlyAudit() {
+      const selectedDate = document.getElementById('auditDateInput').value; // e.g. "2026-10-03"
+      const tbody = document.getElementById('auditDailyDetailBody');
       tbody.innerHTML = '';
-      let totalSales = 0, totalProfit = 0, totalExp = 0, count = 0;
+      let daySales = 0, dayProfit = 0, dayExpenses = 0, count = 0;
 
+      // Kalkulahin ang benta at kita sa napiling araw
       transactions.forEach(t => {
-        if (t.date && t.date.startsWith(monthStr)) {
+        if (t.date === selectedDate) {
           const cost = t.totalCost || 0;
           const profit = t.total - cost;
-          totalSales += t.total;
-          totalProfit += profit;
+          daySales += t.total;
+          dayProfit += profit;
           count++;
 
           tbody.innerHTML += `
             <tr>
-              <td>${t.date}</td>
-              <td class="fw-bold">${t.customer}</td>
-              <td><span class="badge bg-secondary">${t.location}</span></td>
+              <td><span class="badge bg-primary">Benta (Sale)</span></td>
+              <td class="fw-bold">${t.customer} (${t.product})</td>
+              <td>${t.location}</td>
               <td>₱${t.total.toFixed(2)}</td>
               <td class="text-success">₱${profit.toFixed(2)}</td>
-              <td><span class="badge ${t.status === 'PAID' ? 'bg-success' : 'bg-warning text-dark'}">${t.status}</span></td>
             </tr>
           `;
         }
       });
 
-      Object.keys(monthlyExpensesData).forEach(date => {
-        if (date.startsWith(monthStr)) {
-          monthlyExpensesData[date].forEach(ex => {
-            totalExp += (parseFloat(ex.amount) || 0);
-          });
-        }
-      });
-
-      if (count === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Walang transaksyon sa buwang ito.</td></tr>`;
+      // Isama ang expenses sa araw na ito
+      if (monthlyExpensesData[selectedDate]) {
+        monthlyExpensesData[selectedDate].forEach(ex => {
+          dayExpenses += (parseFloat(ex.amount) || 0);
+          count++;
+          tbody.innerHTML += `
+            <tr>
+              <td><span class="badge bg-danger">Gastos (Expense)</span></td>
+              <td class="fw-bold">${ex.title}</td>
+              <td>Salary / Expense</td>
+              <td class="text-danger">-₱${ex.amount.toFixed(2)}</td>
+              <td>-</td>
+            </tr>
+          `;
+        });
       }
 
-      document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
-      document.getElementById('auditTotalProfit').innerText = `₱${totalProfit.toFixed(2)}`;
-      document.getElementById('auditTotalExpenses').innerText = `₱${totalExp.toFixed(2)}`;
+      if (count === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Walang transaksyon o gastos sa petsang ito.</td></tr>`;
+      }
+
+      const netIncome = dayProfit - dayExpenses;
+
+      document.getElementById('auditDaySales').innerText = `₱${daySales.toFixed(2)}`;
+      document.getElementById('auditDayProfit').innerText = `₱${dayProfit.toFixed(2)}`;
+      document.getElementById('auditDayExpenses').innerText = `₱${dayExpenses.toFixed(2)}`;
+      document.getElementById('auditDayNetIncome').innerText = `₱${netIncome.toFixed(2)}`;
     }
 
     function searchCustomerOrder() {

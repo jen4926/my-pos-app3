@@ -269,7 +269,7 @@
           <div class="row g-3 mb-4">
             <div class="col-md-3"><div class="card p-3 stat-card bg-light"><span class="text-muted small fw-bold">HIWAY SALES / PROFIT</span><div class="mt-1"><span class="text-primary fw-bold" id="dailyHiwaySales">₱0.00</span><br><span class="text-success small fw-bold" id="dailyHiwayProfit">₱0.00</span></div></div></div>
             <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #00897b;"><span class="text-muted small fw-bold">BYAHE SALES / PROFIT</span><div class="mt-1"><span class="text-primary fw-bold" id="dailyByaheSales">₱0.00</span><br><span class="text-success small fw-bold" id="dailyByaheProfit">₱0.00</span></div></div></div>
-            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;"><span class="text-muted small fw-bold">TOTAL COLLECTION & NET</span><div class="mt-1"><span class="text-success fw-bold" id="dailyTotalCollected">₱0.00</span><br><span class="text-success fw-bold" id="dailyTotalNetProfit">₱0.00</span></div></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;"><span class="text-muted small fw-bold">TOTAL COLLECTION & NET (W/ BOSS)</span><div class="mt-1"><span class="text-success fw-bold" id="dailyTotalCollected">₱0.00</span><br><span class="text-success fw-bold" id="dailyTotalNetProfit">₱0.00</span></div></div></div>
             <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;"><span class="text-muted small fw-bold">TOTAL SALES & TX</span><div class="mt-1"><span class="text-primary fw-bold" id="dailyTotalSales">₱0.00</span><br><span class="text-warning fw-bold" id="dailyTxCount">0</span></div></div></div>
           </div>
 
@@ -307,7 +307,8 @@
                   <div class="d-flex justify-content-between small mb-1"><span>Less: GCash</span><span id="lessGCash" class="text-danger">-₱0.00</span></div>
                   <div class="d-flex justify-content-between small mb-1"><span>Less: Bank Transfer (BT)</span><span id="lessBT" class="text-danger">-₱0.00</span></div>
                   <div class="d-flex justify-content-between small mb-1"><span>Less: Cheque</span><span id="lessCheque" class="text-danger">-₱0.00</span></div>
-                  <div class="d-flex justify-content-between small mb-1"><span>Less: Salary & Expenses</span><span id="lessExpenses" class="text-danger">-₱0.00</span></div>
+                  <div class="d-flex justify-content-between small mb-1"><span>Less: Salary</span><span id="lessSalary" class="text-danger">-₱0.00</span></div>
+                  <div class="d-flex justify-content-between small mb-1"><span>Less: Expenses</span><span id="lessExpenses" class="text-danger">-₱0.00</span></div>
                   <div class="d-flex justify-content-between small mb-1"><span>Less: Unpaid Balance</span><span id="lessRemainingBalance" class="text-danger">-₱0.00</span></div>
                   <hr class="my-1">
                   <div class="d-flex justify-content-between fw-bold mb-1 bg-light p-1 rounded"><span>Target Cash (Drawer):</span><span id="breakdownTargetWithFund" class="text-primary">₱0.00</span></div>
@@ -327,6 +328,59 @@
               <tbody id="dailyTableBody"></tbody>
             </table>
           </div>
+
+          <!-- Hiwalay na Salary at Expenses Section sa Daily Report -->
+          <div class="mt-4">
+            <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses para sa Petsang Ito</h6>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Petsa</th>
+                    <th>Paglalarawan (Description)</th>
+                    <th style="width: 200px;">Salary (₱)</th>
+                    <th style="width: 200px;">Expenses (₱)</th>
+                  </tr>
+                </thead>
+                <tbody id="dailyExpensesTableBody">
+                  <tr><td colspan="4" class="text-center text-muted">Walang salary o expenses sa petsang ito.</td></tr>
+                </tbody>
+                <tfoot class="table-secondary fw-bold">
+                  <tr>
+                    <td colspan="2" class="text-end">SUBTOTAL / KABUUAN:</td>
+                    <td id="dailyTotalSalarySum" class="text-primary">₱0.00</td>
+                    <td id="dailyTotalExpensesSum" class="text-danger">₱0.00</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- D/Eco Boss Section sa Daily Report -->
+          <div class="mt-4">
+            <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-user-tie me-2"></i>D/Eco Boss para sa Petsang Ito (Idinaragdag sa Net Profit)</h6>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Petsa</th>
+                    <th>Detalye / Remarks</th>
+                    <th style="width: 200px;">Halaga (₱)</th>
+                  </tr>
+                </thead>
+                <tbody id="dailyBossTableBody">
+                  <tr><td colspan="3" class="text-center text-muted">Walang record para kay Boss sa petsang ito.</td></tr>
+                </tbody>
+                <tfoot class="table-secondary fw-bold">
+                  <tr>
+                    <td colspan="2" class="text-end">TOTAL D/ECO BOSS:</td>
+                    <td id="dailyTotalBossSum" class="text-success">₱0.00</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -336,7 +390,7 @@
           <h4 class="card-title text-primary mb-4"><i class="fa-solid fa-users-viewfinder me-2"></i>Utang & Payments</h4>
           <div class="table-responsive">
             <table class="table table-hover align-middle">
-              <thead class="table-dark"><tr><th>Customer</th><th>Location</th><th>Product</th><th>Cost</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th><th class="no-print">Action</th></tr></thead>
+              <thead class="table-dark"><tr><th>Customer</th><th>Location</th><th>Product</th><th>Total (₱)</th><th>Paid (₱)</th><th>Balance (₱)</th><th>Due Date</th><th>Status</th><th class="no-print" style="width: 120px;">Action</th></tr></thead>
               <tbody id="creditTableBody"></tbody>
             </table>
           </div>
@@ -412,16 +466,13 @@
           <!-- 1. Master Product List Form (Permanent Column) -->
           <div class="card bg-white p-3 mb-4 border shadow-sm">
             <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-list-check me-1"></i> Master Product Setup (Permanenteng Listahan ng mga Produkto)</h6>
-            <p class="text-muted small mb-2">Dito mo lang i-a-add minsan ang pangalan ng item at supplier. Hindi mo na kailangang i-type ulit araw-araw.</p>
+            <p class="text-muted small mb-2">Dito mo lang i-a-add minsan ang pangalan ng item, manual description, at supplier.</p>
             <div class="row g-2">
               <div class="col-md-4">
                 <input type="text" id="masterProductName" class="form-control form-control-sm" placeholder="Pangalan ng Produkto (Hal. Palm Oil)">
               </div>
               <div class="col-md-3">
-                <select id="masterCategory" class="form-select form-select-sm">
-                  <option value="Palm & Coco">Palm & Coco Items</option>
-                  <option value="Other Items">Iba pang Items</option>
-                </select>
+                <input type="text" id="masterDescription" class="form-control form-control-sm" placeholder="Description / Uri (Hal. 1 Liter)">
               </div>
               <div class="col-md-3">
                 <input type="text" id="masterSupplier" class="form-control form-control-sm" placeholder="Supplier (Hal. ABC Supplier)">
@@ -457,10 +508,10 @@
           <div class="table-responsive mb-4">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
-                <tr><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
+                <tr><th>Produkto</th><th>Description</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
               </thead>
               <tbody id="palmCocoInventoryBody">
-                <tr><td colspan="7" class="text-center text-muted">Walang record para sa Palm & Coco.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted">Walang record.</td></tr>
               </tbody>
             </table>
           </div>
@@ -469,10 +520,10 @@
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
-                <tr><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
+                <tr><th>Produkto</th><th>Description</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
               </thead>
               <tbody id="otherInventoryBody">
-                <tr><td colspan="7" class="text-center text-muted">Walang record para sa Iba pang Items.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted">Walang record.</td></tr>
               </tbody>
             </table>
           </div>
@@ -483,32 +534,54 @@
       <div class="tab-pane fade" id="expenses-content">
         <div class="card p-4">
           <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger (Per Day)</h4>
-          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo na may hiwalay na column at total.</p>
+          <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo. May hiwalay na column para sa Salary at Expenses para mas madaling ma-subtotal.</p>
+          
           <div class="row g-3 mb-3">
-            <div class="col-md-3">
+            <div class="col-md-2">
               <label class="form-label fw-semibold">Petsa:</label>
               <input type="date" id="expenseDate" class="form-control">
             </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Uri (Type):</label>
+              <select id="expenseType" class="form-select">
+                <option value="Salary">Salary (Sweldo)</option>
+                <option value="Expense">Expense (Gastos)</option>
+              </select>
+            </div>
             <div class="col-md-4">
-              <label class="form-label fw-semibold">Pangalan ng Gastos / Sweldo:</label>
-              <input type="text" id="expenseTitle" class="form-control" placeholder="Hal. Kuryente / Sweldo ni Juan">
+              <label class="form-label fw-semibold">Paglalarawan / Title:</label>
+              <input type="text" id="expenseTitle" class="form-control" placeholder="Hal. Sweldo ni Juan / Kuryente">
             </div>
             <div class="col-md-3">
               <label class="form-label fw-semibold">Halaga (₱):</label>
               <input type="number" step="0.01" id="expenseAmount" class="form-control" placeholder="0.00">
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button class="btn btn-primary w-100 fw-bold" onclick="addExpenseItem()">Magdagdag</button>
-            </div>
           </div>
+          <div class="text-end mb-4">
+            <button class="btn btn-primary px-4 fw-bold" onclick="addExpenseItem()"><i class="fa-solid fa-plus me-1"></i> Idagdag sa Talaan</button>
+          </div>
+
           <div class="table-responsive">
             <table class="table table-bordered align-middle">
-              <thead class="table-dark"><tr><th>Petsa</th><th>Paglalarawan / Expense Title</th><th>Halaga (₱)</th><th class="no-print">Aksyon</th></tr></thead>
+              <thead class="table-dark">
+                <tr>
+                  <th>Petsa</th>
+                  <th>Paglalarawan (Description)</th>
+                  <th style="width: 200px;">Salary (₱)</th>
+                  <th style="width: 200px;">Expenses (₱)</th>
+                  <th class="no-print" style="width: 80px;">Aksyon</th>
+                </tr>
+              </thead>
               <tbody id="expensesTableBody">
-                <tr><td colspan="4" class="text-center text-muted">Walang expenses na naitala.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted">Walang record na naitala.</td></tr>
               </tbody>
               <tfoot class="table-secondary fw-bold">
-                <tr><td colspan="2" class="text-end">KABUUANG GASTOS (TOTAL EXPENSES):</td><td id="totalExpensesSum" class="text-danger">₱0.00</td><td></td></tr>
+                <tr>
+                  <td colspan="2" class="text-end">SUBTOTAL / KABUUAN:</td>
+                  <td id="totalSalarySum" class="text-primary">₱0.00</td>
+                  <td id="totalExpensesSum" class="text-danger">₱0.00</td>
+                  <td></td>
+                </tr>
               </tfoot>
             </table>
           </div>
@@ -562,22 +635,71 @@
           <div class="row g-3 mb-4">
             <div class="col-md-3"><div class="card p-3 stat-card bg-light"><span class="text-muted small fw-bold">BENTA SA ARAW NA ITO</span><h4 class="text-primary fw-bold mt-1" id="auditDaySales">₱0.00</h4></div></div>
             <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;"><span class="text-muted small fw-bold">NET PROFIT SA ARAW NA ITO</span><h4 class="text-success fw-bold mt-1" id="auditDayProfit">₱0.00</h4></div></div>
-            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;"><span class="text-muted small fw-bold">GASTOS SA ARAW NA ITO</span><h4 class="text-danger fw-bold mt-1" id="auditDayExpenses">₱0.00</h4></div></div>
-            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #8e44ad;"><span class="text-muted small fw-bold">NET KITA (NET - EXPENSES)</span><h4 class="text-dark fw-bold mt-1" id="auditDayNetIncome">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #f57c00;"><span class="text-muted small fw-bold">GASTOS & SWELDO SA ARAW</span><h4 class="text-danger fw-bold mt-1" id="auditDayExpenses">₱0.00</h4></div></div>
+            <div class="col-md-3"><div class="card p-3 stat-card bg-light" style="border-left-color: #8e44ad;"><span class="text-muted small fw-bold">NET KITA (WITH BOSS)</span><h4 class="text-dark fw-bold mt-1" id="auditDayNetIncome">₱0.00</h4></div></div>
           </div>
 
           <h5 class="fw-bold text-secondary mb-3">Detalyadong Listahan ng Transaksyon at Expenses sa Napiling Araw</h5>
           <div class="table-responsive mb-4">
             <table class="table table-bordered align-middle">
-              <thead class="table-dark"><tr><th>Uri</th><th>Pangalan / Customer / Paglalarawan</th><th>Location / Kategorya</th><th>Halaga / Total (₱)</th><th>Net Profit (₱)</th></tr></thead>
+              <thead class="table-dark">
+                <tr>
+                  <th>Uri</th>
+                  <th>Pangalan / Customer / Paglalarawan</th>
+                  <th>Location / Kategoriya</th>
+                  <th style="width: 150px;">Salary (₱)</th>
+                  <th style="width: 150px;">Expenses (₱)</th>
+                  <th style="width: 150px;">D/Eco Boss (₱)</th>
+                  <th style="width: 150px;">Net Profit (₱)</th>
+                </tr>
+              </thead>
               <tbody id="auditDailyDetailBody">
-                <tr><td colspan="5" class="text-center text-muted">Walang record sa petsang ito.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted">Walang record sa petsang ito.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- EDIT CREDIT MODAL -->
+  <div class="modal fade" id="editCreditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>I-edit ang Utang / Transaksyon</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editCreditId">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Customer Name:</label>
+            <input type="text" id="editCustomerName" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Total Amount (₱):</label>
+            <input type="number" step="0.01" id="editTotalAmount" class="form-control" required oninput="calculateEditBalance()">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Binayad na Halaga (Paid Amount ₱):</label>
+            <input type="number" step="0.01" id="editPaidAmount" class="form-control" required oninput="calculateEditBalance()">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Remaining Balance (₱):</label>
+            <input type="number" step="0.01" id="editRemainingBalance" class="form-control bg-light" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Due Date:</label>
+            <input type="date" id="editDueDate" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Isara</button>
+          <button type="button" class="btn btn-primary fw-bold" onclick="saveEditedCredit()">I-save ang Pagbabago</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -631,7 +753,7 @@
 
     function exportDataBackup() {
       const backupData = {
-        version: "3.0",
+        version: "5.4",
         exportDate: new Date().toISOString(),
         transactions, inventoryMasterList, inventoryDailyLogs, cashBreakdownData, monthlyExpensesData, bossLedgerData
       };
@@ -853,10 +975,16 @@
           t.payments.forEach(p => {
             if (p.date === date) {
               totalCollected += p.amount;
-              if (p.method === 'Byahe Cash') nonCashByaheCash += p.amount;
-              else if (p.method === 'GCash') nonCashGCash += p.amount;
-              else if (p.method === 'Bank Transfer' || p.method === 'BT') nonCashBT += p.amount;
-              else if (p.method === 'Cheque') nonCashCheque += p.amount;
+              const mLower = p.method.toLowerCase();
+              if (mLower.includes('byahe')) {
+                nonCashByaheCash += p.amount;
+              } else if (mLower.includes('gcash')) {
+                nonCashGCash += p.amount;
+              } else if (mLower.includes('bank') || mLower.includes('bt')) {
+                nonCashBT += p.amount;
+              } else if (mLower.includes('cheque')) {
+                nonCashCheque += p.amount;
+              }
             }
           });
         }
@@ -888,16 +1016,79 @@
         tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-3">Wala pang transaksyon sa araw na ito.</td></tr>`;
       }
 
+      // Render Daily Expenses & Salary Table
+      const expTbody = document.getElementById('dailyExpensesTableBody');
+      expTbody.innerHTML = '';
+      let daySalarySum = 0;
+      let dayExpensesSum = 0;
+      let expCount = 0;
+
+      if (monthlyExpensesData[date]) {
+        monthlyExpensesData[date].forEach(ex => {
+          expCount++;
+          let isSalary = (ex.type === 'Salary' || (!ex.type && ex.title.toLowerCase().includes('sweldo')));
+          let salVal = isSalary ? ex.amount : 0;
+          let expVal = !isSalary ? ex.amount : 0;
+
+          daySalarySum += salVal;
+          dayExpensesSum += expVal;
+
+          expTbody.innerHTML += `
+            <tr>
+              <td>${date}</td>
+              <td class="fw-bold">${ex.title}</td>
+              <td class="text-primary">${salVal > 0 ? '₱' + salVal.toFixed(2) : '-'}</td>
+              <td class="text-danger">${expVal > 0 ? '₱' + expVal.toFixed(2) : '-'}</td>
+            </tr>
+          `;
+        });
+      }
+
+      if (expCount === 0) {
+        expTbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang salary o expenses sa petsang ito.</td></tr>`;
+      }
+
+      document.getElementById('dailyTotalSalarySum').innerText = `₱${daySalarySum.toFixed(2)}`;
+      document.getElementById('dailyTotalExpensesSum').innerText = `₱${dayExpensesSum.toFixed(2)}`;
+
+      // Render Daily Boss Table & Sum
+      const bossTbody = document.getElementById('dailyBossTableBody');
+      bossTbody.innerHTML = '';
+      let dayBossSum = 0;
+      let bossCount = 0;
+
+      if (bossLedgerData[date]) {
+        bossLedgerData[date].forEach(b => {
+          bossCount++;
+          dayBossSum += (b.amount || 0);
+          bossTbody.innerHTML += `
+            <tr>
+              <td>${date}</td>
+              <td class="fw-bold">${b.title}</td>
+              <td class="text-success">₱${b.amount.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+      }
+
+      if (bossCount === 0) {
+        bossTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Walang record para kay Boss sa petsang ito.</td></tr>`;
+      }
+      document.getElementById('dailyTotalBossSum').innerText = `₱${dayBossSum.toFixed(2)}`;
+
       document.getElementById('dailyHiwaySales').innerText = `₱${totalHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${totalHiwayProfit.toFixed(2)}`;
       document.getElementById('dailyByaheSales').innerText = `₱${totalByaheSales.toFixed(2)}`;
       document.getElementById('dailyByaheProfit').innerText = `₱${totalByaheProfit.toFixed(2)}`;
       document.getElementById('dailyTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${totalCollected.toFixed(2)}`;
-      document.getElementById('dailyTotalNetProfit').innerText = `₱${totalNet.toFixed(2)}`;
+      
+      // Total Net Profit kasama ang D/Eco Boss
+      const finalNetWithBoss = totalNet + dayBossSum;
+      document.getElementById('dailyTotalNetProfit').innerText = `₱${finalNetWithBoss.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;
 
-      window.currentDayNonCash = { byaheCash: nonCashByaheCash, gcash: nonCashGCash, bt: nonCashBT, cheque: nonCashCheque, remainingBalance: dayRemainingBalance, totalCollected };
+      window.currentDayNonCash = { byaheCash: nonCashByaheCash, gcash: nonCashGCash, bt: nonCashBT, cheque: nonCashCheque, remainingBalance: dayRemainingBalance, totalCollected, salarySum: daySalarySum, expensesSum: dayExpensesSum };
       calculateMoneyBreakdown();
     }
 
@@ -925,22 +1116,18 @@
       document.getElementById('breakdownTotalAmount').innerText = `₱${totalCash.toFixed(2)}`;
 
       const fund = parseFloat(document.getElementById('cashFundInput').value) || 0;
-      const nonCash = window.currentDayNonCash || { byaheCash: 0, gcash: 0, bt: 0, cheque: 0, remainingBalance: 0, totalCollected: 0 };
+      const nonCash = window.currentDayNonCash || { byaheCash: 0, gcash: 0, bt: 0, cheque: 0, remainingBalance: 0, totalCollected: 0, salarySum: 0, expensesSum: 0 };
       
-      let dayExpenses = 0;
-      if (monthlyExpensesData[date]) {
-        monthlyExpensesData[date].forEach(ex => dayExpenses += (parseFloat(ex.amount) || 0));
-      }
-
       document.getElementById('totalCollectionAll').innerText = `₱${nonCash.totalCollected.toFixed(2)}`;
       document.getElementById('lessByaheCash').innerText = `-₱${nonCash.byaheCash.toFixed(2)}`;
       document.getElementById('lessGCash').innerText = `-₱${nonCash.gcash.toFixed(2)}`;
       document.getElementById('lessBT').innerText = `-₱${nonCash.bt.toFixed(2)}`;
       document.getElementById('lessCheque').innerText = `-₱${nonCash.cheque.toFixed(2)}`;
-      document.getElementById('lessExpenses').innerText = `-₱${dayExpenses.toFixed(2)}`;
+      document.getElementById('lessSalary').innerText = `-₱${nonCash.salarySum.toFixed(2)}`;
+      document.getElementById('lessExpenses').innerText = `-₱${nonCash.expensesSum.toFixed(2)}`;
       document.getElementById('lessRemainingBalance').innerText = `-₱${nonCash.remainingBalance.toFixed(2)}`;
 
-      const targetCash = nonCash.totalCollected - nonCash.byaheCash - nonCash.gcash - nonCash.bt - nonCash.cheque - dayExpenses - nonCash.remainingBalance;
+      const targetCash = nonCash.totalCollected - nonCash.byaheCash - nonCash.gcash - nonCash.bt - nonCash.cheque - nonCash.salarySum - nonCash.expensesSum - nonCash.remainingBalance;
       const targetWithFund = targetCash + fund;
 
       document.getElementById('breakdownTargetWithFund').innerText = `₱${targetWithFund.toFixed(2)}`;
@@ -982,17 +1169,86 @@
     function renderCreditTable() {
       const tbody = document.getElementById('creditTableBody');
       tbody.innerHTML = '';
+      let count = 0;
       transactions.forEach(t => {
         if (t.balance > 0.01) {
-          tbody.innerHTML += `<tr><td>${t.customer}</td><td>${t.location}</td><td>${t.product}</td><td>₱${(t.totalCost||0).toFixed(2)}</td><td>₱${t.paid.toFixed(2)}</td><td>₱${t.balance.toFixed(2)}</td><td>${t.dueDate||'N/A'}</td><td>${t.status}</td><td></td></tr>`;
+          count++;
+          tbody.innerHTML += `
+            <tr>
+              <td class="fw-bold">${t.customer}</td>
+              <td><span class="badge bg-secondary">${t.location}</span></td>
+              <td>${t.product}</td>
+              <td>₱${t.total.toFixed(2)}</td>
+              <td class="text-success">₱${t.paid.toFixed(2)}</td>
+              <td class="text-danger fw-bold">₱${t.balance.toFixed(2)}</td>
+              <td>${t.dueDate || 'N/A'}</td>
+              <td><span class="badge ${t.status === 'PAID' ? 'bg-success' : 'bg-warning text-dark'}">${t.status}</span></td>
+              <td class="no-print text-center">
+                <button class="btn btn-sm btn-outline-primary border-0 p-1 me-1" onclick="openEditCreditModal(${t.id})" title="I-edit ang Utang"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteTransaction(${t.id})" title="Burahin"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
         }
       });
+      if (count === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Walang kasalukuyang utang o balanse.</td></tr>`;
+      }
+    }
+
+    function openEditCreditModal(id) {
+      const t = transactions.find(item => item.id === id);
+      if (!t) return;
+      document.getElementById('editCreditId').value = t.id;
+      document.getElementById('editCustomerName').value = t.customer;
+      document.getElementById('editTotalAmount').value = t.total;
+      document.getElementById('editPaidAmount').value = t.paid;
+      document.getElementById('editRemainingBalance').value = t.balance.toFixed(2);
+      document.getElementById('editDueDate').value = t.dueDate || '';
+
+      const editModal = new bootstrap.Modal(document.getElementById('editCreditModal'));
+      editModal.show();
+    }
+
+    function calculateEditBalance() {
+      const total = parseFloat(document.getElementById('editTotalAmount').value) || 0;
+      const paid = parseFloat(document.getElementById('editPaidAmount').value) || 0;
+      const balance = Math.max(0, total - paid);
+      document.getElementById('editRemainingBalance').value = balance.toFixed(2);
+    }
+
+    function saveEditedCredit() {
+      const id = parseInt(document.getElementById('editCreditId').value);
+      const cust = document.getElementById('editCustomerName').value.trim();
+      const total = parseFloat(document.getElementById('editTotalAmount').value) || 0;
+      const paid = parseFloat(document.getElementById('editPaidAmount').value) || 0;
+      const balance = Math.max(0, total - paid);
+      const dueDate = document.getElementById('editDueDate').value;
+
+      const t = transactions.find(item => item.id === id);
+      if (t) {
+        t.customer = cust;
+        t.total = total;
+        t.paid = paid;
+        t.balance = balance;
+        t.dueDate = dueDate;
+        t.status = balance > 0 && paid > 0 ? "PARTIAL" : (balance > 0 ? "UNPAID" : "PAID");
+
+        saveData();
+        renderCreditTable();
+        generateDailyReport();
+
+        const modalEl = document.getElementById('editCreditModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        modalInstance.hide();
+        alert('Matagumpay na na-update ang utang!');
+      }
     }
 
     // --- MASTER PRODUCT LIST & DAILY INVENTORY MANAGEMENT ---
     function addMasterProduct() {
       const name = document.getElementById('masterProductName').value.trim();
-      const category = document.getElementById('masterCategory').value;
+      const description = document.getElementById('masterDescription').value.trim();
       const supplier = document.getElementById('masterSupplier').value.trim();
 
       if (!name) {
@@ -1005,10 +1261,11 @@
         return;
       }
 
-      inventoryMasterList.push({ id: Date.now(), name, category, supplier: supplier || 'N/A' });
+      inventoryMasterList.push({ id: Date.now(), name, description: description || 'N/A', supplier: supplier || 'N/A' });
       saveData();
       renderInventoryTables();
       document.getElementById('masterProductName').value = '';
+      document.getElementById('masterDescription').value = '';
       document.getElementById('masterSupplier').value = '';
       alert('Matagumpay na naidagdag sa Masterlist!');
     }
@@ -1027,7 +1284,6 @@
 
       if (!inventoryDailyLogs[date]) inventoryDailyLogs[date] = {};
       
-      // I-save o i-update ang log sa araw na ito
       inventoryDailyLogs[date][prodName] = {
         qtyIn,
         returnQty
@@ -1046,19 +1302,6 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    // Function para kalkulahin ang ending ng nakaraang araw para maging beginning ngayon
-    function getEndingStockForDate(prodName, targetDateStr) {
-      let currDate = new Date(targetDateStr);
-      currDate.setDate(currDate.getDate() - 1);
-      let prevDateStr = `${currDate.getFullYear()}-${String(currDate.getMonth() + 1).padStart(2, '0')}-${String(currDate.getDate()).padStart(2, '0')}`;
-      
-      // Recursive or simple lookup: para sa simplicity, kukunin natin ang ending ng kahapon
-      // Kung unang araw o walang entry, ending ay 0 o initial stock
-      let endingKahapon = 0;
-      // Dito pwede nating i-compute pabalik o i-maintain ang running balance per item
-      return endingKahapon;
-    }
-
     function renderInventoryTables() {
       const selectedDate = document.getElementById('inventoryViewDate').value;
       const palmBody = document.getElementById('palmCocoInventoryBody');
@@ -1069,18 +1312,16 @@
       otherBody.innerHTML = '';
       productSelect.innerHTML = `<option value="">-- Piliin ang Produkto mula sa Masterlist --</option>`;
 
-      // Populate select dropdown galing sa Masterlist
       inventoryMasterList.forEach(p => {
-        productSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.category})</option>`;
+        productSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.description})</option>`;
       });
 
       if (inventoryMasterList.length === 0) {
-        palmBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Wala pang produkto sa Masterlist. Mag-add sa itaas.</td></tr>`;
-        otherBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Wala pang produkto sa Masterlist.</td></tr>`;
+        palmBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Wala pang produkto sa Masterlist. Mag-add sa itaas.</td></tr>`;
+        otherBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Wala pang produkto sa Masterlist.</td></tr>`;
         return;
       }
 
-      // Kunin ang total sold per product sa napiling petsa mula sa POS transactions
       let soldMap = {};
       transactions.forEach(t => {
         if (t.itemsList && t.date === selectedDate) {
@@ -1090,9 +1331,7 @@
         }
       });
 
-      // Kunin ang daily logs (In at Return) para sa napiling petsa
       let dayLogs = (inventoryDailyLogs[selectedDate]) || {};
-
       let palmCount = 0;
       let otherCount = 0;
 
@@ -1100,18 +1339,14 @@
         let log = dayLogs[prod.name] || { qtyIn: 0, returnQty: 0 };
         let soldQty = soldMap[prod.name.toLowerCase()] || 0;
 
-        // Awtomatikong beginning (para maipakita ang per-day automated chain, kukunin ang ending kahapon)
-        // Dito natin kakalkulahin: Beginning = Ending kahapon
         let beginning = 0;
         let prevDate = getPreviousDateString(selectedDate);
-        // Hanapin ang ending kahapon kung na-compute na
         if (window.cachedEnding && window.cachedEnding[prevDate] && window.cachedEnding[prevDate][prod.name]) {
           beginning = window.cachedEnding[prevDate][prod.name];
         }
 
         let ending = beginning + log.qtyIn + log.returnQty - soldQty;
 
-        // I-cache ang ending ngayon para magamit bukas bilang beginning
         if (!window.cachedEnding) window.cachedEnding = {};
         if (!window.cachedEnding[selectedDate]) window.cachedEnding[selectedDate] = {};
         window.cachedEnding[selectedDate][prod.name] = ending;
@@ -1119,6 +1354,7 @@
         const rowHtml = `
           <tr>
             <td class="fw-bold">${prod.name}</td>
+            <td>${prod.description}</td>
             <td>${prod.supplier}</td>
             <td>${beginning}</td>
             <td class="text-success">+${log.qtyIn}</td>
@@ -1128,7 +1364,9 @@
           </tr>
         `;
 
-        if (prod.category === 'Palm & Coco') {
+        let isPalmCoco = prod.name.toLowerCase().includes('palm') || prod.name.toLowerCase().includes('coco') || prod.description.toLowerCase().includes('palm') || prod.description.toLowerCase().includes('coco');
+
+        if (isPalmCoco) {
           palmCount++;
           palmBody.innerHTML += rowHtml;
         } else {
@@ -1137,46 +1375,55 @@
         }
       });
 
-      if (palmCount === 0) palmBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Walang Palm & Coco item sa Masterlist.</td></tr>`;
-      if (otherCount === 0) otherBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Walang Iba pang item sa Masterlist.</td></tr>`;
+      if (palmCount === 0) palmBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang Palm & Coco item sa Masterlist.</td></tr>`;
+      if (otherCount === 0) otherBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang Iba pang item sa Masterlist.</td></tr>`;
     }
 
-    // EXPENSES LEDGER
+    // EXPENSES & SALARY LEDGER
     function addExpenseItem() {
       const date = document.getElementById('expenseDate').value;
+      const type = document.getElementById('expenseType').value;
       const title = document.getElementById('expenseTitle').value.trim();
       const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
 
       if (!title || amount <= 0) {
-        alert('Mangyaring ilagay ang wastong pamagat at halaga ng gastos.');
+        alert('Mangyaring ilagay ang wastong pamagat at halaga.');
         return;
       }
 
       if (!monthlyExpensesData[date]) monthlyExpensesData[date] = [];
-      monthlyExpensesData[date].push({ id: Date.now(), title, amount });
+      monthlyExpensesData[date].push({ id: Date.now(), type, title, amount });
 
       saveData();
       renderStandaloneExpensesLedger();
       document.getElementById('expenseTitle').value = '';
       document.getElementById('expenseAmount').value = '';
-      alert('Matagumpay na naidagdag ang expense!');
+      alert('Matagumpay na naidagdag!');
     }
 
     function renderStandaloneExpensesLedger() {
       const tbody = document.getElementById('expensesTableBody');
       tbody.innerHTML = '';
       let count = 0;
-      let grandTotal = 0;
+      let totalSalary = 0;
+      let totalExpenses = 0;
 
       Object.keys(monthlyExpensesData).sort().forEach(date => {
         monthlyExpensesData[date].forEach(ex => {
           count++;
-          grandTotal += ex.amount;
+          let isSalary = (ex.type === 'Salary' || (!ex.type && ex.title.toLowerCase().includes('sweldo')));
+          let salVal = isSalary ? ex.amount : 0;
+          let expVal = !isSalary ? ex.amount : 0;
+
+          totalSalary += salVal;
+          totalExpenses += expVal;
+
           tbody.innerHTML += `
             <tr>
               <td>${date}</td>
               <td class="fw-bold">${ex.title}</td>
-              <td class="text-danger">₱${ex.amount.toFixed(2)}</td>
+              <td class="text-primary">${salVal > 0 ? '₱' + salVal.toFixed(2) : '-'}</td>
+              <td class="text-danger">${expVal > 0 ? '₱' + expVal.toFixed(2) : '-'}</td>
               <td class="no-print text-center">
                 <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpense('${date}', ${ex.id})"><i class="fa-solid fa-trash-can"></i></button>
               </td>
@@ -1186,13 +1433,14 @@
       });
 
       if (count === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang expenses na naitala.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Walang record na naitala.</td></tr>`;
       }
-      document.getElementById('totalExpensesSum').innerText = `₱${grandTotal.toFixed(2)}`;
+      document.getElementById('totalSalarySum').innerText = `₱${totalSalary.toFixed(2)}`;
+      document.getElementById('totalExpensesSum').innerText = `₱${totalExpenses.toFixed(2)}`;
     }
 
     function deleteExpense(date, id) {
-      if (confirm('Burahin ang expense na ito?')) {
+      if (confirm('Burahin ang record na ito?')) {
         monthlyExpensesData[date] = monthlyExpensesData[date].filter(ex => ex.id !== id);
         if (monthlyExpensesData[date].length === 0) delete monthlyExpensesData[date];
         saveData();
@@ -1258,10 +1506,10 @@
 
     // DAILY & MONTHLY AUDIT REVIEW PER DAY
     function generateDailyMonthlyAudit() {
-      const selectedDate = document.getElementById('auditDateInput').value; // e.g. "2026-10-03"
+      const selectedDate = document.getElementById('auditDateInput').value;
       const tbody = document.getElementById('auditDailyDetailBody');
       tbody.innerHTML = '';
-      let daySales = 0, dayProfit = 0, dayExpenses = 0, count = 0;
+      let daySales = 0, dayProfit = 0, dayTotalExpAndSal = 0, dayBossSum = 0, count = 0;
 
       transactions.forEach(t => {
         if (t.date === selectedDate) {
@@ -1276,7 +1524,9 @@
               <td><span class="badge bg-primary">Benta (Sale)</span></td>
               <td class="fw-bold">${t.customer} (${t.product})</td>
               <td>${t.location}</td>
-              <td>₱${t.total.toFixed(2)}</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
               <td class="text-success">₱${profit.toFixed(2)}</td>
             </tr>
           `;
@@ -1285,14 +1535,39 @@
 
       if (monthlyExpensesData[selectedDate]) {
         monthlyExpensesData[selectedDate].forEach(ex => {
-          dayExpenses += (parseFloat(ex.amount) || 0);
+          let isSalary = (ex.type === 'Salary' || (!ex.type && ex.title.toLowerCase().includes('sweldo')));
+          let salVal = isSalary ? ex.amount : 0;
+          let expVal = !isSalary ? ex.amount : 0;
+          dayTotalExpAndSal += (salVal + expVal);
           count++;
+
           tbody.innerHTML += `
             <tr>
-              <td><span class="badge bg-danger">Gastos (Expense)</span></td>
+              <td><span class="badge ${isSalary ? 'bg-info text-dark' : 'bg-danger'}">${ex.type || (isSalary ? 'Salary' : 'Expense')}</span></td>
               <td class="fw-bold">${ex.title}</td>
               <td>Salary / Expense</td>
-              <td class="text-danger">-₱${ex.amount.toFixed(2)}</td>
+              <td class="text-primary">${salVal > 0 ? '-₱' + salVal.toFixed(2) : '-'}</td>
+              <td class="text-danger">${expVal > 0 ? '-₱' + expVal.toFixed(2) : '-'}</td>
+              <td>-</td>
+              <td>-</td>
+            </tr>
+          `;
+        });
+      }
+
+      if (bossLedgerData[selectedDate]) {
+        bossLedgerData[selectedDate].forEach(b => {
+          dayBossSum += (b.amount || 0);
+          count++;
+
+          tbody.innerHTML += `
+            <tr>
+              <td><span class="badge bg-success">D/Eco Boss</span></td>
+              <td class="fw-bold">${b.title}</td>
+              <td>D/Eco Boss Ledger</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="text-success">+₱${b.amount.toFixed(2)}</td>
               <td>-</td>
             </tr>
           `;
@@ -1300,14 +1575,14 @@
       }
 
       if (count === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Walang transaksyon o gastos sa petsang ito.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Walang record sa petsang ito.</td></tr>`;
       }
 
-      const netIncome = dayProfit - dayExpenses;
+      const netIncome = (dayProfit - dayTotalExpAndSal) + dayBossSum;
 
       document.getElementById('auditDaySales').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('auditDayProfit').innerText = `₱${dayProfit.toFixed(2)}`;
-      document.getElementById('auditDayExpenses').innerText = `₱${dayExpenses.toFixed(2)}`;
+      document.getElementById('auditDayExpenses').innerText = `₱${dayTotalExpAndSal.toFixed(2)}`;
       document.getElementById('auditDayNetIncome').innerText = `₱${netIncome.toFixed(2)}`;
     }
 

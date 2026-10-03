@@ -463,24 +463,24 @@
                     <span class="fw-bold text-success" id="breakdownDebtPayment">+₱0.00</span>
                   </div>
 
-                  <!-- MALAKING PAGBABAGO: NAKA-BUKOD NA DITO ANG MULTI-PAYMENTS / NON-CASH BAGO SA KASUNOD NA MGA BAWAS -->
+                  <!-- MULTI-PAYMENT & NON-CASH BAGO SA KASUNOD NA MGA BAWAS (TANGGAL NA ANG - SIGN) -->
                   <div class="bg-light p-2 rounded my-2 border">
                     <span class="d-block fw-bold text-secondary small mb-1"><i class="fa-solid fa-layer-group me-1"></i> Multi-Payment & Non-Cash Deductions:</span>
                     <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• Less: Byahe Cash</span>
-                      <span class="text-danger small fw-semibold" id="lessByaheCash">-₱0.00</span>
+                      <span class="text-muted small">• Byahe Cash</span>
+                      <span class="text-danger small fw-semibold" id="lessByaheCash">₱0.00</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• Less: GCash</span>
-                      <span class="text-danger small fw-semibold" id="lessGCash">-₱0.00</span>
+                      <span class="text-muted small">• GCash</span>
+                      <span class="text-danger small fw-semibold" id="lessGCash">₱0.00</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• Less: Bank Transfer (BT)</span>
-                      <span class="text-danger small fw-semibold" id="lessBT">-₱0.00</span>
+                      <span class="text-muted small">• Bank Transfer (BT)</span>
+                      <span class="text-danger small fw-semibold" id="lessBT">₱0.00</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-1 ps-2">
-                      <span class="text-muted small">• Less: Cheque</span>
-                      <span class="text-danger small fw-semibold" id="lessCheque">-₱0.00</span>
+                      <span class="text-muted small">• Cheque</span>
+                      <span class="text-danger small fw-semibold" id="lessCheque">₱0.00</span>
                     </div>
                   </div>
 
@@ -3036,10 +3036,10 @@
 
       document.getElementById('totalCollectionAll').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('breakdownDebtPayment').innerText = `+₱${dayDebtPayments.toFixed(2)}`;
-      document.getElementById('lessByaheCash').innerText = `-₱${totalByaheCash.toFixed(2)}`;
-      document.getElementById('lessGCash').innerText = `-₱${totalGCash.toFixed(2)}`;
-      document.getElementById('lessBT').innerText = `-₱${totalBT.toFixed(2)}`;
-      document.getElementById('lessCheque').innerText = `-₱${totalCheque.toFixed(2)}`;
+      document.getElementById('lessByaheCash').innerText = `₱${totalByaheCash.toFixed(2)}`;
+      document.getElementById('lessGCash').innerText = `₱${totalGCash.toFixed(2)}`;
+      document.getElementById('lessBT').innerText = `₱${totalBT.toFixed(2)}`;
+      document.getElementById('lessCheque').innerText = `₱${totalCheque.toFixed(2)}`;
       document.getElementById('lessExpenses').innerText = `-₱${dayExpensesTotal.toFixed(2)}`;
       document.getElementById('lessRemainingBalance').innerText = `-₱${dayRemainingBalance.toFixed(2)}`;
       document.getElementById('breakdownTargetSales').innerText = `₱${currentTargetCashInDrawer.toFixed(2)}`;

@@ -947,12 +947,25 @@
         if (name) {
           productSummary.push(`${name} (x${qty})`);
           itemsList.push({ name, desc, qty, cost, price, subtotal: qty * price });
+
+          // AUTOMATIC ADD SA MASTERLIST KUNG WALA PA (PWEDE PADING I-EDIT SA INVENTORY TAB)
+          const existingMaster = inventoryMasterList.find(p => p.name.toLowerCase() === name.toLowerCase());
+          if (!existingMaster) {
+            inventoryMasterList.push({
+              id: Date.now() + Math.floor(Math.random() * 1000),
+              name: name,
+              description: desc || 'N/A',
+              supplier: 'Auto-Added from POS'
+            });
+          } else if (desc && existingMaster.description === 'N/A') {
+            existingMaster.description = desc;
+          }
         }
       });
 
       transactions.push({ id: Date.now(), date, customer: cust, location: loc, product: productSummary.join(', '), itemsList, total, totalCost, paid, balance, status, payments });
       saveData();
-      alert('Transaction saved successfully!');
+      alert('Transaction saved successfully & items added to inventory!');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
       document.getElementById('inventoryOnlyMode').checked = false;

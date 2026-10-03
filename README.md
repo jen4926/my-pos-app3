@@ -536,6 +536,9 @@
           <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-receipt me-2"></i>Salary & Expenses Ledger (Per Day)</h4>
           <p class="text-muted small">Mag-record ng mga araw-araw na gastos o sweldo. May hiwalay na column para sa Salary at Expenses para mas madaling ma-subtotal.</p>
           
+          <!-- Successful Warning Alert Container -->
+          <div id="expenseAlertContainer"></div>
+
           <div class="row g-3 mb-3">
             <div class="col-md-2">
               <label class="form-label fw-semibold">Petsa:</label>
@@ -569,7 +572,7 @@
                   <th>Paglalarawan (Description)</th>
                   <th style="width: 200px;">Salary (₱)</th>
                   <th style="width: 200px;">Expenses (₱)</th>
-                  <th class="no-print" style="width: 80px;">Aksyon</th>
+                  <th class="no-print" style="width: 120px;">Aksyon</th>
                 </tr>
               </thead>
               <tbody id="expensesTableBody">
@@ -741,6 +744,45 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Isara</button>
           <button type="button" class="btn btn-primary fw-bold" onclick="saveEditedCredit()">I-save ang Pagbabago</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT EXPENSE MODAL -->
+  <div class="modal fade" id="editExpenseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>I-edit ang Salary / Expense</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editExpOldDate">
+          <input type="hidden" id="editExpId">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Petsa:</label>
+            <input type="date" id="editExpDate" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Uri (Type):</label>
+            <select id="editExpType" class="form-select">
+              <option value="Salary">Salary (Sweldo)</option>
+              <option value="Expense">Expense (Gastos)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Paglalarawan / Title:</label>
+            <input type="text" id="editExpTitle" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Halaga (₱):</label>
+            <input type="number" step="0.01" id="editExpAmount" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Isara</button>
+          <button type="button" class="btn btn-primary fw-bold" onclick="saveEditedExpense()">I-save ang Pagbabago</button>
         </div>
       </div>
     </div>
@@ -948,7 +990,6 @@
           productSummary.push(`${name} (x${qty})`);
           itemsList.push({ name, desc, qty, cost, price, subtotal: qty * price });
 
-          // AUTOMATIC ADD SA MASTERLIST KUNG WALA PA (PWEDE PADING I-EDIT SA INVENTORY TAB)
           const existingMaster = inventoryMasterList.find(p => p.name.toLowerCase() === name.toLowerCase());
           if (!existingMaster) {
             inventoryMasterList.push({
@@ -1072,7 +1113,6 @@
         tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-3">Wala pang transaksyon sa araw na ito.</td></tr>`;
       }
 
-      // Render Daily Expenses & Salary Table
       const expTbody = document.getElementById('dailyExpensesTableBody');
       expTbody.innerHTML = '';
       let daySalarySum = 0;
@@ -1107,7 +1147,6 @@
       document.getElementById('dailyTotalSalarySum').innerText = `₱${daySalarySum.toFixed(2)}`;
       document.getElementById('dailyTotalExpensesSum').innerText = `₱${dayExpensesSum.toFixed(2)}`;
 
-      // Render Daily Boss Table & Sum
       const bossTbody = document.getElementById('dailyBossTableBody');
       bossTbody.innerHTML = '';
       let dayBossSum = 0;
@@ -1139,7 +1178,6 @@
       document.getElementById('dailyTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${totalCollected.toFixed(2)}`;
       
-      // Total Net Profit kasama ang D/Eco Boss
       const finalNetWithBoss = totalNet + dayBossSum;
       document.getElementById('dailyTotalNetProfit').innerText = `₱${finalNetWithBoss.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;
@@ -1435,7 +1473,20 @@
       if (otherCount === 0) otherBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang Iba pang item sa Masterlist.</td></tr>`;
     }
 
-    // EXPENSES & SALARY LEDGER
+    // EXPENSES & SALARY LEDGER WITH SUCCESS WARNING ALERT
+    function showExpenseAlert(message, type = 'success') {
+      const container = document.getElementById('expenseAlertContainer');
+      container.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show py-2 mb-3 shadow-sm" role="alert">
+          <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation'} me-2"></i> ${message}
+          <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 4000);
+    }
+
     function addExpenseItem() {
       const date = document.getElementById('expenseDate').value;
       const type = document.getElementById('expenseType').value;
@@ -1443,7 +1494,7 @@
       const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
 
       if (!title || amount <= 0) {
-        alert('Mangyaring ilagay ang wastong pamagat at halaga.');
+        showExpenseAlert('Mangyaring ilagay ang wastong pamagat at halaga.', 'danger');
         return;
       }
 
@@ -1454,7 +1505,7 @@
       renderStandaloneExpensesLedger();
       document.getElementById('expenseTitle').value = '';
       document.getElementById('expenseAmount').value = '';
-      alert('Matagumpay na naidagdag!');
+      showExpenseAlert('Tagumpay na naidagdag ang Salary o Expense record!', 'success');
     }
 
     function renderStandaloneExpensesLedger() {
@@ -1481,7 +1532,8 @@
               <td class="text-primary">${salVal > 0 ? '₱' + salVal.toFixed(2) : '-'}</td>
               <td class="text-danger">${expVal > 0 ? '₱' + expVal.toFixed(2) : '-'}</td>
               <td class="no-print text-center">
-                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpense('${date}', ${ex.id})"><i class="fa-solid fa-trash-can"></i></button>
+                <button class="btn btn-sm btn-outline-primary border-0 p-1 me-1" onclick="openEditExpenseModal('${date}', ${ex.id})" title="I-edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpense('${date}', ${ex.id})" title="Burahin"><i class="fa-solid fa-trash-can"></i></button>
               </td>
             </tr>
           `;
@@ -1495,12 +1547,71 @@
       document.getElementById('totalExpensesSum').innerText = `₱${totalExpenses.toFixed(2)}`;
     }
 
+    function openEditExpenseModal(date, id) {
+      const list = monthlyExpensesData[date];
+      if (!list) return;
+      const ex = list.find(item => item.id === id);
+      if (!ex) return;
+
+      document.getElementById('editExpOldDate').value = date;
+      document.getElementById('editExpId').value = ex.id;
+      document.getElementById('editExpDate').value = date;
+      document.getElementById('editExpType').value = ex.type || (ex.title.toLowerCase().includes('sweldo') ? 'Salary' : 'Expense');
+      document.getElementById('editExpTitle').value = ex.title;
+      document.getElementById('editExpAmount').value = ex.amount;
+
+      const editModal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
+      editModal.show();
+    }
+
+    function saveEditedExpense() {
+      const oldDate = document.getElementById('editExpOldDate').value;
+      const id = parseInt(document.getElementById('editExpId').value);
+      const newDate = document.getElementById('editExpDate').value;
+      const type = document.getElementById('editExpType').value;
+      const title = document.getElementById('editExpTitle').value.trim();
+      const amount = parseFloat(document.getElementById('editExpAmount').value) || 0;
+
+      if (!title || amount <= 0 || !newDate) {
+        alert('Punan nang wasto ang mga kinakailangang field.');
+        return;
+      }
+
+      // Hanapin at alisin sa luma
+      let exItem = null;
+      if (monthlyExpensesData[oldDate]) {
+        const index = monthlyExpensesData[oldDate].findIndex(item => item.id === id);
+        if (index !== -1) {
+          exItem = monthlyExpensesData[oldDate].splice(index, 1)[0];
+          if (monthlyExpensesData[oldDate].length === 0) delete monthlyExpensesData[oldDate];
+        }
+      }
+
+      if (exItem) {
+        exItem.type = type;
+        exItem.title = title;
+        exItem.amount = amount;
+
+        if (!monthlyExpensesData[newDate]) monthlyExpensesData[newDate] = [];
+        monthlyExpensesData[newDate].push(exItem);
+
+        saveData();
+        renderStandaloneExpensesLedger();
+
+        const modalEl = document.getElementById('editExpenseModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        modalInstance.hide();
+        showExpenseAlert('Matagumpay na na-update ang Salary / Expense record!', 'success');
+      }
+    }
+
     function deleteExpense(date, id) {
-      if (confirm('Burahin ang record na ito?')) {
+      if (confirm('Sigurado ka bang gusto mong burahin ang record na ito?')) {
         monthlyExpensesData[date] = monthlyExpensesData[date].filter(ex => ex.id !== id);
         if (monthlyExpensesData[date].length === 0) delete monthlyExpensesData[date];
         saveData();
         renderStandaloneExpensesLedger();
+        showExpenseAlert('Matagumpay na nabura ang record.', 'warning');
       }
     }
 
@@ -1565,7 +1676,6 @@
       const selectedDate = document.getElementById('auditDateInput').value;
       const selectedMonthPrefix = selectedDate ? selectedDate.substring(0, 7) : ''; // YYYY-MM
 
-      // --- 1. ARAW NA ITO (DAILY SUMMARY) ---
       const tbody = document.getElementById('auditDailyDetailBody');
       tbody.innerHTML = '';
       let daySales = 0, dayProfit = 0, dayTotalExpAndSal = 0, dayBossSum = 0, count = 0;
@@ -1644,13 +1754,10 @@
       document.getElementById('auditDayExpenses').innerText = `₱${dayTotalExpAndSal.toFixed(2)}`;
       document.getElementById('auditDayNetIncome').innerText = `₱${netIncome.toFixed(2)}`;
 
-
-      // --- 2. KABUUANG BUWAN (MONTHLY SUMMARY) ---
       const monthTbody = document.getElementById('auditMonthlyDetailBody');
       monthTbody.innerHTML = '';
       let monthSales = 0, monthProfit = 0, monthSalSum = 0, monthExpSum = 0, monthBossSum = 0, monthItemCount = 0;
 
-      // Kolektahin at ayusin ang lahat ng petsa sa napiling buwan
       let allDatesInMonth = new Set();
       transactions.forEach(t => { if (t.date && t.date.startsWith(selectedMonthPrefix)) allDatesInMonth.add(t.date); });
       Object.keys(monthlyExpensesData).forEach(d => { if (d.startsWith(selectedMonthPrefix)) allDatesInMonth.add(d); });
@@ -1659,7 +1766,6 @@
       let sortedDates = Array.from(allDatesInMonth).sort();
 
       sortedDates.forEach(dt => {
-        // 1. Transactions sa petsang ito
         transactions.forEach(t => {
           if (t.date === dt) {
             const cost = t.totalCost || 0;
@@ -1683,7 +1789,6 @@
           }
         });
 
-        // 2. Expenses / Salary sa petsang ito
         if (monthlyExpensesData[dt]) {
           monthlyExpensesData[dt].forEach(ex => {
             let isSalary = (ex.type === 'Salary' || (!ex.type && ex.title.toLowerCase().includes('sweldo')));
@@ -1708,7 +1813,6 @@
           });
         }
 
-        // 3. D/Eco Boss sa petsang ito
         if (bossLedgerData[dt]) {
           bossLedgerData[dt].forEach(b => {
             monthBossSum += (b.amount || 0);

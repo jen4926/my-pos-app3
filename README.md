@@ -41,7 +41,7 @@
         <li class="nav-item"><button class="nav-link" id="inventory-tab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" onclick="renderInventoryTables()"><i class="fa-solid fa-boxes-stacked me-1"></i> Inventory</button></li>
         <li class="nav-item"><button class="nav-link" id="expenses-tab" data-bs-toggle="pill" data-bs-target="#expenses-content" type="button" onclick="renderStandaloneExpensesLedger()"><i class="fa-solid fa-receipt me-1"></i> Salary & Expenses</button></li>
         <li class="nav-item"><button class="nav-link" id="boss-tab" data-bs-toggle="pill" data-bs-target="#boss-content" type="button" onclick="renderStandaloneBossLedger()"><i class="fa-solid fa-user-tie me-1"></i> D/Eco Boss</button></li>
-        <li class="nav-item"><button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateMonthlyAudit()"><i class="fa-solid fa-chart-pie me-1"></i> Audit & Salary Review</button></li>
+        <li class="nav-item"><button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit-content" type="button" onclick="generateDailyMonthlyAudit()"><i class="fa-solid fa-chart-pie me-1"></i> Audit & Salary Review</button></li>
       </ul>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Data</button>
@@ -397,41 +397,58 @@
       <div class="tab-pane fade" id="inventory-content">
         <div class="card p-4">
           <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>Advanced Inventory Management</h4>
-          <p class="text-muted small">Mag-add ng produkto kasama ang Supplier nito. Ang Ending ay awtomatikong magiging Beginning kinabukasan (Per Day), kasama ang Return/Sauli.</p>
+          <p class="text-muted small">I-setup minsan ang mga produkto sa <strong>Master Product List</strong>. Pagkatapos, maaari ka nang mag-log ng Araw-araw na Pumasok, Return, at mag-review per day.</p>
+
+          <!-- Select Date for Inventory View -->
+          <div class="row g-3 align-items-center mb-4 bg-light p-3 rounded border">
+            <div class="col-md-4">
+              <label class="form-label fw-bold mb-0">Piliin ang Petsa ng Inventory (Date):</label>
+            </div>
+            <div class="col-md-4">
+              <input type="date" id="inventoryViewDate" class="form-control" onchange="renderInventoryTables()">
+            </div>
+          </div>
           
-          <!-- Add Product / Stock Entry Form -->
-          <div class="card bg-light p-3 mb-4 border">
-            <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-plus-circle me-1"></i> Magdagdag ng Stock / Produkto mula sa Supplier</h6>
+          <!-- 1. Master Product List Form (Permanent Column) -->
+          <div class="card bg-white p-3 mb-4 border shadow-sm">
+            <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-list-check me-1"></i> Master Product Setup (Permanenteng Listahan ng mga Produkto)</h6>
+            <p class="text-muted small mb-2">Dito mo lang i-a-add minsan ang pangalan ng item at supplier. Hindi mo na kailangang i-type ulit araw-araw.</p>
             <div class="row g-2">
-              <div class="col-md-3">
-                <label class="form-label small fw-semibold">Petsa (Date):</label>
-                <input type="date" id="invDate" class="form-control form-control-sm">
+              <div class="col-md-4">
+                <input type="text" id="masterProductName" class="form-control form-control-sm" placeholder="Pangalan ng Produkto (Hal. Palm Oil)">
               </div>
               <div class="col-md-3">
-                <label class="form-label small fw-semibold">Uri / Kategorya:</label>
-                <select id="invCategory" class="form-select form-select-sm">
+                <select id="masterCategory" class="form-select form-select-sm">
                   <option value="Palm & Coco">Palm & Coco Items</option>
                   <option value="Other Items">Iba pang Items</option>
                 </select>
               </div>
               <div class="col-md-3">
-                <label class="form-label small fw-semibold">Pangalan ng Produkto:</label>
-                <input type="text" id="invProductName" class="form-control form-control-sm" placeholder="Hal. Palm Oil / Coco Oil">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small fw-semibold">Supplier:</label>
-                <input type="text" id="invSupplier" class="form-control form-control-sm" placeholder="Hal. ABC Supplier">
+                <input type="text" id="masterSupplier" class="form-control form-control-sm" placeholder="Supplier (Hal. ABC Supplier)">
               </div>
               <div class="col-md-2">
-                <label class="form-label small fw-semibold">Pumasok (In / Qty):</label>
-                <input type="number" step="any" id="invQtyIn" class="form-control form-control-sm" value="0">
+                <button class="btn btn-success btn-sm w-100 fw-bold" onclick="addMasterProduct()"><i class="fa-solid fa-plus me-1"></i> I-save sa Masterlist</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Stock In & Return Form -->
+          <div class="card bg-light p-3 mb-4 border">
+            <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-pen-to-square me-1"></i> Mag-log ng Pumasok na Stock o Return (Para sa Napiling Petsa sa Itaas)</h6>
+            <div class="row g-2">
+              <div class="col-md-4">
+                <select id="logProductSelect" class="form-select form-select-sm">
+                  <option value="">-- Piliin ang Produkto mula sa Masterlist --</option>
+                </select>
               </div>
               <div class="col-md-2">
-                <label class="form-label small fw-semibold">Return / Sauli:</label>
-                <input type="number" step="any" id="invReturn" class="form-control form-control-sm" value="0">
+                <input type="number" step="any" id="logQtyIn" class="form-control form-control-sm" placeholder="Pumasok (In)" value="0">
               </div>
-              <div class="col-md-3 d-flex align-items-end">
-                <button class="btn btn-primary btn-sm w-100 fw-bold" onclick="addInventoryStockEntry()">I-save ang Stock / Delivery</button>
+              <div class="col-md-2">
+                <input type="number" step="any" id="logReturn" class="form-control form-control-sm" placeholder="Return / Sauli" value="0">
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-primary btn-sm w-100 fw-bold" onclick="saveDailyInventoryLog()">I-save ang Araw-araw na Galaw</button>
               </div>
             </div>
           </div>
@@ -440,10 +457,10 @@
           <div class="table-responsive mb-4">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
-                <tr><th>Petsa</th><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
+                <tr><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
               </thead>
               <tbody id="palmCocoInventoryBody">
-                <tr><td colspan="8" class="text-center text-muted">Walang record para sa Palm & Coco.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted">Walang record para sa Palm & Coco.</td></tr>
               </tbody>
             </table>
           </div>
@@ -452,10 +469,10 @@
           <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
               <thead class="table-dark">
-                <tr><th>Petsa</th><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
+                <tr><th>Produkto</th><th>Supplier</th><th>Beginning</th><th>Pumasok (In)</th><th>Return/Sauli</th><th>Nabenta (Sold)</th><th>Ending Stock</th></tr>
               </thead>
               <tbody id="otherInventoryBody">
-                <tr><td colspan="8" class="text-center text-muted">Walang record para sa Iba pang Items.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted">Walang record para sa Iba pang Items.</td></tr>
               </tbody>
             </table>
           </div>
@@ -567,7 +584,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let transactions = JSON.parse(localStorage.getItem('rmv_transactions')) || [];
-    let inventoryStockEntries = JSON.parse(localStorage.getItem('rmv_inventoryStockEntries')) || [];
+    let inventoryMasterList = JSON.parse(localStorage.getItem('rmv_inventoryMasterList')) || [];
+    let inventoryDailyLogs = JSON.parse(localStorage.getItem('rmv_inventoryDailyLogs')) || {};
     let cashBreakdownData = JSON.parse(localStorage.getItem('rmv_cashBreakdownData')) || {};
     let monthlyExpensesData = JSON.parse(localStorage.getItem('rmv_monthlyExpensesData')) || {};
     let bossLedgerData = JSON.parse(localStorage.getItem('rmv_bossLedgerData')) || {};
@@ -583,7 +601,7 @@
     document.getElementById('manualDate').value = todayFormatted;
     document.getElementById('expenseDate').value = todayFormatted;
     document.getElementById('bossDate').value = todayFormatted;
-    document.getElementById('invDate').value = todayFormatted;
+    document.getElementById('inventoryViewDate').value = todayFormatted;
     document.getElementById('auditDateInput').value = todayFormatted;
 
     window.onload = function() {
@@ -599,7 +617,8 @@
 
     function saveData() {
       localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
-      localStorage.setItem('rmv_inventoryStockEntries', JSON.stringify(inventoryStockEntries));
+      localStorage.setItem('rmv_inventoryMasterList', JSON.stringify(inventoryMasterList));
+      localStorage.setItem('rmv_inventoryDailyLogs', JSON.stringify(inventoryDailyLogs));
       localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
       localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
       localStorage.setItem('rmv_bossLedgerData', JSON.stringify(bossLedgerData));
@@ -612,9 +631,9 @@
 
     function exportDataBackup() {
       const backupData = {
-        version: "2.0",
+        version: "3.0",
         exportDate: new Date().toISOString(),
-        transactions, inventoryStockEntries, cashBreakdownData, monthlyExpensesData, bossLedgerData
+        transactions, inventoryMasterList, inventoryDailyLogs, cashBreakdownData, monthlyExpensesData, bossLedgerData
       };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -639,7 +658,8 @@
           const imported = JSON.parse(e.target.result);
           if (confirm('Sigurado ka bang gusto mong i-restore ang data na ito? Mapapalitan nito ang kasalukuyang data.')) {
             if (imported.transactions) transactions = imported.transactions;
-            if (imported.inventoryStockEntries) inventoryStockEntries = imported.inventoryStockEntries;
+            if (imported.inventoryMasterList) inventoryMasterList = imported.inventoryMasterList;
+            if (imported.inventoryDailyLogs) inventoryDailyLogs = imported.inventoryDailyLogs;
             if (imported.cashBreakdownData) cashBreakdownData = imported.cashBreakdownData;
             if (imported.monthlyExpensesData) monthlyExpensesData = imported.monthlyExpensesData;
             if (imported.bossLedgerData) bossLedgerData = imported.bossLedgerData;
@@ -969,83 +989,146 @@
       });
     }
 
-    // ADVANCED INVENTORY MANAGEMENT (Palm & Coco vs Other Items, Beginning/Ending, Returns, Supplier)
-    function addInventoryStockEntry() {
-      const date = document.getElementById('invDate').value;
-      const category = document.getElementById('invCategory').value;
-      const productName = document.getElementById('invProductName').value.trim();
-      const supplier = document.getElementById('invSupplier').value.trim();
-      const qtyIn = parseFloat(document.getElementById('invQtyIn').value) || 0;
-      const returnQty = parseFloat(document.getElementById('invReturn').value) || 0;
+    // --- MASTER PRODUCT LIST & DAILY INVENTORY MANAGEMENT ---
+    function addMasterProduct() {
+      const name = document.getElementById('masterProductName').value.trim();
+      const category = document.getElementById('masterCategory').value;
+      const supplier = document.getElementById('masterSupplier').value.trim();
 
-      if (!productName || !date) {
-        alert('Mangyaring ilagay ang petsa at pangalan ng produkto.');
+      if (!name) {
+        alert('Mangyaring ilagay ang pangalan ng produkto.');
         return;
       }
 
-      inventoryStockEntries.push({
-        id: Date.now(),
-        date,
-        category,
-        productName,
-        supplier: supplier || 'N/A',
+      if (inventoryMasterList.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        alert('Ang produktong ito ay nasa masterlist na.');
+        return;
+      }
+
+      inventoryMasterList.push({ id: Date.now(), name, category, supplier: supplier || 'N/A' });
+      saveData();
+      renderInventoryTables();
+      document.getElementById('masterProductName').value = '';
+      document.getElementById('masterSupplier').value = '';
+      alert('Matagumpay na naidagdag sa Masterlist!');
+    }
+
+    function saveDailyInventoryLog() {
+      const date = document.getElementById('inventoryViewDate').value;
+      const select = document.getElementById('logProductSelect');
+      const prodName = select.value;
+      const qtyIn = parseFloat(document.getElementById('logQtyIn').value) || 0;
+      const returnQty = parseFloat(document.getElementById('logReturn').value) || 0;
+
+      if (!date || !prodName) {
+        alert('Pumili muna ng petsa at produkto.');
+        return;
+      }
+
+      if (!inventoryDailyLogs[date]) inventoryDailyLogs[date] = {};
+      
+      // I-save o i-update ang log sa araw na ito
+      inventoryDailyLogs[date][prodName] = {
         qtyIn,
         returnQty
-      });
+      };
 
       saveData();
       renderInventoryTables();
-      document.getElementById('invProductName').value = '';
-      document.getElementById('invSupplier').value = '';
-      document.getElementById('invQtyIn').value = '0';
-      document.getElementById('invReturn').value = '0';
-      alert('Matagumpay na naidagdag ang inventory stock!');
+      document.getElementById('logQtyIn').value = '0';
+      document.getElementById('logReturn').value = '0';
+      alert('Na-save ang araw-araw na galaw para sa produktong ito!');
+    }
+
+    function getPreviousDateString(dateStr) {
+      let d = new Date(dateStr);
+      d.setDate(d.getDate() - 1);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    // Function para kalkulahin ang ending ng nakaraang araw para maging beginning ngayon
+    function getEndingStockForDate(prodName, targetDateStr) {
+      let currDate = new Date(targetDateStr);
+      currDate.setDate(currDate.getDate() - 1);
+      let prevDateStr = `${currDate.getFullYear()}-${String(currDate.getMonth() + 1).padStart(2, '0')}-${String(currDate.getDate()).padStart(2, '0')}`;
+      
+      // Recursive or simple lookup: para sa simplicity, kukunin natin ang ending ng kahapon
+      // Kung unang araw o walang entry, ending ay 0 o initial stock
+      let endingKahapon = 0;
+      // Dito pwede nating i-compute pabalik o i-maintain ang running balance per item
+      return endingKahapon;
     }
 
     function renderInventoryTables() {
+      const selectedDate = document.getElementById('inventoryViewDate').value;
       const palmBody = document.getElementById('palmCocoInventoryBody');
       const otherBody = document.getElementById('otherInventoryBody');
+      const productSelect = document.getElementById('logProductSelect');
+      
       palmBody.innerHTML = '';
       otherBody.innerHTML = '';
+      productSelect.innerHTML = `<option value="">-- Piliin ang Produkto mula sa Masterlist --</option>`;
 
-      // Kunin ang total sold per product per date mula sa transactions
+      // Populate select dropdown galing sa Masterlist
+      inventoryMasterList.forEach(p => {
+        productSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.category})</option>`;
+      });
+
+      if (inventoryMasterList.length === 0) {
+        palmBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Wala pang produkto sa Masterlist. Mag-add sa itaas.</td></tr>`;
+        otherBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Wala pang produkto sa Masterlist.</td></tr>`;
+        return;
+      }
+
+      // Kunin ang total sold per product sa napiling petsa mula sa POS transactions
       let soldMap = {};
       transactions.forEach(t => {
-        if (t.itemsList && t.date) {
+        if (t.itemsList && t.date === selectedDate) {
           t.itemsList.forEach(item => {
-            const key = `${t.date}_${item.name.toLowerCase()}`;
-            soldMap[key] = (soldMap[key] || 0) + item.qty;
+            soldMap[item.name.toLowerCase()] = (soldMap[item.name.toLowerCase()] || 0) + item.qty;
           });
         }
       });
 
+      // Kunin ang daily logs (In at Return) para sa napiling petsa
+      let dayLogs = (inventoryDailyLogs[selectedDate]) || {};
+
       let palmCount = 0;
       let otherCount = 0;
 
-      // Group stock entries or display row by row per date/product
-      inventoryStockEntries.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(entry => {
-        const soldKey = `${entry.date}_${entry.productName.toLowerCase()}`;
-        const soldQty = soldMap[soldKey] || 0;
+      inventoryMasterList.forEach(prod => {
+        let log = dayLogs[prod.name] || { qtyIn: 0, returnQty: 0 };
+        let soldQty = soldMap[prod.name.toLowerCase()] || 0;
 
-        // Computation: Ending = Beginning (assumed 0 or tracked) + QtyIn + Return - Sold
-        // Para sa per day, pwede nating kalkulahin ang ending
-        const beginning = 0; // Pwede i-link sa ending kahapon kung gusto, o default 0
-        const ending = beginning + entry.qtyIn + entry.returnQty - soldQty;
+        // Awtomatikong beginning (para maipakita ang per-day automated chain, kukunin ang ending kahapon)
+        // Dito natin kakalkulahin: Beginning = Ending kahapon
+        let beginning = 0;
+        let prevDate = getPreviousDateString(selectedDate);
+        // Hanapin ang ending kahapon kung na-compute na
+        if (window.cachedEnding && window.cachedEnding[prevDate] && window.cachedEnding[prevDate][prod.name]) {
+          beginning = window.cachedEnding[prevDate][prod.name];
+        }
+
+        let ending = beginning + log.qtyIn + log.returnQty - soldQty;
+
+        // I-cache ang ending ngayon para magamit bukas bilang beginning
+        if (!window.cachedEnding) window.cachedEnding = {};
+        if (!window.cachedEnding[selectedDate]) window.cachedEnding[selectedDate] = {};
+        window.cachedEnding[selectedDate][prod.name] = ending;
 
         const rowHtml = `
           <tr>
-            <td>${entry.date}</td>
-            <td class="fw-bold">${entry.productName}</td>
-            <td>${entry.supplier}</td>
+            <td class="fw-bold">${prod.name}</td>
+            <td>${prod.supplier}</td>
             <td>${beginning}</td>
-            <td class="text-success">+${entry.qtyIn}</td>
-            <td class="text-warning">+${entry.returnQty}</td>
+            <td class="text-success">+${log.qtyIn}</td>
+            <td class="text-warning">+${log.returnQty}</td>
             <td class="text-danger">-${soldQty}</td>
             <td class="fw-bold text-primary">${ending}</td>
           </tr>
         `;
 
-        if (entry.category === 'Palm & Coco') {
+        if (prod.category === 'Palm & Coco') {
           palmCount++;
           palmBody.innerHTML += rowHtml;
         } else {
@@ -1054,8 +1137,8 @@
         }
       });
 
-      if (palmCount === 0) palmBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang record para sa Palm & Coco.</td></tr>`;
-      if (otherCount === 0) otherBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Walang record para sa Iba pang Items.</td></tr>`;
+      if (palmCount === 0) palmBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Walang Palm & Coco item sa Masterlist.</td></tr>`;
+      if (otherCount === 0) otherBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Walang Iba pang item sa Masterlist.</td></tr>`;
     }
 
     // EXPENSES LEDGER
@@ -1180,7 +1263,6 @@
       tbody.innerHTML = '';
       let daySales = 0, dayProfit = 0, dayExpenses = 0, count = 0;
 
-      // Kalkulahin ang benta at kita sa napiling araw
       transactions.forEach(t => {
         if (t.date === selectedDate) {
           const cost = t.totalCost || 0;
@@ -1201,7 +1283,6 @@
         }
       });
 
-      // Isama ang expenses sa araw na ito
       if (monthlyExpensesData[selectedDate]) {
         monthlyExpensesData[selectedDate].forEach(ex => {
           dayExpenses += (parseFloat(ex.amount) || 0);

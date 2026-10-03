@@ -1140,13 +1140,17 @@
               <td class="fw-bold">${ex.title}</td>
               <td class="text-primary">${salVal > 0 ? '₱' + salVal.toFixed(2) : '-'}</td>
               <td class="text-danger">${expVal > 0 ? '₱' + expVal.toFixed(2) : '-'}</td>
+              <td class="no-print text-center">
+                <button class="btn btn-sm btn-outline-primary border-0 p-1 me-1" onclick="openEditExpenseModal('${date}', ${ex.id})" title="I-edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteExpense('${date}', ${ex.id})" title="Burahin"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
             </tr>
           `;
         });
       }
 
       if (expCount === 0) {
-        expTbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Walang salary o expenses sa petsang ito.</td></tr>`;
+        expTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Walang salary o expenses sa petsang ito.</td></tr>`;
       }
 
       document.getElementById('dailyTotalSalarySum').innerText = `₱${daySalarySum.toFixed(2)}`;

@@ -2921,7 +2921,7 @@
           }
         }
        
-        // Kukunin ang bawat payment breakdown (pati na sa Multi-Payment o single payment)
+        // SINI-SEPARATE ANG BAWAT PAYMENT NA NANGYARI SA ARAW NA ITO (PATI SA MULTI-PAYMENT O SINGLE)
         if (t.payments) {
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
@@ -2930,7 +2930,7 @@
                 dayDebtPayments += p.amount;
               }
 
-              // Ina-accumulate ang non-cash portions para ma-less awtomatiko sa drawer cash target
+              // DIREKTANG BINABAWAS SA DRAWER TARGET ANG MGA HINDI CASH
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
               else if (p.method === 'GCash') totalGCash += p.amount;
               else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
@@ -3006,7 +3006,7 @@
       let daySubtotalNet = dayHiwayNet + dayByaheNet;
       let dayNetProfit = daySubtotalNet - dayExpensesTotal;
 
-      // Tamang pag-compute: Kinukuha ang kabuuang non-cash (GCash, BT, Byahe Cash, Cheque) para ibawas sa kabuuang benta, kaya CASH na lang ang maiiwan para sa Target Cash.
+      // KINUKYUT ANG PURONG CASH: Lahat ng Benta + Koleksyon minus Lahat ng Non-Cash (GCash, BT, Byahe Cash, Cheque) at Expenses
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
       let cashSalesToday = daySales - totalNonCashToday;
      

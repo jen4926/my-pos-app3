@@ -254,7 +254,7 @@
         </div>
       </div>
 
-      <!-- 2. DAILY REPORT TAB -->
+      <!-- 2. DAILY REPORT TAB (Per-Day Sheet) -->
       <div class="tab-pane fade" id="daily-content">
         <div class="card p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
@@ -572,7 +572,7 @@
             </table>
           </div>
 
-          <!-- Input Form nalagay na ngayon sa baba -->
+          <!-- Input Form -->
           <div class="card bg-light p-3 border">
             <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-plus-circle me-1"></i> Magdagdag ng Bagong Salary o Expense</h6>
             <div class="row g-3 mb-3">
@@ -869,7 +869,7 @@
 
     function exportDataBackup() {
       const backupData = {
-        version: "5.5",
+        version: "5.6",
         exportDate: new Date().toISOString(),
         transactions, inventoryMasterList, inventoryDailyLogs, cashBreakdownData, monthlyExpensesData, bossLedgerData
       };
@@ -1087,7 +1087,7 @@
       let nonCashByaheCash = 0, nonCashGCash = 0, nonCashBT = 0, nonCashCheque = 0;
       let dayRemainingBalance = 0;
 
-      transactions.forEach((t, index) => {
+      transactions.forEach((t) => {
         const txCost = t.totalCost || 0;
         const netProf = t.total - txCost;
 
@@ -1116,28 +1116,31 @@
             }
           });
         }
-        count++;
 
-        let methodStr = t.payments ? t.payments.map(p => `${p.method}: ₱${p.amount.toFixed(2)}`).join(', ') : 'Cash';
+        // Ipakita lamang sa table kung ang transaksyon ay para sa petsang ito
+        if (t.date === date) {
+          count++;
+          let methodStr = t.payments ? t.payments.map(p => `${p.method}: ₱${p.amount.toFixed(2)}`).join(', ') : 'Cash';
 
-        tbody.innerHTML += `
-          <tr>
-            <td>${index+1}</td>
-            <td class="fw-bold">${t.customer}</td>
-            <td><span class="badge bg-secondary">${t.location}</span></td>
-            <td>${t.product}</td>
-            <td>${t.containerInfo || 'Wala'}</td>
-            <td>₱${txCost.toFixed(2)}</td>
-            <td>₱${t.total.toFixed(2)}</td>
-            <td class="text-success">₱${t.paid.toFixed(2)}</td>
-            <td class="text-danger">₱${t.balance.toFixed(2)}</td>
-            <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
-            <td><small>${methodStr}</small></td>
-            <td class="no-print text-center">
-              <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteTransaction(${t.id})" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
-            </td>
-          </tr>
-        `;
+          tbody.innerHTML += `
+            <tr>
+              <td>${count}</td>
+              <td class="fw-bold">${t.customer}</td>
+              <td><span class="badge bg-secondary">${t.location}</span></td>
+              <td>${t.product}</td>
+              <td>${t.containerInfo || 'Wala'}</td>
+              <td>₱${txCost.toFixed(2)}</td>
+              <td>₱${t.total.toFixed(2)}</td>
+              <td class="text-success">₱${t.paid.toFixed(2)}</td>
+              <td class="text-danger">₱${t.balance.toFixed(2)}</td>
+              <td class="text-success fw-bold">₱${netProf.toFixed(2)}</td>
+              <td><small>${methodStr}</small></td>
+              <td class="no-print text-center">
+                <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteTransaction(${t.id})" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        }
       });
 
       if(count === 0) {
@@ -1218,6 +1221,7 @@
       document.getElementById('dailyTxCount').innerText = count;
 
       window.currentDayNonCash = { byaheCash: nonCashByaheCash, gcash: nonCashGCash, bt: nonCashBT, cheque: nonCashCheque, remainingBalance: dayRemainingBalance, totalCollected, salarySum: daySalarySum, expensesSum: dayExpensesSum };
+      loadMoneyBreakdown();
       calculateMoneyBreakdown();
     }
 
@@ -1552,7 +1556,7 @@
       let totalExpenses = 0;
 
       Object.keys(monthlyExpensesData).sort().forEach(date => {
-        if (filterDate && date !== filterDate) return; // I-filter para sa napiling araw lang kung may naka-set
+        if (filterDate && date !== filterDate) return;
         monthlyExpensesData[date].forEach(ex => {
           count++;
           let isSalary = (ex.type === 'Salary' || (!ex.type && ex.title.toLowerCase().includes('sweldo')));

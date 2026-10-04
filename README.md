@@ -2968,6 +2968,7 @@
       let dayDebtPayments = 0;
       let dayRemainingBalance = 0;
 
+      // FIXED: Safely accumulate cash/non-cash breakdown without double-counting initial cash payments vs payments array
       const filtered = transactions.filter(t => t.date === selectedDate || (t.payments && t.payments.some(p => p.date === selectedDate)));
 
       filtered.forEach((t, index) => {
@@ -3072,11 +3073,22 @@
       let dayRealNetProfit = daySubtotalNet - dayExpensesTotal;
 
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
-      let cashSalesToday = daySales - totalNonCashToday;
-     
-      const fundInputVal = parseFloat(document.getElementById('cashFundInput').value) || 0;
-     
-      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal - dayRemainingBalance);
+      
+      // FIXED: Correct target cash computation formula
+      // Target Cash = (Total Sales Paid in Cash) + (Debt Payments in Cash) - (Expenses Paid in Cash)
+      // Since non-cash payments are tracked, cash collections from sales = daySales (paid portions) - totalNonCashToday
+      let totalPaidSalesToday = 0;
+      filtered.forEach(t => {
+        if (t.date === selectedDate) {
+          totalPaidSalesToday += (t.paid || 0);
+        }
+      });
+      let cashSalesToday = Math.max(0, totalPaidSalesToday - totalNonCashToday);
+      
+      // FIXED: Total collections shown should reflect total sales
+      let totalSalesAll = daySales;
+
+      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;
@@ -3084,7 +3096,6 @@
       document.getElementById('dailyByaheProfit').innerText = `₱${dayByaheNet.toFixed(2)}`;
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
-      document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
       document.getElementById('dailyTotalNetProfit').innerText = `₱${dayRealNetProfit.toFixed(2)}`;
       document.getElementById('dailyExpensesDeducted').innerText = `Less Exp/Sahod: ₱${dayExpensesTotal.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;

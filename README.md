@@ -2993,7 +2993,20 @@
             if (p.date === selectedDate) {
               dayCollected += p.amount;
               if (t.date !== selectedDate || pIdx > 0) {
-                dayDebtPayments += p.amount;
+                // FIXED: Kung Byahe Cash, GCash, Bank Transfer, o Cheque ang multi-payment o bayad,
+                // huwag itong isama sa utang collection na nagdaragdag sa target cash,
+                // kundi i-record ito sa kaukulang non-cash deduction category.
+                if (p.method === 'Byahe Cash') {
+                  totalByaheCash += p.amount;
+                } else if (p.method === 'GCash') {
+                  totalGCash += p.amount;
+                } else if (p.method === 'Bank Transfer' || p.method === 'BT') {
+                  totalBT += p.amount;
+                } else if (p.method === 'Cheque') {
+                  totalCheque += p.amount;
+                } else {
+                  dayDebtPayments += p.amount;
+                }
               }
 
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
@@ -3040,11 +3053,11 @@
         standalonePayments.forEach(p => {
           if (p.date === selectedDate) {
             dayCollected += p.amount;
-            dayDebtPayments += p.amount;
             if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
             else if (p.method === 'GCash') totalGCash += p.amount;
             else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
             else if (p.method === 'Cheque') totalCheque += p.amount;
+            else dayDebtPayments += p.amount;
           }
         });
       }

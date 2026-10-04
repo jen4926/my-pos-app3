@@ -134,6 +134,12 @@
         <button class="btn btn-success btn-sm fw-semibold" onclick="manualSaveData()" title="Save Data to Local Storage">
           <i class="fa-solid fa-floppy-disk me-1"></i> Save Data
         </button>
+        <button class="btn btn-warning btn-sm fw-semibold text-dark" onclick="exportDataBackup()" title="Download Backup File">
+          <i class="fa-solid fa-download me-1"></i> Download Backup
+        </button>
+        <label class="btn btn-info btn-sm fw-semibold text-white mb-0" title="Restore Data from Backup File">
+          <i class="fa-solid fa-upload me-1"></i> Restore <input type="file" id="importFile" accept=".json" onchange="importDataBackup(event)" style="display: none;">
+        </label>
         <button class="btn btn-outline-light btn-sm fw-semibold" onclick="location.reload()" title="Refresh Page">
           <i class="fa-solid fa-rotate me-1"></i> Refresh
         </button>
@@ -355,10 +361,10 @@
             </div>
             <div class="col-md-3">
               <div class="card p-3 stat-card bg-light" style="border-left-color: #2e7d32;">
-                <span class="text-muted small fw-bold">TOTAL COLLECTION & NET</span>
+                <span class="text-muted small fw-bold">DAILY REAL NET PROFIT (Less Exp/Sahod)</span>
                 <div class="mt-1">
-                  <span class="text-success fw-bold" id="dailyTotalCollected">₱0.00</span> <small class="text-muted">(Coll)</small><br>
-                  <span class="text-success fw-bold" id="dailyTotalNetProfit">₱0.00</span> <small class="text-muted">(Net)</small>
+                  <span class="text-success fw-bold fs-5" id="dailyTotalNetProfit">₱0.00</span> <small class="text-muted">(Net Kita)</small><br>
+                  <span class="text-secondary small" id="dailyExpensesDeducted">Exp: ₱0.00</span>
                 </div>
               </div>
             </div>
@@ -1798,25 +1804,87 @@
     };
 
     function saveData() {
-      localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
-      localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
-      localStorage.setItem('rmv_stockInHistory', JSON.stringify(stockInHistory));
-      localStorage.setItem('rmv_returnHistory', JSON.stringify(returnHistory));
-      localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
-      localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
-      localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
-      localStorage.setItem('rmv_standalonePayments', JSON.stringify(standalonePayments));
-      localStorage.setItem('rmv_users', JSON.stringify(users));
-      if (currentUser) {
-        localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
-      } else {
-        localStorage.removeItem('rmv_current_user');
+      try {
+        localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
+        localStorage.setItem('rmv_inventory', JSON.stringify(inventory));
+        localStorage.setItem('rmv_stockInHistory', JSON.stringify(stockInHistory));
+        localStorage.setItem('rmv_returnHistory', JSON.stringify(returnHistory));
+        localStorage.setItem('rmv_bossAdjustments', JSON.stringify(bossAdjustments));
+        localStorage.setItem('rmv_monthlyExpensesData', JSON.stringify(monthlyExpensesData));
+        localStorage.setItem('rmv_cashBreakdownData', JSON.stringify(cashBreakdownData));
+        localStorage.setItem('rmv_standalonePayments', JSON.stringify(standalonePayments));
+        localStorage.setItem('rmv_users', JSON.stringify(users));
+        if (currentUser) {
+          localStorage.setItem('rmv_current_user', JSON.stringify(currentUser));
+        } else {
+          localStorage.removeItem('rmv_current_user');
+        }
+      } catch (e) {
+        alert('Babala: Malaki na ang data sa browser storage! Mangyaring i-download ang backup file upang hindi mawalan ng records.');
       }
     }
 
     function manualSaveData() {
       saveData();
       alert('Tagumpay na na-save ang lahat ng data sa Local Storage!');
+    }
+
+    // ================= EXPORT & IMPORT BACKUP (JSON) =================
+    function exportDataBackup() {
+      const backupData = {
+        transactions: transactions,
+        inventory: inventory,
+        stockInHistory: stockInHistory,
+        returnHistory: returnHistory,
+        bossAdjustments: bossAdjustments,
+        monthlyExpensesData: monthlyExpensesData,
+        cashBreakdownData: cashBreakdownData,
+        standalonePayments: standalonePayments,
+        users: users,
+        backupDate: new Date().toISOString()
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `RMVillasis_POS_Backup_${getTodayDateString()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importDataBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.transactions && imported.inventory) {
+            if (confirm('Sigurado ka bang gusto mong i-restore ang backup na ito? Papalitan nito ang kasalukuyang data sa iyong screen.')) {
+              transactions = imported.transactions || [];
+              inventory = imported.inventory || [];
+              stockInHistory = imported.stockInHistory || [];
+              returnHistory = imported.returnHistory || [];
+              bossAdjustments = imported.bossAdjustments || [];
+              monthlyExpensesData = imported.monthlyExpensesData || {};
+              cashBreakdownData = imported.cashBreakdownData || {};
+              standalonePayments = imported.standalonePayments || [];
+              users = imported.users || defaultUsers;
+
+              saveData();
+              alert('Tagumpay na nai-restore ang lahat ng records mula sa backup file!');
+              location.reload();
+            }
+          } else {
+            alert('Mali ang format ng file. Hindi ito wastong RMVillasis POS backup file.');
+          }
+        } catch (err) {
+          alert('May error sa pagbasa ng JSON file.');
+        }
+      };
+      reader.readAsText(file);
     }
 
     function handleEnterNext(event, currentInput) {
@@ -2114,7 +2182,6 @@
         if (balance > 0 && paid > 0) status = "PARTIAL";
         if (balance > 0 && paid === 0) status = "UNPAID";
 
-        // Multi-Payment Breakdown Handling (Direktang kinikilala ang bawat bahagi ng bayad)
         if (method === 'Multi-Payment' && paid > 0) {
           const mCash = parseFloat(document.getElementById('multiCashAmt').value) || 0;
           const mGcash = parseFloat(document.getElementById('multiGcashAmt').value) || 0;
@@ -2921,7 +2988,6 @@
           }
         }
        
-        // SINI-SEPARATE ANG BAWAT PAYMENT NA NANGYARI SA ARAW NA ITO (PATI SA MULTI-PAYMENT O SINGLE)
         if (t.payments) {
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
@@ -2930,7 +2996,6 @@
                 dayDebtPayments += p.amount;
               }
 
-              // DIREKTANG BINABAWAS SA DRAWER TARGET ANG MGA HINDI CASH
               if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
               else if (p.method === 'GCash') totalGCash += p.amount;
               else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
@@ -3004,9 +3069,8 @@
       let dayHiwayNet = dayHiwayGrossProfit;
       let dayByaheNet = dayByaheGrossProfit;
       let daySubtotalNet = dayHiwayNet + dayByaheNet;
-      let dayNetProfit = daySubtotalNet - dayExpensesTotal;
+      let dayRealNetProfit = daySubtotalNet - dayExpensesTotal;
 
-      // KINUKYUT ANG PURONG CASH: Lahat ng Benta + Koleksyon minus Lahat ng Non-Cash (GCash, BT, Byahe Cash, Cheque) at Expenses
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
       let cashSalesToday = daySales - totalNonCashToday;
      
@@ -3021,7 +3085,8 @@
 
       document.getElementById('dailyTotalSales').innerText = `₱${daySales.toFixed(2)}`;
       document.getElementById('dailyTotalCollected').innerText = `₱${dayCollected.toFixed(2)}`;
-      document.getElementById('dailyTotalNetProfit').innerText = `₱${dayNetProfit.toFixed(2)}`;
+      document.getElementById('dailyTotalNetProfit').innerText = `₱${dayRealNetProfit.toFixed(2)}`;
+      document.getElementById('dailyExpensesDeducted').innerText = `Less Exp/Sahod: ₱${dayExpensesTotal.toFixed(2)}`;
       document.getElementById('dailyTxCount').innerText = count;
 
       document.getElementById('totalCollectionAll').innerText = `₱${daySales.toFixed(2)}`;
@@ -3279,7 +3344,6 @@
         document.getElementById('lastOrderPaid').innerText = `₱${last.paid.toFixed(2)}`;
         document.getElementById('lastOrderBalance').innerText = `₱${last.balance.toFixed(2)}`;
 
-        // RENDER LAST ORDER DETAILED ITEMS & LAST PRICE
         const lastItemsBody = document.getElementById('lastOrderItemsBody');
         lastItemsBody.innerHTML = '';
         if (last.itemsList && last.itemsList.length > 0) {
@@ -3467,7 +3531,7 @@
     }
 
     function generateMonthlyAudit() {
-      const selectedMonth = document.getElementById('auditMonth').value; // YYYY-MM
+      const selectedMonth = document.getElementById('auditMonth').value;
       if (!selectedMonth) return;
 
       let totalSales = 0;
@@ -3600,7 +3664,7 @@
 
       document.getElementById('auditTotalSales').innerText = `₱${totalSales.toFixed(2)}`;
       document.getElementById('auditTotalCost').innerText = `₱${totalCost.toFixed(2)}`;
-      document.getElementById('auditGrossProfit').innerText = `₱${subtotalNet.toFixed(2)}`;
+      document.getElementById('auditGrossProfit').innerText = `₱${(hiwayNet + byaheNet).toFixed(2)}`;
       document.getElementById('auditExpenses').innerText = `₱${totalExpenses.toFixed(2)}`;
       document.getElementById('auditNetProfit').innerText = `₱${netProfit.toFixed(2)}`;
 

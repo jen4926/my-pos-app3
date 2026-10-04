@@ -2993,9 +2993,6 @@
             if (p.date === selectedDate) {
               dayCollected += p.amount;
               if (t.date !== selectedDate || pIdx > 0) {
-                // FIXED: Kung Byahe Cash, GCash, Bank Transfer, o Cheque ang multi-payment o bayad,
-                // huwag itong isama sa utang collection na nagdaragdag sa target cash,
-                // kundi i-record ito sa kaukulang non-cash deduction category.
                 if (p.method === 'Byahe Cash') {
                   totalByaheCash += p.amount;
                 } else if (p.method === 'GCash') {
@@ -3008,11 +3005,6 @@
                   dayDebtPayments += p.amount;
                 }
               }
-
-              if (p.method === 'Byahe Cash') totalByaheCash += p.amount;
-              else if (p.method === 'GCash') totalGCash += p.amount;
-              else if (p.method === 'Bank Transfer' || p.method === 'BT') totalBT += p.amount;
-              else if (p.method === 'Cheque') totalCheque += p.amount;
             }
           });
         }
@@ -3084,19 +3076,21 @@
       let daySubtotalNet = dayHiwayNet + dayByaheNet;
       let dayRealNetProfit = daySubtotalNet - dayExpensesTotal;
 
-      let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
-      
-      let totalPaidSalesToday = 0;
+      // FIXED: Kinukuwenta ang aktwal na cash na galing sa mga benta at multi-payment nang hiwalay para maiwasan ang times-two error
+      let totalCashCollectedFromTransactions = 0;
       filtered.forEach(t => {
-        if (t.date === selectedDate) {
-          totalPaidSalesToday += (t.paid || 0);
+        if (t.date === selectedDate && t.payments) {
+          t.payments.forEach(p => {
+            if (p.date === selectedDate) {
+              if (p.method === 'Cash') {
+                totalCashCollectedFromTransactions += p.amount;
+              }
+            }
+          });
         }
       });
-      let cashSalesToday = Math.max(0, totalPaidSalesToday - totalNonCashToday);
-      
-      let totalSalesAll = daySales;
 
-      currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
+      currentTargetCashInDrawer = Math.max(0, totalCashCollectedFromTransactions + dayDebtPayments - dayExpensesTotal);
 
       document.getElementById('dailyHiwaySales').innerText = `₱${dayHiwaySales.toFixed(2)}`;
       document.getElementById('dailyHiwayProfit').innerText = `₱${dayHiwayNet.toFixed(2)}`;

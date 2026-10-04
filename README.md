@@ -2992,16 +2992,17 @@
           t.payments.forEach((p, pIdx) => {
             if (p.date === selectedDate) {
               dayCollected += p.amount;
-              if (t.date !== selectedDate || pIdx > 0) {
-                if (p.method === 'Byahe Cash') {
-                  totalByaheCash += p.amount;
-                } else if (p.method === 'GCash') {
-                  totalGCash += p.amount;
-                } else if (p.method === 'Bank Transfer' || p.method === 'BT') {
-                  totalBT += p.amount;
-                } else if (p.method === 'Cheque') {
-                  totalCheque += p.amount;
-                } else {
+              // Kapag ito ay bayad o transaksyon sa napiling petsa
+              if (p.method === 'Byahe Cash') {
+                totalByaheCash += p.amount;
+              } else if (p.method === 'GCash') {
+                totalGCash += p.amount;
+              } else if (p.method === 'Bank Transfer' || p.method === 'BT') {
+                totalBT += p.amount;
+              } else if (p.method === 'Cheque') {
+                totalCheque += p.amount;
+              } else {
+                if (t.date !== selectedDate || pIdx > 0) {
                   dayDebtPayments += p.amount;
                 }
               }
@@ -3076,7 +3077,7 @@
       let daySubtotalNet = dayHiwayNet + dayByaheNet;
       let dayRealNetProfit = daySubtotalNet - dayExpensesTotal;
 
-      // FIXED: Kinukuwenta ang aktwal na cash na galing sa mga benta at multi-payment nang hiwalay para maiwasan ang times-two error
+      // Kinukuwenta ang aktwal na cash na galing sa mga benta (Cash lang o Cash portion ng Multi-Payment)
       let totalCashCollectedFromTransactions = 0;
       filtered.forEach(t => {
         if (t.date === selectedDate && t.payments) {

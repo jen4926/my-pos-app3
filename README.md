@@ -52,6 +52,9 @@
   </nav>
 
   <div class="container pb-5">
+    <!-- Global Success Alert Box -->
+    <div id="globalAlertContainer"></div>
+
     <div class="tab-content" id="mainTabsContent">
 
       <!-- 1. POS ENTRY TAB -->
@@ -78,7 +81,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Customer Name:</label>
-                <input type="text" id="customerName" class="form-control" required>
+                <input type="text" id="customerName" class="form-control" placeholder="Pangalan ng customer..." required>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Location / Uri:</label>
@@ -853,6 +856,18 @@
       generateDailyMonthlyAudit();
     };
 
+    function showGlobalSuccess(message) {
+      const container = document.getElementById('globalAlertContainer');
+      container.innerHTML = `
+        <div class="alert alert-success alert-dismissible fade show py-2 mb-3 shadow-sm fw-bold" role="alert">
+          <i class="fa-solid fa-circle-check me-2"></i> ${message}
+          <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => { container.innerHTML = ''; }, 4000);
+    }
+
     function saveData() {
       localStorage.setItem('rmv_transactions', JSON.stringify(transactions));
       localStorage.setItem('rmv_inventoryMasterList', JSON.stringify(inventoryMasterList));
@@ -864,7 +879,7 @@
 
     function manualSaveData() {
       saveData();
-      alert('Data saved successfully!');
+      showGlobalSuccess('Data saved successfully!');
     }
 
     function exportDataBackup() {
@@ -880,7 +895,7 @@
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      alert('Tagumpay na na-download ang iyong backup file!');
+      showGlobalSuccess('Tagumpay na na-download ang iyong backup file!');
     }
 
     function importDataBackup() {
@@ -902,7 +917,7 @@
             if (imported.monthlyExpensesData) monthlyExpensesData = imported.monthlyExpensesData;
             if (imported.bossLedgerData) bossLedgerData = imported.bossLedgerData;
             saveData();
-            alert('Tagumpay na nai-restore ang lahat ng data!');
+            showGlobalSuccess('Tagumpay na nai-restore ang lahat ng data!');
             location.reload();
           }
         } catch (error) {
@@ -1044,7 +1059,8 @@
       renderInventoryTables();
       generateDailyMonthlyAudit();
 
-      alert('Transaction saved successfully & synced to all ledgers!');
+      // SUCCESSFUL & BLANK/RESET FORMS FOR NEXT ENCODING
+      showGlobalSuccess('SUCCESSFUL! Na-save na ang transaksyon at blangko na ang form para sa susunod na i-e-encode.');
       this.reset();
       document.getElementById('posItemsBody').innerHTML = '';
       document.getElementById('inventoryOnlyMode').checked = false;
@@ -1080,7 +1096,7 @@
       generateDailyReport();
       generateDailyMonthlyAudit();
 
-      alert('Tagumpay na naidagdag ang Manual Payment / Past Entry at nai-reflect sa ledger!');
+      showGlobalSuccess('SUCCESSFUL! Na-save na ang Manual Entry at blangko na ang form para sa susunod.');
       this.reset();
       document.getElementById('manualDate').value = getTodayDateString();
     });
@@ -1382,7 +1398,7 @@
         const modalEl = document.getElementById('editCreditModal');
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
         modalInstance.hide();
-        alert('Matagumpay na na-update ang utang!');
+        showGlobalSuccess('SUCCESSFUL! Matagumpay na na-update ang utang.');
       }
     }
 
@@ -1407,7 +1423,7 @@
       document.getElementById('masterProductName').value = '';
       document.getElementById('masterDescription').value = '';
       document.getElementById('masterSupplier').value = '';
-      alert('Matagumpay na naidagdag sa Masterlist!');
+      showGlobalSuccess('SUCCESSFUL! Naidagdag na ang produkto sa Masterlist at blangko na ang form.');
     }
 
     function saveDailyInventoryLog() {
@@ -1430,7 +1446,7 @@
       renderInventoryTables();
       document.getElementById('logQtyIn').value = '0';
       document.getElementById('logReturn').value = '0';
-      alert('Na-save ang araw-araw na galaw para sa produktong ito!');
+      showGlobalSuccess('SUCCESSFUL! Na-save ang araw-araw na galaw at blangko na ang form.');
     }
 
     function getPreviousDateString(dateStr) {
@@ -1548,7 +1564,7 @@
 
       document.getElementById('expenseTitle').value = '';
       document.getElementById('expenseAmount').value = '';
-      showExpenseAlert('Tagumpay na naidagdag ang Salary o Expense record!', 'success');
+      showExpenseAlert('SUCCESSFUL! Naidagdag na ang Salary o Expense record at blangko na ang input.', 'success');
     }
 
     function renderStandaloneExpensesLedger() {
@@ -1647,7 +1663,7 @@
         const modalEl = document.getElementById('editExpenseModal');
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
         modalInstance.hide();
-        showExpenseAlert('Matagumpay na na-update ang Salary / Expense record!', 'success');
+        showExpenseAlert('SUCCESSFUL! Na-update ang Salary / Expense record.', 'success');
       }
     }
 
@@ -1659,7 +1675,7 @@
         renderStandaloneExpensesLedger();
         generateDailyReport();
         generateDailyMonthlyAudit();
-        showExpenseAlert('Matagumpay na nabura ang record.', 'warning');
+        showExpenseAlert('Nabura na ang record.', 'warning');
       }
     }
 
@@ -1683,7 +1699,7 @@
 
       document.getElementById('bossTitle').value = '';
       document.getElementById('bossAmount').value = '';
-      alert('Matagumpay na nai-record kay Boss!');
+      showGlobalSuccess('SUCCESSFUL! Nai-record na kay Boss at blangko na ang form.');
     }
 
     function renderStandaloneBossLedger() {

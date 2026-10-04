@@ -920,7 +920,7 @@
                 <i class="fa-solid fa-plus me-1"></i> Add Expense / Salary Line
               </button>
              
-              <!-- PER-DAY FILTER TOGGLE / DATE SELECTOR -->
+              <!-- PER-DAY / PER-MONTH FILTER TOGGLE -->
               <div class="d-flex align-items-center gap-1 ms-2">
                 <label class="fw-bold small text-nowrap">View:</label>
                 <select id="expenseViewMode" class="form-select form-select-sm" onchange="toggleExpenseViewMode()">
@@ -2968,7 +2968,6 @@
       let dayDebtPayments = 0;
       let dayRemainingBalance = 0;
 
-      // FIXED: Safely accumulate cash/non-cash breakdown without double-counting initial cash payments vs payments array
       const filtered = transactions.filter(t => t.date === selectedDate || (t.payments && t.payments.some(p => p.date === selectedDate)));
 
       filtered.forEach((t, index) => {
@@ -3074,9 +3073,6 @@
 
       let totalNonCashToday = totalByaheCash + totalGCash + totalBT + totalCheque;
       
-      // FIXED: Correct target cash computation formula
-      // Target Cash = (Total Sales Paid in Cash) + (Debt Payments in Cash) - (Expenses Paid in Cash)
-      // Since non-cash payments are tracked, cash collections from sales = daySales (paid portions) - totalNonCashToday
       let totalPaidSalesToday = 0;
       filtered.forEach(t => {
         if (t.date === selectedDate) {
@@ -3085,7 +3081,6 @@
       });
       let cashSalesToday = Math.max(0, totalPaidSalesToday - totalNonCashToday);
       
-      // FIXED: Total collections shown should reflect total sales
       let totalSalesAll = daySales;
 
       currentTargetCashInDrawer = Math.max(0, cashSalesToday + dayDebtPayments - dayExpensesTotal);
